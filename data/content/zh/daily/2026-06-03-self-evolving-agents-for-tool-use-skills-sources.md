@@ -7,7 +7,7 @@ summary: "候选池 18 篇论文的来源与评分记录"
 tags: ["sources", "scoring"]
 topics: ["sources"]
 brief_page: "/zh/daily/2026-06-03-self-evolving-agents-for-tool-use-skills/"
-generated_at: "2026-06-04T03:09:23.419787+00:00"
+generated_at: "2026-06-04T05:16:39.083098+00:00"
 page_type: "sources"
 candidate_count: 18
 featured_count: 5
@@ -16,7 +16,7 @@ mentions_count: 13
 
 # 论文来源与评分
 
-本页公开 18 篇候选论文的来源与评分。抓取时间：2026-06-04T03:09:22.814749+00:00。生成时间：2026-06-04T03:09:23.419787+00:00。其中重点论文 5 篇，也值得关注 13 篇。
+本页公开 18 篇候选论文的来源与评分。抓取时间：2026-06-04T05:16:38.611893+00:00。生成时间：2026-06-04T05:16:39.083098+00:00。其中重点论文 5 篇，也值得关注 13 篇。
 
 ## 评分规则摘要
 
@@ -26,8 +26,8 @@ mentions_count: 13
 
 | 排名 | 论文 | 主题 | Score | arXiv |
 |---:|---|---|---:|---|
-| 1 | Self Evolving Agents for Tool Use Skills | Agent 与工具调用 | 22 | [2606.00001](https://arxiv.org/abs/2606.00001) |
-| 2 | RAG Evaluation under Noisy Retrieval | 基准与评测 | 21 | [2606.00003](https://arxiv.org/abs/2606.00003) |
+| 1 | Self Evolving Agents for Tool Use Skills | Agent 与工具调用 | 21 | [2606.00001](https://arxiv.org/abs/2606.00001) |
+| 2 | RAG Evaluation under Noisy Retrieval | 基准与评测 | 20 | [2606.00003](https://arxiv.org/abs/2606.00003) |
 | 3 | Efficient Long Context Inference with Cache Compression | 系统与部署 | 19 | [2606.00002](https://arxiv.org/abs/2606.00002) |
 | 4 | Multimodal Safety Evaluation for Vision Language Models | 安全与对齐 | 19 | [2606.00004](https://arxiv.org/abs/2606.00004) |
 | 5 | Code Model Repair with Execution Feedback | 代码智能 | 15 | [2606.00005](https://arxiv.org/abs/2606.00005) |
@@ -36,34 +36,34 @@ mentions_count: 13
 
 | 排名 | 论文 | 主题 | Score | arXiv |
 |---:|---|---|---:|---|
-| 6 | Preference Optimization for Safer Tool Agents | Agent 与工具调用 | 14 | [2606.00012](https://arxiv.org/abs/2606.00012) |
-| 7 | Red Teaming Open Source LLM Guardrails | 安全与对齐 | 14 | [2606.00017](https://arxiv.org/abs/2606.00017) |
-| 8 | Database Native Retrieval for Enterprise RAG | 检索与 RAG | 13 | [2606.00013](https://arxiv.org/abs/2606.00013) |
-| 9 | Agentic 3D Modeling through Code Execution | Agent 与工具调用 | 13 | [2606.00015](https://arxiv.org/abs/2606.00015) |
-| 10 | Synthetic Data Curation for Post Training | 数据工程 | 12 | [2606.00007](https://arxiv.org/abs/2606.00007) |
+| 6 | Red Teaming Open Source LLM Guardrails | 安全与对齐 | 14 | [2606.00017](https://arxiv.org/abs/2606.00017) |
+| 7 | Preference Optimization for Safer Tool Agents | Agent 与工具调用 | 13 | [2606.00012](https://arxiv.org/abs/2606.00012) |
+| 8 | Synthetic Data Curation for Post Training | 数据工程 | 12 | [2606.00007](https://arxiv.org/abs/2606.00007) |
+| 9 | Database Native Retrieval for Enterprise RAG | 检索与 RAG | 12 | [2606.00013](https://arxiv.org/abs/2606.00013) |
+| 10 | Agentic 3D Modeling through Code Execution | Agent 与工具调用 | 12 | [2606.00015](https://arxiv.org/abs/2606.00015) |
 | 11 | Low Rank Adapters as Model Memory Probes | 训练与后训练 | 12 | [2606.00018](https://arxiv.org/abs/2606.00018) |
 | 12 | Chart Understanding for Vision Language Models | 多模态模型 | 11 | [2606.00014](https://arxiv.org/abs/2606.00014) |
 | 13 | Robotics Policies with Memory Grounded Planning | 机器人与具身智能 | 10 | [2606.00006](https://arxiv.org/abs/2606.00006) |
 | 14 | Mechanistic Attribution for Factual Editing | 可解释性 | 10 | [2606.00008](https://arxiv.org/abs/2606.00008) |
 | 15 | Serving Quantized Models with Adaptive Batching | 系统与部署 | 10 | [2606.00011](https://arxiv.org/abs/2606.00011) |
 | 16 | Video Diffusion Models Need Temporal Tests | 视频生成 | 9 | [2606.00010](https://arxiv.org/abs/2606.00010) |
-| 17 | Training Data Deduplication for Foundation Models | Agent 与工具调用 | 8 | [2606.00016](https://arxiv.org/abs/2606.00016) |
-| 18 | Open Speech Agent Benchmark | Agent 与工具调用 | 6 | [2606.00009](https://arxiv.org/abs/2606.00009) |
+| 17 | Training Data Deduplication for Foundation Models | Agent 与工具调用 | 7 | [2606.00016](https://arxiv.org/abs/2606.00016) |
+| 18 | Open Speech Agent Benchmark | Agent 与工具调用 | 5 | [2606.00009](https://arxiv.org/abs/2606.00009) |
 
 ## 完整候选评分
 
 ### #1 Self Evolving Agents for Tool Use Skills
 
 - Tier: featured
-- Score: 22
+- Score: 21
 - Topic: Agent 与工具调用
 - Original title: Self Evolving Agents for Tool Use Skills
 - Authors: Alice Chen, Bob Smith
 - arXiv: [2606.00001](https://arxiv.org/abs/2606.00001)
 - PDF: [PDF](https://arxiv.org/pdf/2606.00001)
 - Code URL: none verified
-- Score breakdown: {"arxiv_category_weight": 2, "code_available": 2, "hf_daily": 3, "hf_upvotes": 5, "institution_background": 3, "novelty_or_duplicate": 1, "open_source_heat": 2, "practitioner_relevance": 3, "recent_topic_repeat": 0, "safety_ethics_governance": 0, "semantic_scholar_citations": 1, "top_conference": 0}
-- Selected reason: Top institution signal: OpenAI, Stanford; Included by HF Daily Papers; HF community heat: 94 upvotes; Code or executable artifact signal; Open-source heat: 420 stars; Early citation signal: 78 citations; Practitioner keywords: agent, tool use, evaluation; arXiv category weight: cs.AI; No duplicate title in candidate pool
+- Score breakdown: {"arxiv_category_weight": 2, "code_available": 2, "hf_daily": 3, "hf_upvotes": 5, "institution_background": 3, "novelty_or_duplicate": 1, "open_source_heat": 2, "practitioner_relevance": 3, "recent_topic_repeat": -1, "safety_ethics_governance": 0, "semantic_scholar_citations": 1, "top_conference": 0}
+- Selected reason: Top institution signal: OpenAI, Stanford; Included by HF Daily Papers; HF community heat: 94 upvotes; Code or executable artifact signal; Open-source heat: 420 stars; Early citation signal: 78 citations; Practitioner keywords: agent, tool use, evaluation; arXiv category weight: cs.AI; No duplicate title in candidate pool; Recent topic repeat penalty: agents
 - Matched keywords: agent, tool use, evaluation, agents, tool
 - Signals: HF Daily (94 upvotes), Code signal present, URL not verified, GitHub 420 stars / 0 forks, Semantic Scholar 78 citations, OpenAI, Stanford
 - Warnings: none
@@ -71,15 +71,15 @@ mentions_count: 13
 ### #2 RAG Evaluation under Noisy Retrieval
 
 - Tier: featured
-- Score: 21
+- Score: 20
 - Topic: 基准与评测
 - Original title: RAG Evaluation under Noisy Retrieval
 - Authors: Dan Wang
 - arXiv: [2606.00003](https://arxiv.org/abs/2606.00003)
 - PDF: [PDF](https://arxiv.org/pdf/2606.00003)
 - Code URL: none verified
-- Score breakdown: {"arxiv_category_weight": 2, "code_available": 2, "hf_daily": 3, "hf_upvotes": 4, "institution_background": 0, "novelty_or_duplicate": 1, "open_source_heat": 0, "practitioner_relevance": 4, "recent_topic_repeat": 0, "safety_ethics_governance": 0, "semantic_scholar_citations": 2, "top_conference": 3}
-- Selected reason: Included by HF Daily Papers; HF community heat: 26 upvotes; Top conference signal: SIGIR; Code or executable artifact signal; Academic impact signal: 124 citations; Practitioner keywords: rag, retrieval, evaluation, benchmark; arXiv category weight: cs.IR; No duplicate title in candidate pool
+- Score breakdown: {"arxiv_category_weight": 2, "code_available": 2, "hf_daily": 3, "hf_upvotes": 4, "institution_background": 0, "novelty_or_duplicate": 1, "open_source_heat": 0, "practitioner_relevance": 4, "recent_topic_repeat": -1, "safety_ethics_governance": 0, "semantic_scholar_citations": 2, "top_conference": 3}
+- Selected reason: Included by HF Daily Papers; HF community heat: 26 upvotes; Top conference signal: SIGIR; Code or executable artifact signal; Academic impact signal: 124 citations; Practitioner keywords: rag, retrieval, evaluation, benchmark; arXiv category weight: cs.IR; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation
 - Matched keywords: rag, retrieval, evaluation, benchmark, eval
 - Signals: HF Daily (26 upvotes), Code signal present, URL not verified, GitHub 96 stars / 0 forks, Semantic Scholar 124 citations, SIGIR
 - Warnings: none
@@ -132,23 +132,7 @@ mentions_count: 13
 - Signals: HF Daily (17 upvotes), Code signal present, URL not verified, GitHub 260 stars / 0 forks, Semantic Scholar 44 citations
 - Warnings: none
 
-### #6 Preference Optimization for Safer Tool Agents
-
-- Tier: mention
-- Score: 14
-- Topic: Agent 与工具调用
-- Original title: Preference Optimization for Safer Tool Agents
-- Authors: Mona Singh
-- arXiv: [2606.00012](https://arxiv.org/abs/2606.00012)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00012)
-- Code URL: none verified
-- Score breakdown: {"arxiv_category_weight": 2, "code_available": 0, "hf_daily": 0, "hf_upvotes": 3, "institution_background": 0, "novelty_or_duplicate": 1, "open_source_heat": 0, "practitioner_relevance": 2, "recent_topic_repeat": 0, "safety_ethics_governance": 2, "semantic_scholar_citations": 1, "top_conference": 3}
-- Selected reason: HF community heat: 11 upvotes; Top conference signal: NeurIPS; Early citation signal: 60 citations; Practitioner keywords: agent, post-training; arXiv category weight: cs.AI; No duplicate title in candidate pool; Safety/ethics/governance keywords: harmful
-- Matched keywords: agent, post-training, agents, tool
-- Signals: Semantic Scholar 60 citations, NeurIPS
-- Warnings: none
-
-### #7 Red Teaming Open Source LLM Guardrails
+### #6 Red Teaming Open Source LLM Guardrails
 
 - Tier: mention
 - Score: 14
@@ -164,39 +148,23 @@ mentions_count: 13
 - Signals: Semantic Scholar 90 citations, AAAI
 - Warnings: none
 
-### #8 Database Native Retrieval for Enterprise RAG
-
-- Tier: mention
-- Score: 13
-- Topic: 检索与 RAG
-- Original title: Database Native Retrieval for Enterprise RAG
-- Authors: Nate Brown
-- arXiv: [2606.00013](https://arxiv.org/abs/2606.00013)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00013)
-- Code URL: none verified
-- Score breakdown: {"arxiv_category_weight": 2, "code_available": 2, "hf_daily": 0, "hf_upvotes": 3, "institution_background": 0, "novelty_or_duplicate": 1, "open_source_heat": 2, "practitioner_relevance": 3, "recent_topic_repeat": 0, "safety_ethics_governance": 0, "semantic_scholar_citations": 0, "top_conference": 0}
-- Selected reason: HF community heat: 10 upvotes; Code or executable artifact signal; Open-source heat: 120 stars; Practitioner keywords: rag, retrieval, database; arXiv category weight: cs.IR; No duplicate title in candidate pool
-- Matched keywords: rag, retrieval, database, index
-- Signals: Code signal present, URL not verified, GitHub 120 stars / 0 forks
-- Warnings: none
-
-### #9 Agentic 3D Modeling through Code Execution
+### #7 Preference Optimization for Safer Tool Agents
 
 - Tier: mention
 - Score: 13
 - Topic: Agent 与工具调用
-- Original title: Agentic 3D Modeling through Code Execution
-- Authors: Paul Davis
-- arXiv: [2606.00015](https://arxiv.org/abs/2606.00015)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00015)
+- Original title: Preference Optimization for Safer Tool Agents
+- Authors: Mona Singh
+- arXiv: [2606.00012](https://arxiv.org/abs/2606.00012)
+- PDF: [PDF](https://arxiv.org/pdf/2606.00012)
 - Code URL: none verified
-- Score breakdown: {"arxiv_category_weight": 2, "code_available": 2, "hf_daily": 0, "hf_upvotes": 3, "institution_background": 0, "novelty_or_duplicate": 1, "open_source_heat": 2, "practitioner_relevance": 3, "recent_topic_repeat": 0, "safety_ethics_governance": 0, "semantic_scholar_citations": 0, "top_conference": 0}
-- Selected reason: HF community heat: 13 upvotes; Code or executable artifact signal; Open-source heat: 112 stars; Practitioner keywords: agent, benchmark, code; arXiv category weight: cs.CL; No duplicate title in candidate pool
-- Matched keywords: agent, benchmark, code, agents
-- Signals: Code signal present, URL not verified, GitHub 112 stars / 0 forks
+- Score breakdown: {"arxiv_category_weight": 2, "code_available": 0, "hf_daily": 0, "hf_upvotes": 3, "institution_background": 0, "novelty_or_duplicate": 1, "open_source_heat": 0, "practitioner_relevance": 2, "recent_topic_repeat": -1, "safety_ethics_governance": 2, "semantic_scholar_citations": 1, "top_conference": 3}
+- Selected reason: HF community heat: 11 upvotes; Top conference signal: NeurIPS; Early citation signal: 60 citations; Practitioner keywords: agent, post-training; arXiv category weight: cs.AI; No duplicate title in candidate pool; Recent topic repeat penalty: agents; Safety/ethics/governance keywords: harmful
+- Matched keywords: agent, post-training, agents, tool
+- Signals: Semantic Scholar 60 citations, NeurIPS
 - Warnings: none
 
-### #10 Synthetic Data Curation for Post Training
+### #8 Synthetic Data Curation for Post Training
 
 - Tier: mention
 - Score: 12
@@ -210,6 +178,38 @@ mentions_count: 13
 - Selected reason: Top institution signal: Google; Early HF votes: 8; Code or executable artifact signal; Practitioner keywords: synthetic data, fine-tuning, post-training; arXiv category weight: cs.LG; No duplicate title in candidate pool
 - Matched keywords: synthetic data, fine-tuning, post-training, data, curation, pipeline
 - Signals: Code signal present, URL not verified, GitHub 80 stars / 0 forks, Google
+- Warnings: none
+
+### #9 Database Native Retrieval for Enterprise RAG
+
+- Tier: mention
+- Score: 12
+- Topic: 检索与 RAG
+- Original title: Database Native Retrieval for Enterprise RAG
+- Authors: Nate Brown
+- arXiv: [2606.00013](https://arxiv.org/abs/2606.00013)
+- PDF: [PDF](https://arxiv.org/pdf/2606.00013)
+- Code URL: none verified
+- Score breakdown: {"arxiv_category_weight": 2, "code_available": 2, "hf_daily": 0, "hf_upvotes": 3, "institution_background": 0, "novelty_or_duplicate": 1, "open_source_heat": 2, "practitioner_relevance": 3, "recent_topic_repeat": -1, "safety_ethics_governance": 0, "semantic_scholar_citations": 0, "top_conference": 0}
+- Selected reason: HF community heat: 10 upvotes; Code or executable artifact signal; Open-source heat: 120 stars; Practitioner keywords: rag, retrieval, database; arXiv category weight: cs.IR; No duplicate title in candidate pool; Recent topic repeat penalty: rag
+- Matched keywords: rag, retrieval, database, index
+- Signals: Code signal present, URL not verified, GitHub 120 stars / 0 forks
+- Warnings: none
+
+### #10 Agentic 3D Modeling through Code Execution
+
+- Tier: mention
+- Score: 12
+- Topic: Agent 与工具调用
+- Original title: Agentic 3D Modeling through Code Execution
+- Authors: Paul Davis
+- arXiv: [2606.00015](https://arxiv.org/abs/2606.00015)
+- PDF: [PDF](https://arxiv.org/pdf/2606.00015)
+- Code URL: none verified
+- Score breakdown: {"arxiv_category_weight": 2, "code_available": 2, "hf_daily": 0, "hf_upvotes": 3, "institution_background": 0, "novelty_or_duplicate": 1, "open_source_heat": 2, "practitioner_relevance": 3, "recent_topic_repeat": -1, "safety_ethics_governance": 0, "semantic_scholar_citations": 0, "top_conference": 0}
+- Selected reason: HF community heat: 13 upvotes; Code or executable artifact signal; Open-source heat: 112 stars; Practitioner keywords: agent, benchmark, code; arXiv category weight: cs.CL; No duplicate title in candidate pool; Recent topic repeat penalty: agents
+- Matched keywords: agent, benchmark, code, agents
+- Signals: Code signal present, URL not verified, GitHub 112 stars / 0 forks
 - Warnings: none
 
 ### #11 Low Rank Adapters as Model Memory Probes
@@ -311,15 +311,15 @@ mentions_count: 13
 ### #17 Training Data Deduplication for Foundation Models
 
 - Tier: mention
-- Score: 8
+- Score: 7
 - Topic: Agent 与工具调用
 - Original title: Training Data Deduplication for Foundation Models
 - Authors: Qian Wu
 - arXiv: [2606.00016](https://arxiv.org/abs/2606.00016)
 - PDF: [PDF](https://arxiv.org/pdf/2606.00016)
 - Code URL: none verified
-- Score breakdown: {"arxiv_category_weight": 2, "code_available": 2, "hf_daily": 0, "hf_upvotes": 1, "institution_background": 0, "novelty_or_duplicate": 1, "open_source_heat": 0, "practitioner_relevance": 2, "recent_topic_repeat": 0, "safety_ethics_governance": 0, "semantic_scholar_citations": 0, "top_conference": 0}
-- Selected reason: Early HF votes: 4; Code or executable artifact signal; Practitioner keywords: workflow, benchmark; arXiv category weight: cs.LG; No duplicate title in candidate pool
+- Score breakdown: {"arxiv_category_weight": 2, "code_available": 2, "hf_daily": 0, "hf_upvotes": 1, "institution_background": 0, "novelty_or_duplicate": 1, "open_source_heat": 0, "practitioner_relevance": 2, "recent_topic_repeat": -1, "safety_ethics_governance": 0, "semantic_scholar_citations": 0, "top_conference": 0}
+- Selected reason: Early HF votes: 4; Code or executable artifact signal; Practitioner keywords: workflow, benchmark; arXiv category weight: cs.LG; No duplicate title in candidate pool; Recent topic repeat penalty: agents
 - Matched keywords: workflow, benchmark
 - Signals: Code signal present, URL not verified, GitHub 51 stars / 0 forks
 - Warnings: none
@@ -327,15 +327,15 @@ mentions_count: 13
 ### #18 Open Speech Agent Benchmark
 
 - Tier: mention
-- Score: 6
+- Score: 5
 - Topic: Agent 与工具调用
 - Original title: Open Speech Agent Benchmark
 - Authors: Jack Sun
 - arXiv: [2606.00009](https://arxiv.org/abs/2606.00009)
 - PDF: [PDF](https://arxiv.org/pdf/2606.00009)
 - Code URL: none verified
-- Score breakdown: {"arxiv_category_weight": 0, "code_available": 2, "hf_daily": 0, "hf_upvotes": 1, "institution_background": 0, "novelty_or_duplicate": 1, "open_source_heat": 0, "practitioner_relevance": 2, "recent_topic_repeat": 0, "safety_ethics_governance": 0, "semantic_scholar_citations": 0, "top_conference": 0}
-- Selected reason: Early HF votes: 5; Code or executable artifact signal; Practitioner keywords: agent, benchmark; No duplicate title in candidate pool
+- Score breakdown: {"arxiv_category_weight": 0, "code_available": 2, "hf_daily": 0, "hf_upvotes": 1, "institution_background": 0, "novelty_or_duplicate": 1, "open_source_heat": 0, "practitioner_relevance": 2, "recent_topic_repeat": -1, "safety_ethics_governance": 0, "semantic_scholar_citations": 0, "top_conference": 0}
+- Selected reason: Early HF votes: 5; Code or executable artifact signal; Practitioner keywords: agent, benchmark; No duplicate title in candidate pool; Recent topic repeat penalty: agents
 - Matched keywords: agent, benchmark, agents, tool, tools
 - Signals: Code signal present, URL not verified, GitHub 62 stars / 0 forks
 - Warnings: none

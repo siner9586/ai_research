@@ -7,7 +7,7 @@ summary: "This issue selects 5 featured papers and 13 honorable mentions from 18
 tags: ["agents", "code", "data-engineering", "evaluation", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 topics: ["agents", "code", "data-engineering", "evaluation", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 sources_page: "/en/daily/2026-06-03-self-evolving-agents-for-tool-use-skills-sources/"
-generated_at: "2026-06-04T03:09:24.061752+00:00"
+generated_at: "2026-06-04T05:16:39.647622+00:00"
 page_type: "brief"
 candidate_count: 18
 featured_count: 5
@@ -114,19 +114,19 @@ High-scoring papers today cluster around Agents and Tool Use, Benchmarks and Eva
   - Scores are ranking signals, not final quality judgments.
 
 ## Honorable Mentions
-- [Preference Optimization for Safer Tool Agents](https://arxiv.org/abs/2606.00012) - Agents and Tool Use, score 14. Why track: It targets a verifiable AI research question. The abstract signal is: Post-training with preference optimization reduces harmful tool calls and improves auditability.
 - [Red Teaming Open Source LLM Guardrails](https://arxiv.org/abs/2606.00017) - Safety and Alignment, score 14. Why track: It targets a verifiable AI research question. The abstract signal is: A safety study evaluates jailbreak resistance, guardrail routing, and risk classification for open-source models.
-- [Database Native Retrieval for Enterprise RAG](https://arxiv.org/abs/2606.00013) - Retrieval and RAG, score 13. Why track: It targets a verifiable AI research question. The abstract signal is: A retrieval architecture routes queries to native database, graph, and vector indexes instead of flattening all sources.
-- [Agentic 3D Modeling through Code Execution](https://arxiv.org/abs/2606.00015) - Agents and Tool Use, score 13. Why track: It targets a verifiable AI research question. The abstract signal is: A code intelligence benchmark tests agents that generate executable scripts for procedural 3D modeling.
+- [Preference Optimization for Safer Tool Agents](https://arxiv.org/abs/2606.00012) - Agents and Tool Use, score 13. Why track: It targets a verifiable AI research question. The abstract signal is: Post-training with preference optimization reduces harmful tool calls and improves auditability.
 - [Synthetic Data Curation for Post Training](https://arxiv.org/abs/2606.00007) - Data Engineering, score 12. Why track: It targets a verifiable AI research question. The abstract signal is: A data pipeline selects synthetic instruction data for fine-tuning and post-training with quality filters.
+- [Database Native Retrieval for Enterprise RAG](https://arxiv.org/abs/2606.00013) - Retrieval and RAG, score 12. Why track: It targets a verifiable AI research question. The abstract signal is: A retrieval architecture routes queries to native database, graph, and vector indexes instead of flattening all sources.
+- [Agentic 3D Modeling through Code Execution](https://arxiv.org/abs/2606.00015) - Agents and Tool Use, score 12. Why track: It targets a verifiable AI research question. The abstract signal is: A code intelligence benchmark tests agents that generate executable scripts for procedural 3D modeling.
 - [Low Rank Adapters as Model Memory Probes](https://arxiv.org/abs/2606.00018) - Training and Post-training, score 12. Why track: It targets a verifiable AI research question. The abstract signal is: A training analysis uses LoRA adapters to estimate memorization capacity and decide when full fine-tuning is needed.
 - [Chart Understanding for Vision Language Models](https://arxiv.org/abs/2606.00014) - Multimodal Models, score 11. Why track: It targets a verifiable AI research question. The abstract signal is: A vision-language benchmark measures chart, table, and document understanding in multimodal models.
 - [Robotics Policies with Memory Grounded Planning](https://arxiv.org/abs/2606.00006) - Robotics and Embodied AI, score 10. Why track: It targets a verifiable AI research question. The abstract signal is: Embodied robot policies use memory, visual observations, and planning to improve manipulation and navigation.
 - [Mechanistic Attribution for Factual Editing](https://arxiv.org/abs/2606.00008) - Interpretability, score 10. Why track: It targets a verifiable AI research question. The abstract signal is: An interpretability method localizes representations involved in factual editing and model memory.
 - [Serving Quantized Models with Adaptive Batching](https://arxiv.org/abs/2606.00011) - Systems and Deployment, score 10. Why track: It targets a verifiable AI research question. The abstract signal is: A deployment system improves throughput for quantized language models using adaptive batching and cache-aware scheduling.
 - [Video Diffusion Models Need Temporal Tests](https://arxiv.org/abs/2606.00010) - Video Generation, score 9. Why track: It targets a verifiable AI research question. The abstract signal is: A video generation evaluation suite probes temporal consistency, motion realism, and causal order.
-- [Training Data Deduplication for Foundation Models](https://arxiv.org/abs/2606.00016) - Agents and Tool Use, score 8. Why track: It targets a verifiable AI research question. The abstract signal is: A data engineering workflow removes near duplicates and measures downstream benchmark contamination.
-- [Open Speech Agent Benchmark](https://arxiv.org/abs/2606.00009) - Agents and Tool Use, score 6. Why track: It targets a verifiable AI research question. The abstract signal is: A benchmark evaluates speech and audio agents that call tools, transcribe speech, and reason over sound.
+- [Training Data Deduplication for Foundation Models](https://arxiv.org/abs/2606.00016) - Agents and Tool Use, score 7. Why track: It targets a verifiable AI research question. The abstract signal is: A data engineering workflow removes near duplicates and measures downstream benchmark contamination.
+- [Open Speech Agent Benchmark](https://arxiv.org/abs/2606.00009) - Agents and Tool Use, score 5. Why track: It targets a verifiable AI research question. The abstract signal is: A benchmark evaluates speech and audio agents that call tools, transcribe speech, and reason over sound.
 
 ## Keywords
 

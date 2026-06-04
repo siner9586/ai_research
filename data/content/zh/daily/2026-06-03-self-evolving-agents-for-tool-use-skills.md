@@ -7,7 +7,7 @@ summary: "本期从 18 篇候选论文中筛出 5 篇重点论文和 13 篇也�
 tags: ["agents", "code", "data-engineering", "evaluation", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 topics: ["agents", "code", "data-engineering", "evaluation", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 sources_page: "/zh/daily/2026-06-03-self-evolving-agents-for-tool-use-skills-sources/"
-generated_at: "2026-06-04T03:09:23.417912+00:00"
+generated_at: "2026-06-04T05:16:39.081555+00:00"
 page_type: "brief"
 candidate_count: 18
 featured_count: 5
@@ -114,19 +114,19 @@ mentions_count: 13
   - 评分只是筛选信号，不是论文质量定论。
 
 ## 也值得关注
-- [Preference Optimization for Safer Tool Agents](https://arxiv.org/abs/2606.00012) - Agent 与工具调用, score 14. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Post-training with preference optimization reduces harmful tool calls and improves auditability.
 - [Red Teaming Open Source LLM Guardrails](https://arxiv.org/abs/2606.00017) - 安全与对齐, score 14. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A safety study evaluates jailbreak resistance, guardrail routing, and risk classification for open-source models.
-- [Database Native Retrieval for Enterprise RAG](https://arxiv.org/abs/2606.00013) - 检索与 RAG, score 13. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A retrieval architecture routes queries to native database, graph, and vector indexes instead of flattening all sources.
-- [Agentic 3D Modeling through Code Execution](https://arxiv.org/abs/2606.00015) - Agent 与工具调用, score 13. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A code intelligence benchmark tests agents that generate executable scripts for procedural 3D modeling.
+- [Preference Optimization for Safer Tool Agents](https://arxiv.org/abs/2606.00012) - Agent 与工具调用, score 13. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Post-training with preference optimization reduces harmful tool calls and improves auditability.
 - [Synthetic Data Curation for Post Training](https://arxiv.org/abs/2606.00007) - 数据工程, score 12. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A data pipeline selects synthetic instruction data for fine-tuning and post-training with quality filters.
+- [Database Native Retrieval for Enterprise RAG](https://arxiv.org/abs/2606.00013) - 检索与 RAG, score 12. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A retrieval architecture routes queries to native database, graph, and vector indexes instead of flattening all sources.
+- [Agentic 3D Modeling through Code Execution](https://arxiv.org/abs/2606.00015) - Agent 与工具调用, score 12. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A code intelligence benchmark tests agents that generate executable scripts for procedural 3D modeling.
 - [Low Rank Adapters as Model Memory Probes](https://arxiv.org/abs/2606.00018) - 训练与后训练, score 12. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A training analysis uses LoRA adapters to estimate memorization capacity and decide when full fine-tuning is needed.
 - [Chart Understanding for Vision Language Models](https://arxiv.org/abs/2606.00014) - 多模态模型, score 11. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A vision-language benchmark measures chart, table, and document understanding in multimodal models.
 - [Robotics Policies with Memory Grounded Planning](https://arxiv.org/abs/2606.00006) - 机器人与具身智能, score 10. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Embodied robot policies use memory, visual observations, and planning to improve manipulation and navigation.
 - [Mechanistic Attribution for Factual Editing](https://arxiv.org/abs/2606.00008) - 可解释性, score 10. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：An interpretability method localizes representations involved in factual editing and model memory.
 - [Serving Quantized Models with Adaptive Batching](https://arxiv.org/abs/2606.00011) - 系统与部署, score 10. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A deployment system improves throughput for quantized language models using adaptive batching and cache-aware scheduling.
 - [Video Diffusion Models Need Temporal Tests](https://arxiv.org/abs/2606.00010) - 视频生成, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A video generation evaluation suite probes temporal consistency, motion realism, and causal order.
-- [Training Data Deduplication for Foundation Models](https://arxiv.org/abs/2606.00016) - Agent 与工具调用, score 8. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A data engineering workflow removes near duplicates and measures downstream benchmark contamination.
-- [Open Speech Agent Benchmark](https://arxiv.org/abs/2606.00009) - Agent 与工具调用, score 6. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A benchmark evaluates speech and audio agents that call tools, transcribe speech, and reason over sound.
+- [Training Data Deduplication for Foundation Models](https://arxiv.org/abs/2606.00016) - Agent 与工具调用, score 7. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A data engineering workflow removes near duplicates and measures downstream benchmark contamination.
+- [Open Speech Agent Benchmark](https://arxiv.org/abs/2606.00009) - Agent 与工具调用, score 5. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A benchmark evaluates speech and audio agents that call tools, transcribe speech, and reason over sound.
 
 ## 今日关键词
 

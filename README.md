@@ -4,6 +4,15 @@ AI Research Brief is a reproducible AI paper briefing system. It collects AI-rel
 
 The project learns from the information architecture of daily AI paper brief products, but does not copy any third-party brand, copy, visual design, logo, domain, trademark, or original content.
 
+## Website and WeChat / 网站与公众号
+
+- Website / 网站: https://aici.ccwu.cc/
+- WeChat Official Account / 微信公众号: 灵感与观点交流
+
+<p align="left">
+  <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=http%3A%2F%2Fweixin.qq.com%2Fr%2Fmp%2FIiNGXnLEuC-HrTY993Yw" alt="微信公众号：灵感与观点交流 二维码" width="180" />
+</p>
+
 ## Features
 
 - arXiv Atom API collection for `cs.AI`, `cs.CL`, `cs.LG`, `cs.CV`, `cs.MA`, `cs.IR`.

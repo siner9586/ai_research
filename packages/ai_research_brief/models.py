@@ -1,5 +1,14 @@
-from datetime import datetime, date
+from __future__ import annotations
+
+from datetime import date, datetime, timezone
+from typing import Any
+
 from pydantic import BaseModel, Field
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
 
 class Paper(BaseModel):
     id: str
@@ -14,7 +23,7 @@ class Paper(BaseModel):
     abs_url: str
     pdf_url: str
     source: str = 'arxiv'
-    fetched_at: datetime = Field(default_factory=datetime.utcnow)
+    fetched_at: datetime = Field(default_factory=utc_now)
 
 class PaperSignal(BaseModel):
     arxiv_id: str
@@ -26,8 +35,13 @@ class PaperSignal(BaseModel):
     code_source: str | None = None
     github_stars: int = 0
     github_forks: int = 0
+    repo_updated_at: datetime | None = None
     github_trending: bool = False
+    semantic_scholar_id: str | None = None
     citation_count: int = 0
+    influential_citation_count: int = 0
+    fields_of_study: list[str] = Field(default_factory=list)
+    external_ids: dict[str, Any] = Field(default_factory=dict)
     top_institution: bool = False
     institutions: list[str] = Field(default_factory=list)
     top_conference: str | None = None
@@ -50,6 +64,40 @@ class ScoredPaper(BaseModel):
     selection_tier: str = "candidate"
     rank: int = 0
 
+class BriefPaper(BaseModel):
+    arxiv_id: str
+    title: str
+    short_title: str
+    original_title: str
+    authors: list[str]
+    topic: str
+    topic_slug: str
+    score: int
+    abs_url: str
+    pdf_url: str
+    code_url: str | None = None
+    why_it_matters: str
+    problem: str
+    method: str
+    practitioner_takeaway: str
+    limitations: str
+    bullets: list[str] = Field(default_factory=list)
+
+
+class DailyBrief(BaseModel):
+    date: date
+    lang: str
+    title: str
+    slug: str
+    overview: str
+    trend_observation: str
+    featured_papers: list[BriefPaper] = Field(default_factory=list)
+    honorable_mentions: list[BriefPaper] = Field(default_factory=list)
+    keywords: list[str] = Field(default_factory=list)
+    sources_path: str
+    generated_at: datetime = Field(default_factory=utc_now)
+
+
 class DailyBriefMeta(BaseModel):
     date: date
     slug: str
@@ -60,7 +108,7 @@ class DailyBriefMeta(BaseModel):
     featured_count: int
     mentions_count: int
     sources_page: str
-    generated_at: datetime = Field(default_factory=datetime.utcnow)
+    generated_at: datetime = Field(default_factory=utc_now)
 
 class QAReport(BaseModel):
     date: date
@@ -68,4 +116,4 @@ class QAReport(BaseModel):
     warnings: list[str]
     errors: list[str]
     checked_files: list[str]
-    generated_at: datetime = Field(default_factory=datetime.utcnow)
+    generated_at: datetime = Field(default_factory=utc_now)

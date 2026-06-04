@@ -17,10 +17,16 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       <li>Practitioner relevance keywords such as deployment, inference, agents, RAG, safety, and evaluation.</li>
       <li>Academic impact through optional Semantic Scholar citation counts.</li>
       <li>Open-source heat through optional GitHub stars and trending signals.</li>
+      <li>arXiv category weight from configured AI categories.</li>
+      <li>Novelty and duplicate penalties for repeated titles.</li>
+      <li>Recent topic repetition penalties to reduce consecutive same-topic concentration.</li>
+      <li>Safety, ethics, and governance keywords for additional visibility.</li>
     </ul>
     <h2>Cadence</h2>
-    <p>The default cadence is T+3 so community signals can mature. Without external API keys, the pipeline still builds with arXiv metadata and mock data.</p>
+    <p>The default cadence is T+3 so community signals can mature. Without external API keys, production runs continue with arXiv metadata; mock-run uses fixed demo data for offline validation.</p>
     <h2>Transparency</h2>
     <p>Every issue has a source page listing all candidates, selection tiers, total scores, score breakdowns, matched keywords, external signals, and degradation warnings.</p>
+    <h2>Limits</h2>
+    <p>Briefs are generated from titles, abstracts, and public metadata by default. They do not replace full-paper reading, and arXiv preprints must not be described as verified conclusions or conference acceptances.</p>
   </article>
 </BaseLayout>

@@ -1,93 +1,142 @@
 ---
-title: "Agent 与工具调用、基准与评测 等方向值得跟进"
+title: "AI 研究简报：Agent 与工具调用、基准与评测、系统与部署"
 date: "2026-06-03"
 lang: "zh"
 slug: "2026-06-03-self-evolving-agents-for-tool-use-skills"
-page_type: "brief"
-site_name: "前沿论文雷达"
-summary: "本期从 18 篇候选论文中筛出 5 篇重点关注。核心线索包括：Self Evolving Agents for Tool Use Skills；RAG Evaluation under Noisy Retrieval；Efficient Long Context Inference with Cache Compression。"
+summary: "本期从 18 篇候选论文中筛出 5 篇重点论文和 13 篇也值得关注论文，主要覆盖 Agent 与工具调用、基准与评测、系统与部署。"
 tags: ["agents", "code", "data-engineering", "evaluation", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
+topics: ["agents", "code", "data-engineering", "evaluation", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 sources_page: "/zh/daily/2026-06-03-self-evolving-agents-for-tool-use-skills-sources/"
+generated_at: "2026-06-04T03:09:23.417912+00:00"
+page_type: "brief"
 candidate_count: 18
 featured_count: 5
-mentions_count: 12
+mentions_count: 13
 ---
 
-# Agent 与工具调用、基准与评测 等方向值得跟进
+# AI 研究简报：Agent 与工具调用、基准与评测、系统与部署
 
-本期从 18 篇候选论文中筛出 5 篇重点关注。核心线索包括：Self Evolving Agents for Tool Use Skills；RAG Evaluation under Noisy Retrieval；Efficient Long Context Inference with Cache Compression。
+**日期**: 2026-06-03
 
-## 重点关注
+## 今日概览
 
-## 1. Self Evolving Agents for Tool Use Skills
+本期从 18 篇候选论文中筛出 5 篇重点论文和 13 篇也值得关注论文，主要覆盖 Agent 与工具调用、基准与评测、系统与部署。
 
-- 方向: Agent 与工具调用
-- 评分: 19 (high)
+## 今日趋势观察
+
+今天的高分论文集中在 Agent 与工具调用、基准与评测、系统与部署。这些信号更适合作为选题和工程跟进线索，而不是对论文结论的最终背书。
+
+## 重点论文
+
+### 1. Self Evolving Agents for Tool Use Skills
+
+- 原始论文标题: Self Evolving Agents for Tool Use Skills
+- 作者/机构: Alice Chen, Bob Smith
+- 主题: Agent 与工具调用
 - arXiv: [2606.00001](https://arxiv.org/abs/2606.00001)
-- PDF: [download](https://arxiv.org/pdf/2606.00001)
-- 入选理由: Top institution signal: OpenAI, Stanford
+- PDF: [PDF](https://arxiv.org/pdf/2606.00001)
+- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Agents learn reusable tool use skills through iterative self improvement, unit tests, execution feedback, and evaluation
+- 它解决了什么问题: 论文试图处理的问题是：Agents learn reusable tool use skills through iterative self improvement, unit tests, execution feedback, and evaluation
+- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
+- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
+- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
+- 三条要点:
+  - 保留原始 arXiv 链接作为事实来源。
+  - 代码链接只在输入已验证时呈现。
+  - 评分只是筛选信号，不是论文质量定论。
 
-这篇论文值得关注，因为它把问题落在 **Agent 与工具调用** 方向，并且摘要显示：Agents learn reusable tool use skills through iterative self improvement, unit tests, execution feedback, and evaluation。当前判断基于公开元数据和摘要，完整结论仍应以原论文为准。
+### 2. RAG Evaluation under Noisy Retrieval
 
-## 2. RAG Evaluation under Noisy Retrieval
-
-- 方向: 基准与评测
-- 评分: 18 (high)
+- 原始论文标题: RAG Evaluation under Noisy Retrieval
+- 作者/机构: Dan Wang
+- 主题: 基准与评测
 - arXiv: [2606.00003](https://arxiv.org/abs/2606.00003)
-- PDF: [download](https://arxiv.org/pdf/2606.00003)
-- 入选理由: Included by HF Daily Papers
+- PDF: [PDF](https://arxiv.org/pdf/2606.00003)
+- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A benchmark studies retrieval augmented generation reliability under noisy evidence, missing citations, and adversarial documents.
+- 它解决了什么问题: 论文试图处理的问题是：A benchmark studies retrieval augmented generation reliability under noisy evidence, missing citations, and adversarial documents.
+- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
+- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
+- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
+- 三条要点:
+  - 保留原始 arXiv 链接作为事实来源。
+  - 代码链接只在输入已验证时呈现。
+  - 评分只是筛选信号，不是论文质量定论。
 
-这篇论文值得关注，因为它把问题落在 **基准与评测** 方向，并且摘要显示：A benchmark studies retrieval augmented generation reliability under noisy evidence, missing citations, and adversarial documents.。当前判断基于公开元数据和摘要，完整结论仍应以原论文为准。
+### 3. Efficient Long Context Inference with Cache Compression
 
-## 3. Efficient Long Context Inference with Cache Compression
-
-- 方向: 系统与部署
-- 评分: 16 (high)
+- 原始论文标题: Efficient Long Context Inference with Cache Compression
+- 作者/机构: Carol Li
+- 主题: 系统与部署
 - arXiv: [2606.00002](https://arxiv.org/abs/2606.00002)
-- PDF: [download](https://arxiv.org/pdf/2606.00002)
-- 入选理由: Included by HF Daily Papers
+- PDF: [PDF](https://arxiv.org/pdf/2606.00002)
+- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A systems method reduces memory and latency during long context model inference while preserving code reasoning accuracy.
+- 它解决了什么问题: 论文试图处理的问题是：A systems method reduces memory and latency during long context model inference while preserving code reasoning accuracy.
+- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
+- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
+- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
+- 三条要点:
+  - 保留原始 arXiv 链接作为事实来源。
+  - 代码链接只在输入已验证时呈现。
+  - 评分只是筛选信号，不是论文质量定论。
 
-这篇论文值得关注，因为它把问题落在 **系统与部署** 方向，并且摘要显示：A systems method reduces memory and latency during long context model inference while preserving code reasoning accuracy.。当前判断基于公开元数据和摘要，完整结论仍应以原论文为准。
+### 4. Multimodal Safety Evaluation for Vision Language Models
 
-## 4. Multimodal Safety Evaluation for Vision Language Models
-
-- 方向: 安全与对齐
-- 评分: 14 (high)
+- 原始论文标题: Multimodal Safety Evaluation for Vision Language Models
+- 作者/机构: Eva Green
+- 主题: 安全与对齐
 - arXiv: [2606.00004](https://arxiv.org/abs/2606.00004)
-- PDF: [download](https://arxiv.org/pdf/2606.00004)
-- 入选理由: Included by HF Daily Papers
+- PDF: [PDF](https://arxiv.org/pdf/2606.00004)
+- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A safety evaluation suite measures multimodal models across risky visual prompts, jailbreak attempts, and alignment failures.
+- 它解决了什么问题: 论文试图处理的问题是：A safety evaluation suite measures multimodal models across risky visual prompts, jailbreak attempts, and alignment failures.
+- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
+- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
+- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
+- 三条要点:
+  - 保留原始 arXiv 链接作为事实来源。
+  - 代码链接只在输入已验证时呈现。
+  - 评分只是筛选信号，不是论文质量定论。
 
-这篇论文值得关注，因为它把问题落在 **安全与对齐** 方向，并且摘要显示：A safety evaluation suite measures multimodal models across risky visual prompts, jailbreak attempts, and alignment failures.。当前判断基于公开元数据和摘要，完整结论仍应以原论文为准。
+### 5. Code Model Repair with Execution Feedback
 
-## 5. Code Model Repair with Execution Feedback
-
-- 方向: 代码智能
-- 评分: 12 (high)
+- 原始论文标题: Code Model Repair with Execution Feedback
+- 作者/机构: Frank Moore
+- 主题: 代码智能
 - arXiv: [2606.00005](https://arxiv.org/abs/2606.00005)
-- PDF: [download](https://arxiv.org/pdf/2606.00005)
-- 入选理由: Included by HF Daily Papers
-
-这篇论文值得关注，因为它把问题落在 **代码智能** 方向，并且摘要显示：Code models improve patch generation through execution feedback loops, repository tests, and API-aware repair.。当前判断基于公开元数据和摘要，完整结论仍应以原论文为准。
+- PDF: [PDF](https://arxiv.org/pdf/2606.00005)
+- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Code models improve patch generation through execution feedback loops, repository tests, and API-aware repair.
+- 它解决了什么问题: 论文试图处理的问题是：Code models improve patch generation through execution feedback loops, repository tests, and API-aware repair.
+- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
+- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
+- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
+- 三条要点:
+  - 保留原始 arXiv 链接作为事实来源。
+  - 代码链接只在输入已验证时呈现。
+  - 评分只是筛选信号，不是论文质量定论。
 
 ## 也值得关注
-- [Database Native Retrieval for Enterprise RAG](https://arxiv.org/abs/2606.00013) - 检索与 RAG, score 10. HF community heat: 10 upvotes
-- [Agentic 3D Modeling through Code Execution](https://arxiv.org/abs/2606.00015) - Agent 与工具调用, score 10. HF community heat: 13 upvotes
-- [Robotics Policies with Memory Grounded Planning](https://arxiv.org/abs/2606.00006) - 机器人与具身智能, score 9. HF community heat: 12 upvotes
-- [Synthetic Data Curation for Post Training](https://arxiv.org/abs/2606.00007) - 数据工程, score 9. Top institution signal: Google
-- [Serving Quantized Models with Adaptive Batching](https://arxiv.org/abs/2606.00011) - 系统与部署, score 9. HF community heat: 14 upvotes
-- [Preference Optimization for Safer Tool Agents](https://arxiv.org/abs/2606.00012) - Agent 与工具调用, score 9. HF community heat: 11 upvotes
-- [Red Teaming Open Source LLM Guardrails](https://arxiv.org/abs/2606.00017) - 安全与对齐, score 9. HF community heat: 16 upvotes
-- [Low Rank Adapters as Model Memory Probes](https://arxiv.org/abs/2606.00018) - 训练与后训练, score 9. Early HF votes: 6
-- [Chart Understanding for Vision Language Models](https://arxiv.org/abs/2606.00014) - 多模态模型, score 8. Early HF votes: 9
-- [Mechanistic Attribution for Factual Editing](https://arxiv.org/abs/2606.00008) - 可解释性, score 7. Early HF votes: 7
-- [Video Diffusion Models Need Temporal Tests](https://arxiv.org/abs/2606.00010) - 视频生成, score 6. Early HF votes: 6
-- [Open Speech Agent Benchmark](https://arxiv.org/abs/2606.00009) - Agent 与工具调用, score 5. Early HF votes: 5
+- [Preference Optimization for Safer Tool Agents](https://arxiv.org/abs/2606.00012) - Agent 与工具调用, score 14. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Post-training with preference optimization reduces harmful tool calls and improves auditability.
+- [Red Teaming Open Source LLM Guardrails](https://arxiv.org/abs/2606.00017) - 安全与对齐, score 14. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A safety study evaluates jailbreak resistance, guardrail routing, and risk classification for open-source models.
+- [Database Native Retrieval for Enterprise RAG](https://arxiv.org/abs/2606.00013) - 检索与 RAG, score 13. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A retrieval architecture routes queries to native database, graph, and vector indexes instead of flattening all sources.
+- [Agentic 3D Modeling through Code Execution](https://arxiv.org/abs/2606.00015) - Agent 与工具调用, score 13. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A code intelligence benchmark tests agents that generate executable scripts for procedural 3D modeling.
+- [Synthetic Data Curation for Post Training](https://arxiv.org/abs/2606.00007) - 数据工程, score 12. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A data pipeline selects synthetic instruction data for fine-tuning and post-training with quality filters.
+- [Low Rank Adapters as Model Memory Probes](https://arxiv.org/abs/2606.00018) - 训练与后训练, score 12. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A training analysis uses LoRA adapters to estimate memorization capacity and decide when full fine-tuning is needed.
+- [Chart Understanding for Vision Language Models](https://arxiv.org/abs/2606.00014) - 多模态模型, score 11. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A vision-language benchmark measures chart, table, and document understanding in multimodal models.
+- [Robotics Policies with Memory Grounded Planning](https://arxiv.org/abs/2606.00006) - 机器人与具身智能, score 10. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Embodied robot policies use memory, visual observations, and planning to improve manipulation and navigation.
+- [Mechanistic Attribution for Factual Editing](https://arxiv.org/abs/2606.00008) - 可解释性, score 10. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：An interpretability method localizes representations involved in factual editing and model memory.
+- [Serving Quantized Models with Adaptive Batching](https://arxiv.org/abs/2606.00011) - 系统与部署, score 10. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A deployment system improves throughput for quantized language models using adaptive batching and cache-aware scheduling.
+- [Video Diffusion Models Need Temporal Tests](https://arxiv.org/abs/2606.00010) - 视频生成, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A video generation evaluation suite probes temporal consistency, motion realism, and causal order.
+- [Training Data Deduplication for Foundation Models](https://arxiv.org/abs/2606.00016) - Agent 与工具调用, score 8. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A data engineering workflow removes near duplicates and measures downstream benchmark contamination.
+- [Open Speech Agent Benchmark](https://arxiv.org/abs/2606.00009) - Agent 与工具调用, score 6. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A benchmark evaluates speech and audio agents that call tools, transcribe speech, and reason over sound.
 
-## 来源透明
+## 今日关键词
 
-本期候选池共 18 篇，完整评分、入选层级和未入选候选见 [来源页](/zh/daily/2026-06-03-self-evolving-agents-for-tool-use-skills-sources/)。
+agent, agents, alignment, api, attribution, benchmark, cache, chart, code, compression, curation, data, database, deployment
 
-## 已知局限
+## 来源页链接
+
+完整候选池、评分规则摘要和每篇 score breakdown 见 [来源透明页](/zh/daily/2026-06-03-self-evolving-agents-for-tool-use-skills-sources/)。
+
+## 阅读边界
 - 自动评分会偏向有社区信号、代码信号和工程关键词的论文。
 - 简报默认基于标题、摘要和公开元数据，不替代全文精读。
 - 外部 API 限流或不可用时，相关信号会降级为空并在来源页保留说明。

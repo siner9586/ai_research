@@ -1,37 +1,47 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, time, timezone
 import re
 from urllib.parse import quote
 import feedparser
 import httpx
 from tenacity import retry, stop_after_attempt, wait_fixed
 from ..models import Paper
+from ..utils.http import DEFAULT_USER_AGENT
 
-def fetch_arxiv_category(category: str, max_results: int = 50) -> list[Paper]:
+
+def fetch_arxiv_category(category: str, max_results: int = 50, day: date | None = None) -> list[Paper]:
     try:
-        return _fetch_arxiv_api(category, max_results)
+        return _fetch_arxiv_api(category, max_results, day)
     except Exception:
+        if day is not None:
+            raise
         return fetch_arxiv_rss_category(category, max_results)
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
-def _fetch_arxiv_api(category: str, max_results: int = 50) -> list[Paper]:
-    query = quote(f'cat:{category}')
+def _fetch_arxiv_api(category: str, max_results: int = 50, day: date | None = None) -> list[Paper]:
+    query_text = f"cat:{category}"
+    if day:
+        stamp = day.strftime("%Y%m%d")
+        query_text += f" AND submittedDate:[{stamp}0000 TO {stamp}2359]"
+    query = quote(query_text)
     url = f'https://export.arxiv.org/api/query?search_query={query}&sortBy=submittedDate&sortOrder=descending&start=0&max_results={max_results}'
-    r = httpx.get(url, timeout=30, follow_redirects=True, headers={'User-Agent':'frontier-paper-radar/0.1'})
+    r = httpx.get(url, timeout=30, follow_redirects=True, headers={'User-Agent': DEFAULT_USER_AGENT})
     r.raise_for_status()
     feed = feedparser.parse(r.text)
     papers = []
     for e in feed.entries:
-        arxiv_id = e.id.split('/abs/')[-1]
+        arxiv_id = normalize_arxiv_id(e.id.split('/abs/')[-1])
         cats = [t['term'] for t in getattr(e, 'tags', [])]
-        papers.append(Paper(id=arxiv_id, arxiv_id=arxiv_id, title=e.title.replace('\n',' ').strip(), abstract=e.summary.replace('\n',' ').strip(), authors=[a.name for a in getattr(e,'authors',[])], primary_category=cats[0] if cats else category, categories=cats or [category], published_at=datetime(*e.published_parsed[:6], tzinfo=timezone.utc), updated_at=datetime(*e.updated_parsed[:6], tzinfo=timezone.utc), abs_url=e.id, pdf_url=e.id.replace('/abs/','/pdf/')))
+        published = datetime(*e.published_parsed[:6], tzinfo=timezone.utc)
+        updated = datetime(*e.updated_parsed[:6], tzinfo=timezone.utc)
+        papers.append(Paper(id=arxiv_id, arxiv_id=arxiv_id, title=e.title.replace('\n',' ').strip(), abstract=e.summary.replace('\n',' ').strip(), authors=[a.name for a in getattr(e,'authors',[])], primary_category=cats[0] if cats else category, categories=cats or [category], published_at=published, updated_at=updated, abs_url=f"https://arxiv.org/abs/{arxiv_id}", pdf_url=f"https://arxiv.org/pdf/{arxiv_id}"))
     return papers
 
 
 @retry(stop=stop_after_attempt(2), wait=wait_fixed(1))
 def fetch_arxiv_rss_category(category: str, max_results: int = 50) -> list[Paper]:
     url = f"https://rss.arxiv.org/rss/{category}"
-    r = httpx.get(url, timeout=20, follow_redirects=True, headers={"User-Agent": "frontier-paper-radar/0.1"})
+    r = httpx.get(url, timeout=20, follow_redirects=True, headers={"User-Agent": DEFAULT_USER_AGENT})
     r.raise_for_status()
     feed = feedparser.parse(r.text)
     papers: list[Paper] = []
@@ -40,7 +50,7 @@ def fetch_arxiv_rss_category(category: str, max_results: int = 50) -> list[Paper
         match = re.search(r"(\d{4}\.\d{4,5}(?:v\d+)?)", link + " " + getattr(e, "description", ""))
         if not match:
             continue
-        arxiv_id = match.group(1)
+        arxiv_id = normalize_arxiv_id(match.group(1))
         published = getattr(e, "published_parsed", None) or getattr(e, "updated_parsed", None)
         dt = datetime(*published[:6], tzinfo=timezone.utc) if published else datetime.now(timezone.utc)
         abstract = _clean_rss_description(getattr(e, "description", ""))
@@ -60,10 +70,10 @@ def fetch_arxiv_rss_category(category: str, max_results: int = 50) -> list[Paper
     return papers
 
 
-def fetch_arxiv_categories(categories: list[str], max_results_per_category: int = 80) -> list[Paper]:
+def fetch_arxiv_categories(categories: list[str], max_results_per_category: int = 80, day: date | None = None) -> list[Paper]:
     papers: list[Paper] = []
     for category in categories:
-        papers.extend(fetch_arxiv_category(category, max_results_per_category))
+        papers.extend(fetch_arxiv_category(category, max_results_per_category, day=day))
     return papers
 
 
@@ -103,3 +113,15 @@ def _rss_authors(entry) -> list[str]:
     if not value:
         return []
     return [part.strip() for part in re.split(r",| and ", value) if part.strip()]
+
+
+def normalize_arxiv_id(value: str) -> str:
+    value = value.strip().split("/")[-1]
+    return re.sub(r"v\d+$", "", value)
+
+
+def date_window(day: date) -> tuple[datetime, datetime]:
+    return (
+        datetime.combine(day, time.min, tzinfo=timezone.utc),
+        datetime.combine(day, time.max, tzinfo=timezone.utc),
+    )

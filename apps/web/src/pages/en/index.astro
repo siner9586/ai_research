@@ -5,6 +5,8 @@ import { loadBriefs, loadSite } from '../../utils/content';
 const lang = 'en';
 const site = loadSite()[lang];
 const briefs = loadBriefs(lang);
+const latest = briefs[0];
+const recent = briefs.slice(0, 7);
 const totalCandidates = briefs.reduce((sum, doc) => sum + Number(doc.meta.candidate_count || 0), 0);
 ---
 <BaseLayout lang={lang} title={site.name} description={site.tagline}>
@@ -12,7 +14,11 @@ const totalCandidates = briefs.reduce((sum, doc) => sum + Number(doc.meta.candid
     <div>
       <h1>{site.name}</h1>
       <p>{site.tagline}</p>
-      <p class="muted">Daily arXiv collection, multi-signal scoring, tiered selection, bilingual briefs, and transparent source records.</p>
+      <div class="action-row">
+        <a class="button" href="/en/feed.xml">RSS</a>
+        <a class="button secondary" href="/en/methodology/">Methodology</a>
+        <a class="button secondary" href="/en/search/">Search</a>
+      </div>
     </div>
     <div class="metrics">
       <div class="metric"><strong>{briefs.length}</strong><span>briefs</span></div>
@@ -20,9 +26,28 @@ const totalCandidates = briefs.reduce((sum, doc) => sum + Number(doc.meta.candid
       <div class="metric"><strong>15</strong><span>topics</span></div>
     </div>
   </section>
+  {latest && (
+    <section class="latest-issue">
+      <p class="section-kicker">Latest issue</p>
+      <h2><a href={latest.url}>{latest.meta.title}</a></h2>
+      <div class="article-meta">
+        <span>{latest.meta.date}</span>
+        <span>{latest.meta.candidate_count} candidates</span>
+        <span>{latest.meta.featured_count} featured</span>
+        <a href={latest.meta.sources_page}>sources and scoring</a>
+      </div>
+      <p>{latest.meta.summary}</p>
+    </section>
+  )}
+  <section class="subscribe-strip">
+    <span>Subscribe</span>
+    <a href="/en/feed.xml">English RSS</a>
+    <a href="/zh/feed.xml">中文 RSS</a>
+    <a href="/en/privacy/">Privacy</a>
+  </section>
   <section class="article-list">
     {briefs.length === 0 && <p>No generated content yet. Run <code>ai-brief mock-run</code> to create a daily brief.</p>}
-    {briefs.map((doc) => (
+    {recent.map((doc) => (
       <article class="article-card">
         <h2><a href={doc.url}>{doc.meta.title}</a></h2>
         <div class="article-meta">

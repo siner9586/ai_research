@@ -12,7 +12,7 @@ from .static import read_content_documents
 def build_rss(lang: str) -> Path:
     config = site_config().get("site", {})
     base_url = config.get("base_url", "").rstrip("/")
-    site_name = config.get("name", {}).get(lang, "Frontier Paper Radar")
+    site_name = config.get("name", {}).get(lang, "AI Research Brief")
     description = config.get("description", {}).get(lang, "")
     docs = [
         doc for doc in read_content_documents(lang)
@@ -31,6 +31,8 @@ def build_rss(lang: str) -> Path:
             f"<guid>{escape(url)}</guid>"
             f"<description>{escape(str(meta.get('summary', '')))}</description>"
             f"<pubDate>{pub_date}</pubDate>"
+            f"<language>{escape(lang)}</language>"
+            f"<content>{escape(doc['body'][:8000])}</content>"
             "</item>"
         )
 

@@ -1,93 +1,142 @@
 ---
-title: "Agents and Tool Use, Benchmarks and Evaluation, and other signals to track"
+title: "AI Research Brief: Agents and Tool Use, Benchmarks and Evaluation, Systems and Deployment"
 date: "2026-06-03"
 lang: "en"
 slug: "2026-06-03-self-evolving-agents-for-tool-use-skills"
-page_type: "brief"
-site_name: "Frontier Paper Radar"
-summary: "This issue selects 5 featured papers from 18 candidates. Main signals: Self Evolving Agents for Tool Use Skills；RAG Evaluation under Noisy Retrieval；Efficient Long Context Inference with Cache Compression."
+summary: "This issue selects 5 featured papers and 13 honorable mentions from 18 candidates, mainly covering Agents and Tool Use, Benchmarks and Evaluation, Systems and Deployment."
 tags: ["agents", "code", "data-engineering", "evaluation", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
+topics: ["agents", "code", "data-engineering", "evaluation", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 sources_page: "/en/daily/2026-06-03-self-evolving-agents-for-tool-use-skills-sources/"
+generated_at: "2026-06-04T03:09:24.061752+00:00"
+page_type: "brief"
 candidate_count: 18
 featured_count: 5
-mentions_count: 12
+mentions_count: 13
 ---
 
-# Agents and Tool Use, Benchmarks and Evaluation, and other signals to track
+# AI Research Brief: Agents and Tool Use, Benchmarks and Evaluation, Systems and Deployment
 
-This issue selects 5 featured papers from 18 candidates. Main signals: Self Evolving Agents for Tool Use Skills；RAG Evaluation under Noisy Retrieval；Efficient Long Context Inference with Cache Compression.
+**Date**: 2026-06-03
+
+## Overview
+
+This issue selects 5 featured papers and 13 honorable mentions from 18 candidates, mainly covering Agents and Tool Use, Benchmarks and Evaluation, Systems and Deployment.
+
+## Trend Observation
+
+High-scoring papers today cluster around Agents and Tool Use, Benchmarks and Evaluation, Systems and Deployment. Treat these as research and engineering follow-up signals, not final validation of the claims.
 
 ## Featured Papers
 
-## 1. Self Evolving Agents for Tool Use Skills
+### 1. Self Evolving Agents for Tool Use Skills
 
+- Original paper title: Self Evolving Agents for Tool Use Skills
+- Authors / institutions: Alice Chen, Bob Smith
 - Topic: Agents and Tool Use
-- Score: 19 (high)
 - arXiv: [2606.00001](https://arxiv.org/abs/2606.00001)
-- PDF: [download](https://arxiv.org/pdf/2606.00001)
-- Why selected: Top institution signal: OpenAI, Stanford
+- PDF: [PDF](https://arxiv.org/pdf/2606.00001)
+- Why it matters: It targets a verifiable AI research question. The abstract signal is: Agents learn reusable tool use skills through iterative self improvement, unit tests, execution feedback, and evaluation
+- Problem addressed: The problem signal is: Agents learn reusable tool use skills through iterative self improvement, unit tests, execution feedback, and evaluation
+- Method sketch: The method description is constrained to the title, abstract, and public metadata.
+- Practitioner takeaway: Practitioners should inspect the evaluation setup, data assumptions, and reproducibility assets.
+- Limitations and risks: This assessment is based on arXiv preprint metadata and is not peer-review confirmation.
+- Three notes:
+  - The original arXiv link remains the factual source.
+  - Code links are shown only when verified.
+  - Scores are ranking signals, not final quality judgments.
 
-This paper is worth tracking because it lands in **Agents and Tool Use** and the abstract indicates: Agents learn reusable tool use skills through iterative self improvement, unit tests, execution feedback, and evaluation. The assessment is based on public metadata and the abstract; the original paper remains authoritative.
+### 2. RAG Evaluation under Noisy Retrieval
 
-## 2. RAG Evaluation under Noisy Retrieval
-
+- Original paper title: RAG Evaluation under Noisy Retrieval
+- Authors / institutions: Dan Wang
 - Topic: Benchmarks and Evaluation
-- Score: 18 (high)
 - arXiv: [2606.00003](https://arxiv.org/abs/2606.00003)
-- PDF: [download](https://arxiv.org/pdf/2606.00003)
-- Why selected: Included by HF Daily Papers
+- PDF: [PDF](https://arxiv.org/pdf/2606.00003)
+- Why it matters: It targets a verifiable AI research question. The abstract signal is: A benchmark studies retrieval augmented generation reliability under noisy evidence, missing citations, and adversarial documents.
+- Problem addressed: The problem signal is: A benchmark studies retrieval augmented generation reliability under noisy evidence, missing citations, and adversarial documents.
+- Method sketch: The method description is constrained to the title, abstract, and public metadata.
+- Practitioner takeaway: Practitioners should inspect the evaluation setup, data assumptions, and reproducibility assets.
+- Limitations and risks: This assessment is based on arXiv preprint metadata and is not peer-review confirmation.
+- Three notes:
+  - The original arXiv link remains the factual source.
+  - Code links are shown only when verified.
+  - Scores are ranking signals, not final quality judgments.
 
-This paper is worth tracking because it lands in **Benchmarks and Evaluation** and the abstract indicates: A benchmark studies retrieval augmented generation reliability under noisy evidence, missing citations, and adversarial documents.. The assessment is based on public metadata and the abstract; the original paper remains authoritative.
+### 3. Efficient Long Context Inference with Cache Compression
 
-## 3. Efficient Long Context Inference with Cache Compression
-
+- Original paper title: Efficient Long Context Inference with Cache Compression
+- Authors / institutions: Carol Li
 - Topic: Systems and Deployment
-- Score: 16 (high)
 - arXiv: [2606.00002](https://arxiv.org/abs/2606.00002)
-- PDF: [download](https://arxiv.org/pdf/2606.00002)
-- Why selected: Included by HF Daily Papers
+- PDF: [PDF](https://arxiv.org/pdf/2606.00002)
+- Why it matters: It targets a verifiable AI research question. The abstract signal is: A systems method reduces memory and latency during long context model inference while preserving code reasoning accuracy.
+- Problem addressed: The problem signal is: A systems method reduces memory and latency during long context model inference while preserving code reasoning accuracy.
+- Method sketch: The method description is constrained to the title, abstract, and public metadata.
+- Practitioner takeaway: Practitioners should inspect the evaluation setup, data assumptions, and reproducibility assets.
+- Limitations and risks: This assessment is based on arXiv preprint metadata and is not peer-review confirmation.
+- Three notes:
+  - The original arXiv link remains the factual source.
+  - Code links are shown only when verified.
+  - Scores are ranking signals, not final quality judgments.
 
-This paper is worth tracking because it lands in **Systems and Deployment** and the abstract indicates: A systems method reduces memory and latency during long context model inference while preserving code reasoning accuracy.. The assessment is based on public metadata and the abstract; the original paper remains authoritative.
+### 4. Multimodal Safety Evaluation for Vision Language Models
 
-## 4. Multimodal Safety Evaluation for Vision Language Models
-
+- Original paper title: Multimodal Safety Evaluation for Vision Language Models
+- Authors / institutions: Eva Green
 - Topic: Safety and Alignment
-- Score: 14 (high)
 - arXiv: [2606.00004](https://arxiv.org/abs/2606.00004)
-- PDF: [download](https://arxiv.org/pdf/2606.00004)
-- Why selected: Included by HF Daily Papers
+- PDF: [PDF](https://arxiv.org/pdf/2606.00004)
+- Why it matters: It targets a verifiable AI research question. The abstract signal is: A safety evaluation suite measures multimodal models across risky visual prompts, jailbreak attempts, and alignment failures.
+- Problem addressed: The problem signal is: A safety evaluation suite measures multimodal models across risky visual prompts, jailbreak attempts, and alignment failures.
+- Method sketch: The method description is constrained to the title, abstract, and public metadata.
+- Practitioner takeaway: Practitioners should inspect the evaluation setup, data assumptions, and reproducibility assets.
+- Limitations and risks: This assessment is based on arXiv preprint metadata and is not peer-review confirmation.
+- Three notes:
+  - The original arXiv link remains the factual source.
+  - Code links are shown only when verified.
+  - Scores are ranking signals, not final quality judgments.
 
-This paper is worth tracking because it lands in **Safety and Alignment** and the abstract indicates: A safety evaluation suite measures multimodal models across risky visual prompts, jailbreak attempts, and alignment failures.. The assessment is based on public metadata and the abstract; the original paper remains authoritative.
+### 5. Code Model Repair with Execution Feedback
 
-## 5. Code Model Repair with Execution Feedback
-
+- Original paper title: Code Model Repair with Execution Feedback
+- Authors / institutions: Frank Moore
 - Topic: Code Intelligence
-- Score: 12 (high)
 - arXiv: [2606.00005](https://arxiv.org/abs/2606.00005)
-- PDF: [download](https://arxiv.org/pdf/2606.00005)
-- Why selected: Included by HF Daily Papers
+- PDF: [PDF](https://arxiv.org/pdf/2606.00005)
+- Why it matters: It targets a verifiable AI research question. The abstract signal is: Code models improve patch generation through execution feedback loops, repository tests, and API-aware repair.
+- Problem addressed: The problem signal is: Code models improve patch generation through execution feedback loops, repository tests, and API-aware repair.
+- Method sketch: The method description is constrained to the title, abstract, and public metadata.
+- Practitioner takeaway: Practitioners should inspect the evaluation setup, data assumptions, and reproducibility assets.
+- Limitations and risks: This assessment is based on arXiv preprint metadata and is not peer-review confirmation.
+- Three notes:
+  - The original arXiv link remains the factual source.
+  - Code links are shown only when verified.
+  - Scores are ranking signals, not final quality judgments.
 
-This paper is worth tracking because it lands in **Code Intelligence** and the abstract indicates: Code models improve patch generation through execution feedback loops, repository tests, and API-aware repair.. The assessment is based on public metadata and the abstract; the original paper remains authoritative.
+## Honorable Mentions
+- [Preference Optimization for Safer Tool Agents](https://arxiv.org/abs/2606.00012) - Agents and Tool Use, score 14. Why track: It targets a verifiable AI research question. The abstract signal is: Post-training with preference optimization reduces harmful tool calls and improves auditability.
+- [Red Teaming Open Source LLM Guardrails](https://arxiv.org/abs/2606.00017) - Safety and Alignment, score 14. Why track: It targets a verifiable AI research question. The abstract signal is: A safety study evaluates jailbreak resistance, guardrail routing, and risk classification for open-source models.
+- [Database Native Retrieval for Enterprise RAG](https://arxiv.org/abs/2606.00013) - Retrieval and RAG, score 13. Why track: It targets a verifiable AI research question. The abstract signal is: A retrieval architecture routes queries to native database, graph, and vector indexes instead of flattening all sources.
+- [Agentic 3D Modeling through Code Execution](https://arxiv.org/abs/2606.00015) - Agents and Tool Use, score 13. Why track: It targets a verifiable AI research question. The abstract signal is: A code intelligence benchmark tests agents that generate executable scripts for procedural 3D modeling.
+- [Synthetic Data Curation for Post Training](https://arxiv.org/abs/2606.00007) - Data Engineering, score 12. Why track: It targets a verifiable AI research question. The abstract signal is: A data pipeline selects synthetic instruction data for fine-tuning and post-training with quality filters.
+- [Low Rank Adapters as Model Memory Probes](https://arxiv.org/abs/2606.00018) - Training and Post-training, score 12. Why track: It targets a verifiable AI research question. The abstract signal is: A training analysis uses LoRA adapters to estimate memorization capacity and decide when full fine-tuning is needed.
+- [Chart Understanding for Vision Language Models](https://arxiv.org/abs/2606.00014) - Multimodal Models, score 11. Why track: It targets a verifiable AI research question. The abstract signal is: A vision-language benchmark measures chart, table, and document understanding in multimodal models.
+- [Robotics Policies with Memory Grounded Planning](https://arxiv.org/abs/2606.00006) - Robotics and Embodied AI, score 10. Why track: It targets a verifiable AI research question. The abstract signal is: Embodied robot policies use memory, visual observations, and planning to improve manipulation and navigation.
+- [Mechanistic Attribution for Factual Editing](https://arxiv.org/abs/2606.00008) - Interpretability, score 10. Why track: It targets a verifiable AI research question. The abstract signal is: An interpretability method localizes representations involved in factual editing and model memory.
+- [Serving Quantized Models with Adaptive Batching](https://arxiv.org/abs/2606.00011) - Systems and Deployment, score 10. Why track: It targets a verifiable AI research question. The abstract signal is: A deployment system improves throughput for quantized language models using adaptive batching and cache-aware scheduling.
+- [Video Diffusion Models Need Temporal Tests](https://arxiv.org/abs/2606.00010) - Video Generation, score 9. Why track: It targets a verifiable AI research question. The abstract signal is: A video generation evaluation suite probes temporal consistency, motion realism, and causal order.
+- [Training Data Deduplication for Foundation Models](https://arxiv.org/abs/2606.00016) - Agents and Tool Use, score 8. Why track: It targets a verifiable AI research question. The abstract signal is: A data engineering workflow removes near duplicates and measures downstream benchmark contamination.
+- [Open Speech Agent Benchmark](https://arxiv.org/abs/2606.00009) - Agents and Tool Use, score 6. Why track: It targets a verifiable AI research question. The abstract signal is: A benchmark evaluates speech and audio agents that call tools, transcribe speech, and reason over sound.
 
-## Also Worth Watching
-- [Database Native Retrieval for Enterprise RAG](https://arxiv.org/abs/2606.00013) - Retrieval and RAG, score 10. HF community heat: 10 upvotes
-- [Agentic 3D Modeling through Code Execution](https://arxiv.org/abs/2606.00015) - Agents and Tool Use, score 10. HF community heat: 13 upvotes
-- [Robotics Policies with Memory Grounded Planning](https://arxiv.org/abs/2606.00006) - Robotics and Embodied AI, score 9. HF community heat: 12 upvotes
-- [Synthetic Data Curation for Post Training](https://arxiv.org/abs/2606.00007) - Data Engineering, score 9. Top institution signal: Google
-- [Serving Quantized Models with Adaptive Batching](https://arxiv.org/abs/2606.00011) - Systems and Deployment, score 9. HF community heat: 14 upvotes
-- [Preference Optimization for Safer Tool Agents](https://arxiv.org/abs/2606.00012) - Agents and Tool Use, score 9. HF community heat: 11 upvotes
-- [Red Teaming Open Source LLM Guardrails](https://arxiv.org/abs/2606.00017) - Safety and Alignment, score 9. HF community heat: 16 upvotes
-- [Low Rank Adapters as Model Memory Probes](https://arxiv.org/abs/2606.00018) - Training and Post-training, score 9. Early HF votes: 6
-- [Chart Understanding for Vision Language Models](https://arxiv.org/abs/2606.00014) - Multimodal Models, score 8. Early HF votes: 9
-- [Mechanistic Attribution for Factual Editing](https://arxiv.org/abs/2606.00008) - Interpretability, score 7. Early HF votes: 7
-- [Video Diffusion Models Need Temporal Tests](https://arxiv.org/abs/2606.00010) - Video Generation, score 6. Early HF votes: 6
-- [Open Speech Agent Benchmark](https://arxiv.org/abs/2606.00009) - Agents and Tool Use, score 5. Early HF votes: 5
+## Keywords
 
-## Source Transparency
+agent, agents, alignment, api, attribution, benchmark, cache, chart, code, compression, curation, data, database, deployment
 
-The candidate pool contains 18 papers. Full scoring, tiers, and non-selected candidates are available on the [source page](/en/daily/2026-06-03-self-evolving-agents-for-tool-use-skills-sources/).
+## Source Page
 
-## Known Limits
+See the [source transparency page](/en/daily/2026-06-03-self-evolving-agents-for-tool-use-skills-sources/) for the full candidate pool, scoring summary, and per-paper score breakdown.
+
+## Reading Boundaries
 - Automated scoring favors papers with community, code, and applied-engineering signals.
 - Briefs are based on titles, abstracts, and public metadata by default, not full-paper review.
 - External API failures degrade optional signals and are reflected in source records.

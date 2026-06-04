@@ -16,18 +16,18 @@ export type Doc = {
 export function loadSite() {
   return {
     zh: {
-      name: '前沿论文雷达',
-      tagline: '从源头论文中筛出值得跟进的 AI 研究信号',
+      name: 'AI 研究简报',
+      tagline: '从 arXiv 与公开信号中筛出值得跟进的 AI 论文',
     },
     en: {
-      name: 'Frontier Paper Radar',
-      tagline: 'A source-first radar for AI papers worth tracking',
+      name: 'AI Research Brief',
+      tagline: 'Source-first daily briefs for AI papers worth tracking',
     },
   };
 }
 
 export function loadTopics() {
-  const file = path.join(configsRoot, 'topics.yml');
+  const file = path.join(configsRoot, 'topics.yaml');
   const text = fs.existsSync(file) ? fs.readFileSync(file, 'utf-8') : '';
   const rows: any[] = [];
   let current: any = null;
@@ -100,6 +100,11 @@ export function markdownToHtml(markdown: string) {
       closeList();
       continue;
     }
+    if (line.startsWith('|')) {
+      closeList();
+      out.push(`<pre class="table-line">${escapeHtml(line)}</pre>`);
+      continue;
+    }
     const heading = line.match(/^(#{1,3})\s+(.*)$/);
     if (heading) {
       closeList();
@@ -114,6 +119,15 @@ export function markdownToHtml(markdown: string) {
         inList = true;
       }
       out.push(`<li>${inline(item[1])}</li>`);
+      continue;
+    }
+    const nestedItem = line.match(/^\s+-\s+(.*)$/);
+    if (nestedItem) {
+      if (!inList) {
+        out.push('<ul>');
+        inList = true;
+      }
+      out.push(`<li>${inline(nestedItem[1])}</li>`);
       continue;
     }
     closeList();

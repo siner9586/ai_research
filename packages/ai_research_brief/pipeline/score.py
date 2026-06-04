@@ -3,16 +3,38 @@ from ..models import PaperSignal, ScoredPaper
 from .topics import classify_topic
 
 
-def score_papers(papers, signals):
+DIMENSIONS = [
+    "institution_background",
+    "hf_daily",
+    "hf_upvotes",
+    "top_conference",
+    "code_available",
+    "practitioner_relevance",
+    "semantic_scholar_citations",
+    "open_source_heat",
+    "arxiv_category_weight",
+    "novelty_or_duplicate",
+    "recent_topic_repeat",
+    "safety_ethics_governance",
+]
+
+
+def score_papers(papers, signals, recent_topics: set[str] | None = None):
     config = scoring_config()
     weights = config.get("weights", {})
     thresholds = config.get("thresholds", {})
+    category_weights = config.get("category_weights", {})
+    safety_keywords = [item.lower() for item in config.get("safety_keywords", [])]
+    title_counts: dict[str, int] = {}
+    for paper in papers:
+        title_counts[paper.title.strip().lower()] = title_counts.get(paper.title.strip().lower(), 0) + 1
+
     rows = []
     for paper in papers:
         sig = signals[paper.arxiv_id]
         text = (paper.title + ' ' + paper.abstract).lower()
         score = 0
-        parts = {}
+        parts = {dimension: 0 for dimension in DIMENSIONS}
         reasons = []
 
         if sig.top_institution:
@@ -68,17 +90,17 @@ def score_papers(papers, signals):
 
         if sig.citation_count >= int(thresholds.get("citation_high", 500)):
             value = int(weights.get("citation_high", 3))
-            parts["citation_count"] = value
+            parts["semantic_scholar_citations"] = value
             reasons.append(f"Academic impact signal: {sig.citation_count} citations")
             score += value
         elif sig.citation_count >= int(thresholds.get("citation_mid", 100)):
             value = int(weights.get("citation_mid", 2))
-            parts["citation_count"] = value
+            parts["semantic_scholar_citations"] = value
             reasons.append(f"Academic impact signal: {sig.citation_count} citations")
             score += value
         elif sig.citation_count >= int(thresholds.get("citation_low", 20)):
             value = int(weights.get("citation_low", 1))
-            parts["citation_count"] = value
+            parts["semantic_scholar_citations"] = value
             reasons.append(f"Early citation signal: {sig.citation_count} citations")
             score += value
 
@@ -90,10 +112,38 @@ def score_papers(papers, signals):
             score += value
 
         topic, topic_slug, hits = classify_topic(paper.title, paper.abstract)
+        category_score = max([int(category_weights.get(cat, 0)) for cat in paper.categories] + [int(category_weights.get(paper.primary_category, 0))])
+        if category_score:
+            parts["arxiv_category_weight"] = category_score
+            reasons.append(f"arXiv category weight: {paper.primary_category}")
+            score += category_score
+
+        novelty_value = int(weights.get("novelty_bonus", 1))
+        if title_counts.get(paper.title.strip().lower(), 0) > 1:
+            novelty_value = int(weights.get("duplicate_penalty", -3))
+            reasons.append("Duplicate title penalty")
+        else:
+            reasons.append("No duplicate title in candidate pool")
+        parts["novelty_or_duplicate"] = novelty_value
+        score += novelty_value
+
+        if recent_topics and topic_slug in recent_topics:
+            value = int(weights.get("recent_topic_repeat_penalty", -1))
+            parts["recent_topic_repeat"] = value
+            reasons.append(f"Recent topic repeat penalty: {topic_slug}")
+            score += value
+
+        safety_hits = [keyword for keyword in safety_keywords if keyword in text]
+        if safety_hits:
+            value = int(weights.get("safety_ethics_governance", 2))
+            parts["safety_ethics_governance"] = value
+            reasons.append(f"Safety/ethics/governance keywords: {', '.join(safety_hits[:5])}")
+            score += value
+
         rows.append(ScoredPaper(
             paper=paper,
             signal=sig,
-            total_score=score,
+            total_score=max(score, 0),
             score_breakdown=parts,
             score_reasons=reasons,
             selected_reason='; '.join(reasons) or 'arXiv category relevance',

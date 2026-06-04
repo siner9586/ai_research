@@ -7,7 +7,7 @@ from datetime import date
 from ..config import scoring_config
 from ..fetchers.github import extract_github_url, fetch_repo_signal
 from ..fetchers.huggingface import fetch_daily_papers
-from ..fetchers.semantic_scholar import fetch_citation_counts
+from ..fetchers.semantic_scholar import fetch_paper_signals
 from ..models import Paper, PaperSignal
 
 
@@ -53,10 +53,10 @@ def build_signals(papers: list[Paper], day: date, mock: bool = False) -> dict[st
         if arxiv_id in signals:
             _apply_patch(signals[arxiv_id], patch, source="huggingface")
 
-    citation_counts = fetch_citation_counts(list(signals))
-    for arxiv_id, count in citation_counts.items():
-        signals[arxiv_id].citation_count = count
-        signals[arxiv_id].signal_sources["citation_count"] = "semantic_scholar"
+    semantic_signals = fetch_paper_signals(list(signals))
+    for arxiv_id, patch in semantic_signals.items():
+        if arxiv_id in signals:
+            _apply_patch(signals[arxiv_id], patch, source="semantic_scholar")
 
     for paper in papers:
         signal = signals[paper.arxiv_id]

@@ -39,15 +39,19 @@ def build_search_index() -> Path:
     rows = []
     for doc in read_content_documents():
         meta = doc["meta"]
+        text = _strip_markdown(doc["body"])
         rows.append({
             "title": meta.get("title", ""),
-            "summary": meta.get("summary", ""),
+            "date": meta.get("date", ""),
             "lang": doc["lang"],
             "url": doc["url"],
-            "date": meta.get("date", ""),
-            "type": meta.get("page_type", "page"),
+            "summary": meta.get("summary", ""),
             "tags": meta.get("tags", []),
-            "text": _strip_markdown(doc["body"])[:5000],
+            "topics": meta.get("topics", meta.get("tags", [])),
+            "authors": _extract_authors(doc["body"]),
+            "content_excerpt": text[:800],
+            "type": meta.get("page_type", "page"),
+            "text": text[:5000],
         })
     out = REPO_ROOT / "apps" / "web" / "public" / "search-index.json"
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -69,6 +73,10 @@ def build_sitemap() -> Path:
         "/en/topics/",
         "/zh/methodology/",
         "/en/methodology/",
+        "/zh/privacy/",
+        "/en/privacy/",
+        "/zh/whatsnew/",
+        "/en/whatsnew/",
     ]
     topic_paths = []
     for lang in ("zh", "en"):
@@ -106,3 +114,12 @@ def _strip_markdown(text: str) -> str:
     text = re.sub(r"\[(.*?)\]\(.*?\)", r"\1", text)
     text = re.sub(r"[#*_`>-]", " ", text)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def _extract_authors(markdown: str) -> list[str]:
+    authors: list[str] = []
+    for match in re.finditer(r"(?:Authors / institutions|作者/机构|Authors):\s*([^\n]+)", markdown):
+        value = re.sub(r"\[(.*?)\]\(.*?\)", r"\1", match.group(1)).strip()
+        if value and value.lower() not in {"unknown", "未知"}:
+            authors.extend([part.strip() for part in value.split(",") if part.strip()])
+    return list(dict.fromkeys(authors))[:20]

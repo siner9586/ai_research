@@ -3,20 +3,20 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { loadBriefs, loadTopics } from '../../../utils/content';
 
 export function getStaticPaths() {
-  return loadTopics().map((topic) => ({ params: { slug: topic.slug }, props: { topic } }));
+  return loadTopics().map((topic) => ({ params: { topic: topic.slug }, props: { topic } }));
 }
 
 const { topic } = Astro.props;
-const briefs = loadBriefs('zh').filter((doc) => (doc.meta.tags || []).includes(topic.slug));
+const briefs = loadBriefs('en').filter((doc) => (doc.meta.tags || []).includes(topic.slug));
 ---
-<BaseLayout lang="zh" title={topic.zh}>
-  <h1>{topic.zh}</h1>
+<BaseLayout lang="en" title={topic.en}>
+  <h1>{topic.en}</h1>
   <section class="article-list">
-    {briefs.length === 0 && <p class="muted">暂无相关简报。</p>}
+    {briefs.length === 0 && <p class="muted">No related briefs yet.</p>}
     {briefs.map((doc) => (
       <article class="article-card">
         <h2><a href={doc.url}>{doc.meta.title}</a></h2>
-        <div class="article-meta"><span>{doc.meta.date}</span><a href={doc.meta.sources_page}>来源页</a></div>
+        <div class="article-meta"><span>{doc.meta.date}</span><a href={doc.meta.sources_page}>source log</a></div>
         <p>{doc.meta.summary}</p>
       </article>
     ))}

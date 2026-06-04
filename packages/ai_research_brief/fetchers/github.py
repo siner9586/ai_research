@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+from datetime import datetime
 
 import httpx
 
@@ -19,9 +20,11 @@ def fetch_repo_signal(repo_url: str, timeout: float = 8.0) -> dict:
     if not match:
         return {}
     owner, repo = match.groups()
-    headers = {"User-Agent": "frontier-paper-radar/0.1"}
-    if os.environ.get("GITHUB_API_TOKEN"):
-        headers["Authorization"] = f"Bearer {os.environ['GITHUB_API_TOKEN']}"
+    repo = repo.rstrip(".")
+    token = os.environ.get("GITHUB_API_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    headers = {"User-Agent": "ai-research-brief/0.1"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
     try:
         response = httpx.get(f"https://api.github.com/repos/{owner}/{repo}", timeout=timeout, headers=headers)
         response.raise_for_status()
@@ -31,4 +34,14 @@ def fetch_repo_signal(repo_url: str, timeout: float = 8.0) -> dict:
     return {
         "github_stars": int(payload.get("stargazers_count") or 0),
         "github_forks": int(payload.get("forks_count") or 0),
+        "repo_updated_at": _parse_datetime(payload.get("updated_at")),
     }
+
+
+def _parse_datetime(value: str | None):
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None

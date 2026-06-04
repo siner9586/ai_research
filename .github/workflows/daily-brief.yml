@@ -43,7 +43,10 @@ jobs:
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+          AI_RESEARCH_EXTERNAL_SIGNALS: ${{ secrets.AI_RESEARCH_EXTERNAL_SIGNALS }}
+          GITHUB_TOKEN: ${{ github.token }}
           GITHUB_API_TOKEN: ${{ github.token }}
         run: |
           export LLM_PROVIDER="${LLM_PROVIDER:-mock}"

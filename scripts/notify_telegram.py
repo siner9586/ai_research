@@ -10,7 +10,7 @@ def main() -> int:
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
     site_url = os.environ.get("SITE_URL", "https://aici.ccwu.cc").rstrip("/")
     if not token or not chat_id:
-        print("Telegram notification skipped: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing.")
+        print("Telegram missing config, skipped: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing.")
         return 0
     text = (
         "今日 AI 论文简报已更新\n"

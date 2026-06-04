@@ -11,7 +11,7 @@ def main() -> int:
     mail_to = os.environ.get("MAIL_TO")
     site_url = os.environ.get("SITE_URL", "https://aici.ccwu.cc").rstrip("/")
     if not api_key or not mail_from or not mail_to:
-        print("Email notification skipped: RESEND_API_KEY, MAIL_FROM, or MAIL_TO is missing.")
+        print("Email missing config, skipped: RESEND_API_KEY, MAIL_FROM, or MAIL_TO is missing.")
         return 0
     text = (
         "今日 AI 论文简报已更新\n"

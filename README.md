@@ -131,6 +131,31 @@ export GITHUB_API_TOKEN=...
 
 `GITHUB_TOKEN` is also accepted. Without keys, Semantic Scholar and authenticated GitHub enrichment are skipped. Basic code-link detection only trusts explicit GitHub URLs present in paper text.
 
+## GitHub Secrets
+
+Recommended repository secrets for unattended runs:
+
+```text
+LLM_PROVIDER
+OPENAI_API_KEY
+OPENAI_BASE_URL
+OPENAI_MODEL
+DEEPSEEK_API_KEY
+OPENROUTER_API_KEY
+ANTHROPIC_API_KEY
+SEMANTIC_SCHOLAR_API_KEY
+GITHUB_TOKEN
+AI_RESEARCH_EXTERNAL_SIGNALS
+TELEGRAM_BOT_TOKEN
+TELEGRAM_CHAT_ID
+RESEND_API_KEY
+MAIL_FROM
+MAIL_TO
+SITE_URL
+```
+
+No secret is required for `mock-run`. Without notification secrets, the notification scripts print `missing config, skipped` and exit successfully.
+
 ## Generate Daily Briefs
 
 ```bash
@@ -239,7 +264,7 @@ Current project does not need Workers KV.
 3. Daily state is tracked in `data/processed/YYYY-MM-DD`.
 4. Notification state can initially be inspected through GitHub Actions logs and generated JSON.
 
-Future user subscriptions, send-state storage, online APIs, reading state, or admin dashboards may justify Cloudflare KV, D1, or R2.
+Future user subscriptions, send-state storage, online APIs, reading state, or admin dashboards may justify Cloudflare KV, D1, or R2. If a strong-consistency subscription system is needed, evaluate Cloudflare D1 before KV.
 
 ## Data Directories
 

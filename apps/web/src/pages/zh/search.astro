@@ -1,1 +1,23 @@
-<html><body><h1>搜索</h1><p>静态搜索索引位于 /search-index.json。</p></body></html>
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout lang="zh" title="搜索">
+  <h1>搜索</h1>
+  <section class="search-panel" data-lang="zh">
+    <input id="search-box" type="search" placeholder="输入论文、方向、关键词" />
+    <div id="search-results" class="article-list"></div>
+  </section>
+  <script is:inline>
+    const panel = document.querySelector('.search-panel');
+    const input = document.querySelector('#search-box');
+    const results = document.querySelector('#search-results');
+    const lang = panel.dataset.lang;
+    let rows = [];
+    fetch('/search-index.json').then((r) => r.json()).then((data) => rows = data.filter((row) => row.lang === lang));
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      const hits = q ? rows.filter((row) => `${row.title} ${row.summary} ${row.text}`.toLowerCase().includes(q)).slice(0, 20) : [];
+      results.innerHTML = hits.map((row) => `<article class="article-card"><h2><a href="${row.url}">${row.title}</a></h2><p>${row.summary}</p></article>`).join('');
+    });
+  </script>
+</BaseLayout>

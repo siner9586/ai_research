@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout lang="en" title="Method">
+  <article class="prose">
+    <h1>Method</h1>
+    <p>This project implements a verifiable information pipeline: collect candidate papers from primary sources, rank them with a multi-signal rules engine, generate bilingual daily briefs, and expose candidate-level scoring on source pages.</p>
+    <h2>Collection</h2>
+    <p>The default collector covers six arXiv categories: cs.AI, cs.CL, cs.LG, cs.CV, cs.MA, and cs.IR. Categories and limits are configuration-driven.</p>
+    <h2>Scoring Signals</h2>
+    <ul>
+      <li>Institution background from configured top institutions.</li>
+      <li>Community recommendation through optional HF Daily Papers enrichment.</li>
+      <li>Community heat through HF upvote tiers.</li>
+      <li>Top conference signals such as NeurIPS, ICML, ICLR, ACL, and CVPR.</li>
+      <li>Code availability through paper text or GitHub metadata.</li>
+      <li>Practitioner relevance keywords such as deployment, inference, agents, RAG, safety, and evaluation.</li>
+      <li>Academic impact through optional Semantic Scholar citation counts.</li>
+      <li>Open-source heat through optional GitHub stars and trending signals.</li>
+    </ul>
+    <h2>Cadence</h2>
+    <p>The default cadence is T+3 so community signals can mature. Without external API keys, the pipeline still builds with arXiv metadata and mock data.</p>
+    <h2>Transparency</h2>
+    <p>Every issue has a source page listing all candidates, selection tiers, total scores, score breakdowns, matched keywords, external signals, and degradation warnings.</p>
+  </article>
+</BaseLayout>

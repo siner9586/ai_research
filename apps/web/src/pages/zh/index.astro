@@ -1,1 +1,39 @@
-<html><body><h1>AI 研究简报</h1><p>自动化 AI 论文筛选、评分、解读与来源透明。</p><p><a href="/zh/archive/">归档</a> <a href="/zh/search/">搜索</a> <a href="/zh/feed.xml">RSS</a></p></body></html>
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { loadBriefs, loadSite } from '../../utils/content';
+
+const lang = 'zh';
+const site = loadSite()[lang];
+const briefs = loadBriefs(lang);
+const latest = briefs[0];
+const totalCandidates = briefs.reduce((sum, doc) => sum + Number(doc.meta.candidate_count || 0), 0);
+---
+<BaseLayout lang={lang} title={site.name} description={site.tagline}>
+  <section class="hero">
+    <div>
+      <h1>{site.name}</h1>
+      <p>{site.tagline}</p>
+      <p class="muted">每日采集 arXiv AI 核心分类，结合社区、代码、引用、机构、顶会和工程关键词等信号分层入选，并公开来源页。</p>
+    </div>
+    <div class="metrics">
+      <div class="metric"><strong>{briefs.length}</strong><span>期简报</span></div>
+      <div class="metric"><strong>{totalCandidates}</strong><span>篇候选</span></div>
+      <div class="metric"><strong>15</strong><span>个专题</span></div>
+    </div>
+  </section>
+  <section class="article-list">
+    {briefs.length === 0 && <p>还没有生成内容。运行 <code>ai-brief mock-run</code> 后会出现每日简报。</p>}
+    {briefs.map((doc) => (
+      <article class="article-card">
+        <h2><a href={doc.url}>{doc.meta.title}</a></h2>
+        <div class="article-meta">
+          <span>{doc.meta.date}</span>
+          <span>候选 {doc.meta.candidate_count} 篇</span>
+          <span>重点 {doc.meta.featured_count} 篇</span>
+          <a href={doc.meta.sources_page}>来源与评分</a>
+        </div>
+        <p>{doc.meta.summary}</p>
+      </article>
+    ))}
+  </section>
+</BaseLayout>

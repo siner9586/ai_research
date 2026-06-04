@@ -17,6 +17,6 @@ jobs:
         with:
           node-version: '22'
       - run: pip install -r requirements.txt -e .
-      - run: ai-brief mock-run
+      - run: ai-brief run-daily --mock
       - run: pytest -q
       - run: cd apps/web && npm install && npm run build

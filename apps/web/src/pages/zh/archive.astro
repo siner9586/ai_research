@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { loadBriefs } from '../../utils/content';
+const briefs = loadBriefs('zh');
+---
+<BaseLayout lang="zh" title="归档">
+  <h1>归档</h1>
+  <section class="article-list">
+    {briefs.map((doc) => (
+      <article class="article-card">
+        <h2><a href={doc.url}>{doc.meta.title}</a></h2>
+        <div class="article-meta"><span>{doc.meta.date}</span><span>候选 {doc.meta.candidate_count} 篇</span><a href={doc.meta.sources_page}>来源页</a></div>
+      </article>
+    ))}
+  </section>
+</BaseLayout>

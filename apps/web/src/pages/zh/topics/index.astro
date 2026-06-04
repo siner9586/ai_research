@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { loadTopics, topicCounts } from '../../../utils/content';
+const topics = loadTopics();
+const counts = topicCounts('zh');
+---
+<BaseLayout lang="zh" title="专题">
+  <h1>专题</h1>
+  <p class="muted">按技术方向追踪每日入选论文。专题数量来自配置文件，便于持续调整。</p>
+  <section class="topic-grid">
+    {topics.map((topic) => (
+      <a class="topic-row" href={`/zh/topics/${topic.slug}/`}>
+        <strong>{topic.zh}</strong>
+        <p>{counts[topic.slug] || 0} 期相关简报</p>
+      </a>
+    ))}
+  </section>
+</BaseLayout>

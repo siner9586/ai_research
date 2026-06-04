@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { loadTopics, topicCounts } from '../../../utils/content';
+const topics = loadTopics();
+const counts = topicCounts('en');
+---
+<BaseLayout lang="en" title="Topics">
+  <h1>Topics</h1>
+  <p class="muted">Track selected papers by technical area. Topics are configuration-driven and easy to revise.</p>
+  <section class="topic-grid">
+    {topics.map((topic) => (
+      <a class="topic-row" href={`/en/topics/${topic.slug}/`}>
+        <strong>{topic.en}</strong>
+        <p>{counts[topic.slug] || 0} related briefs</p>
+      </a>
+    ))}
+  </section>
+</BaseLayout>

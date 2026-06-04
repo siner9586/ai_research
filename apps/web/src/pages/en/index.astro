@@ -1,1 +1,38 @@
-<html><body><h1>AI Research Brief</h1><p>Automated AI paper selection, scoring, briefing and source transparency.</p><p><a href="/en/archive/">Archive</a> <a href="/en/search/">Search</a> <a href="/en/feed.xml">RSS</a></p></body></html>
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { loadBriefs, loadSite } from '../../utils/content';
+
+const lang = 'en';
+const site = loadSite()[lang];
+const briefs = loadBriefs(lang);
+const totalCandidates = briefs.reduce((sum, doc) => sum + Number(doc.meta.candidate_count || 0), 0);
+---
+<BaseLayout lang={lang} title={site.name} description={site.tagline}>
+  <section class="hero">
+    <div>
+      <h1>{site.name}</h1>
+      <p>{site.tagline}</p>
+      <p class="muted">Daily arXiv collection, multi-signal scoring, tiered selection, bilingual briefs, and transparent source records.</p>
+    </div>
+    <div class="metrics">
+      <div class="metric"><strong>{briefs.length}</strong><span>briefs</span></div>
+      <div class="metric"><strong>{totalCandidates}</strong><span>candidates</span></div>
+      <div class="metric"><strong>15</strong><span>topics</span></div>
+    </div>
+  </section>
+  <section class="article-list">
+    {briefs.length === 0 && <p>No generated content yet. Run <code>ai-brief mock-run</code> to create a daily brief.</p>}
+    {briefs.map((doc) => (
+      <article class="article-card">
+        <h2><a href={doc.url}>{doc.meta.title}</a></h2>
+        <div class="article-meta">
+          <span>{doc.meta.date}</span>
+          <span>{doc.meta.candidate_count} candidates</span>
+          <span>{doc.meta.featured_count} featured</span>
+          <a href={doc.meta.sources_page}>sources and scoring</a>
+        </div>
+        <p>{doc.meta.summary}</p>
+      </article>
+    ))}
+  </section>
+</BaseLayout>

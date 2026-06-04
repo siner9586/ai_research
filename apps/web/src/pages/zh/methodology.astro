@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout lang="zh" title="方法">
+  <article class="prose">
+    <h1>方法</h1>
+    <p>这个站点复现的是一种可验证的信息流水线：从论文源头采集候选，使用多信号规则引擎做排序，生成每日中英双语简报，并把每篇候选的得分原因公开在 sources 页面。</p>
+    <h2>采集范围</h2>
+    <p>默认采集 arXiv 的 cs.AI、cs.CL、cs.LG、cs.CV、cs.MA、cs.IR 六个 AI 相关分类。生产模式可通过配置调整分类和每类抓取数量。</p>
+    <h2>评分信号</h2>
+    <ul>
+      <li>机构背景：标题或摘要中出现配置中的顶级机构时加分。</li>
+      <li>社区推荐：可选接入 Hugging Face Daily Papers。</li>
+      <li>社区热度：HF upvotes 分档加权。</li>
+      <li>顶会信号：识别 NeurIPS、ICML、ICLR、ACL、CVPR 等会议。</li>
+      <li>代码可用：识别代码、GitHub 或可执行产物信号。</li>
+      <li>从业者相关性：部署、推理、Agent、RAG、安全、评测等关键词。</li>
+      <li>学术影响：可选接入 Semantic Scholar 引用数。</li>
+      <li>开源热度：可选接入 GitHub stars 和 trending 信号。</li>
+    </ul>
+    <h2>发布节奏</h2>
+    <p>默认采用 T+3 节奏，让社区信号有时间沉淀。没有外部密钥时，流水线仍能使用 arXiv 元数据和 mock 数据完成构建。</p>
+    <h2>透明性</h2>
+    <p>每期简报都有对应 sources 页，展示全部候选论文、入选层级、总分、分项得分、关键词、外部信号和降级 warning。</p>
+  </article>
+</BaseLayout>

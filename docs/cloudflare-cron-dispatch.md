@@ -121,15 +121,17 @@ main = "src/index.js"
 compatibility_date = "2026-06-05"
 
 [triggers]
-crons = ["30 2 * * *"]
+crons = ["32 6 * * *"]
 ```
 
 Or run a few minutes later so GitHub's native schedule gets the first chance:
 
 ```toml
 [triggers]
-crons = ["35 2 * * *"]
+crons = ["37 6 * * *"]
 ```
+
+The target time is UTC 06:32, which is 14:32 in Beijing/Taipei time.
 
 ## Verification
 

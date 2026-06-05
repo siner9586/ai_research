@@ -23,6 +23,12 @@ logger = logging.getLogger(__name__)
 DEFAULT_ARXIV_CATEGORIES = ["cs.AI", "cs.CL", "cs.LG", "cs.CV", "cs.MA", "cs.IR"]
 
 
+class FetchResolutionError(RuntimeError):
+    def __init__(self, message: str, attempts: list[dict]):
+        super().__init__(message)
+        self.attempts = attempts
+
+
 def fetch_stage(day: date, mock: bool = False) -> list[Paper]:
     papers, _stats = _fetch_stage_with_stats(day, mock=mock)
     return papers
@@ -202,6 +208,14 @@ def run_daily(
             "run_report": run_report["report_path"],
         }
     except Exception as exc:
+        attempts = getattr(exc, "attempts", None)
+        if attempts:
+            run_report["attempts"] = attempts
+            last_attempt = attempts[-1]
+            run_report["category_counts"] = last_attempt.get("category_counts", {})
+            run_report["errors"] = last_attempt.get("errors", {})
+            run_report["total_candidates"] = last_attempt.get("total_candidates", 0)
+            run_report["deduped_papers"] = last_attempt.get("deduped_papers", 0)
         run_report["status"] = "failed"
         run_report["errors"] = _append_error(run_report.get("errors", {}), "pipeline", str(exc))
         _write_run_report(run_report)
@@ -255,6 +269,14 @@ def _resolve_fetch_day(day: date, mock: bool, fallback_days: int) -> tuple[date,
             logger.warning("No usable arXiv papers for %s: %s", candidate_day, exc)
             continue
         attempts.append(_attempt_summary(candidate_day, stats))
+        if stats.get("all_categories_failed"):
+            messages = "; ".join(f"{key}: {value}" for key, value in stats.get("errors", {}).items())
+            raise FetchResolutionError(
+                "All arXiv categories failed for "
+                f"{candidate_day}; not using date fallback because this is a fetch failure, "
+                f"not an empty arXiv publication day. Errors: {messages}",
+                attempts,
+            )
         if papers:
             return candidate_day, papers, stats, attempts
 
@@ -262,9 +284,10 @@ def _resolve_fetch_day(day: date, mock: bool, fallback_days: int) -> tuple[date,
     detail = "; ".join(f"{attempt['date']}: {attempt.get('error') or '0 papers'}" for attempt in attempts)
     if all_errors:
         detail = detail or "; ".join(f"{key}: {value}" for key, value in all_errors.items())
-    raise RuntimeError(
+    raise FetchResolutionError(
         "No real arXiv papers found for target date or fallback window; "
-        f"searched {searched}. Details: {detail}"
+        f"searched {searched}. Details: {detail}",
+        attempts,
     )
 
 

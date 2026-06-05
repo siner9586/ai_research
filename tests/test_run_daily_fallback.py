@@ -78,3 +78,31 @@ def test_run_daily_fails_when_fallback_window_has_no_real_papers(monkeypatch):
     assert report["target_date"] == str(target)
     assert report["actual_date"] is None
     assert report["generated_files"] == []
+
+
+def test_run_daily_does_not_fallback_when_all_categories_fail(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    target = date(2026, 6, 5)
+
+    def fake_fetch(categories, max_results_per_category, day=None, **_kwargs):
+        return [], {
+            "target": str(day),
+            "categories": categories,
+            "category_counts": {category: 0 for category in categories},
+            "errors": {category: "HTTP 429 Too Many Requests" for category in categories},
+            "failed_categories": categories,
+            "successful_categories": [],
+            "total_papers": 0,
+            "all_categories_failed": True,
+        }
+
+    monkeypatch.setattr(run_daily_module, "fetch_arxiv_categories_with_stats", fake_fetch)
+
+    with pytest.raises(RuntimeError, match="All arXiv categories failed"):
+        run_daily_module.run_daily(target, mock=False, fallback_days=4)
+
+    report = json.loads((REPO_ROOT / "data/reports/runs/last-run.json").read_text(encoding="utf-8"))
+    assert report["status"] == "failed"
+    assert len(report["attempts"]) == 1
+    assert report["attempts"][0]["date"] == str(target)
+    assert report["errors"]["pipeline"].startswith("All arXiv categories failed")

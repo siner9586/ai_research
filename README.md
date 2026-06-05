@@ -13,12 +13,41 @@ The project learns from the information architecture of daily AI paper brief pro
   <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=http%3A%2F%2Fweixin.qq.com%2Fr%2Fmp%2FIiNGXnLEuC-HrTY993Yw" alt="微信公众号：灵感与观点交流 二维码" width="180" />
 </p>
 
+## Publishing Cadence / 发布节奏
+
+- Daily schedule: **07:12 Beijing/Taipei time**.
+- Cron schedule: **23:12 UTC** on the previous UTC day.
+- Data cadence: **T+2**. Each production run normally covers arXiv papers from two Beijing/Taipei calendar days earlier.
+- Example: a run at Beijing/Taipei **2026-06-05 07:12** normally generates the **2026-06-03** AI research brief.
+- If the T+2 date has no usable arXiv papers in the configured categories, the job searches backward up to `pipeline.fallback_days` days and records `target_date`, `actual_date`, and `fallback_from`.
+- Production real mode never publishes mock papers as real content.
+
+## Coverage / 技术方向
+
+The selection rules are still score-first and source-grounded. The daily paper pool covers, but is not limited to:
+
+- Agent
+- reasoning / 推理
+- training optimization / 训练优化
+- retrieval and RAG / 检索与 RAG
+- multimodal / 多模态
+- code intelligence / 代码智能
+- vision and image generation / 视觉与图像生成
+- video generation / 视频生成
+- safety and alignment / 安全与对齐
+- speech and audio / 语音与音频
+- robotics / 机器人
+- interpretability / 可解释性
+- benchmarks and evaluation / 基准与评测
+- data engineering / 数据工程
+- industry signals / 行业动态
+
 ## Features
 
 - arXiv Atom API collection for `cs.AI`, `cs.CL`, `cs.LG`, `cs.CV`, `cs.MA`, `cs.IR`.
 - Optional Hugging Face, Semantic Scholar, and GitHub signal enrichment.
 - Configurable 12-part scoring system with per-paper score breakdowns.
-- Topic classification, diversity-aware selection, T+3 publishing cadence, and safe fallback to the nearest recent arXiv data date.
+- Topic classification, diversity-aware selection, T+2 publishing cadence, and safe fallback to the nearest recent arXiv data date.
 - Mock provider and mock data so the full pipeline runs without API keys.
 - OpenAI-compatible provider support for OpenAI, DeepSeek, and OpenRouter.
 - Chinese and English Markdown briefs plus source transparency pages.
@@ -30,8 +59,8 @@ The project learns from the information architecture of daily AI paper brief pro
 
 ```mermaid
 flowchart TD
-  A[GitHub Actions 02:30 UTC] --> B[Python pipeline]
-  B --> C[Fetch arXiv]
+  A[GitHub Actions 23:12 UTC / Beijing 07:12] --> B[Python pipeline]
+  B --> C[Fetch arXiv T+2]
   C --> D[Normalize and dedupe]
   D --> E[Optional HF / Semantic Scholar / GitHub signals]
   E --> F[Score and classify topics]
@@ -47,7 +76,6 @@ flowchart TD
 ## Local Quick Start
 
 ```bash
-cd /Users/wangzheng/Documents/vibecoding/ai_research
 python -m venv .venv || true
 source .venv/bin/activate
 python -m pip install --upgrade pip
@@ -59,29 +87,11 @@ npm install
 npm run build
 ```
 
-## Mock Run Demo
-
-`mock-run` is deterministic, offline-friendly, and requires no API keys:
-
-```bash
-ai-brief mock-run
-ai-brief mock-run --date 2026-06-03
-```
-
-It generates:
-
-- `data/content/{zh,en}/daily/*.md`
-- `data/processed/YYYY-MM-DD/*.json`
-- `data/reports/qa/YYYY-MM-DD.json`
-- `apps/web/public/{zh,en}/feed.xml`
-- `apps/web/public/sitemap.xml`
-- `apps/web/public/search-index.json`
-
 ## Real arXiv Collection
 
 ```bash
-ai-brief run-daily --delay-days 3
-ai-brief run-daily --delay-days 3 --fallback-days 4
+ai-brief run-daily --delay-days 2
+ai-brief run-daily --delay-days 2 --fallback-days 4
 ai-brief run-daily --date 2026-06-03 --fallback-days 4
 ai-brief fetch --date 2026-06-03
 ai-brief enrich --date 2026-06-03
@@ -90,7 +100,7 @@ ai-brief build-content --date 2026-06-03
 ai-brief qa --date 2026-06-03
 ```
 
-Production runs query arXiv for the target date. The default target is T+3: today minus `pipeline.delay_days` from `configs/site.yaml`, currently 3 days. If that target date has no real arXiv papers in the configured categories, `run-daily` searches backward up to `pipeline.fallback_days`, currently 4 days, and uses the nearest date with real arXiv data.
+Production runs query arXiv for the target date. The default target is T+2: today in Beijing/Taipei time minus `pipeline.delay_days` from `configs/site.yaml`, currently 2 days. If that target date has no real arXiv papers in the configured categories, `run-daily` searches backward up to `pipeline.fallback_days`, currently 4 days, and uses the nearest date with real arXiv data.
 
 Brief and source pages record both `target_date` and `actual_date`; fallback pages also record `fallback_from`. If every fallback date has no real papers, or every arXiv category fails, the command fails clearly and does not publish mock content. Use `ai-brief mock-run` only for local demo, CI validation, and manual mock workflow runs.
 
@@ -157,7 +167,6 @@ DEEPSEEK_API_KEY
 OPENROUTER_API_KEY
 ANTHROPIC_API_KEY
 SEMANTIC_SCHOLAR_API_KEY
-GITHUB_TOKEN
 AI_RESEARCH_EXTERNAL_SIGNALS
 TELEGRAM_BOT_TOKEN
 TELEGRAM_CHAT_ID
@@ -168,47 +177,25 @@ SITE_URL
 CLOUDFLARE_PAGES_DEPLOY_HOOK
 ```
 
-No secret is required for `mock-run`. Without API keys, the default `LLM_PROVIDER=mock` can still generate deterministic text from real arXiv metadata; optional enrichers are skipped unless configured. The built-in `GITHUB_TOKEN` is provided by GitHub Actions and does not need to be added as a repository secret. Without notification secrets, the notification scripts print `missing config, skipped` and exit successfully.
+No secret is required for `mock-run`. Without API keys, the default `LLM_PROVIDER=mock` can still generate deterministic text from real arXiv metadata; optional enrichers are skipped unless configured. The built-in `GITHUB_TOKEN` is provided by GitHub Actions and does not need to be added as a repository secret.
 
 `CLOUDFLARE_PAGES_DEPLOY_HOOK` is optional. When set, the workflow POSTs it after a successful push as a Pages deployment fallback. If it is missing or the hook call fails, the GitHub push remains the source of truth.
 
-## Generate Daily Briefs
-
-```bash
-ai-brief run-daily --date 2026-06-03
-ai-brief run-daily --delay-days 3
-ai-brief run-daily --delay-days 3 --fallback-days 4
-ai-brief generate --date 2026-06-03 --lang zh
-ai-brief generate --date 2026-06-03 --lang en
-ai-brief build-content --date 2026-06-03
-```
-
-## Build the Astro Site
-
-```bash
-cd apps/web
-npm install
-npm run build
-npm run dev
-```
-
-The static output is `apps/web/dist`.
-
 ## GitHub Actions Automation
 
-`.github/workflows/daily-brief.yml` runs every day at UTC 02:30, which is 10:30 in Beijing/Taipei time. GitHub scheduled workflows can be delayed during platform load, so the repository also supports manual `workflow_dispatch` and external `repository_dispatch` triggers. It:
+`.github/workflows/daily-brief.yml` runs every day at **UTC 23:12**, which is **07:12 the next day in Beijing/Taipei time**. GitHub scheduled workflows can be delayed during platform load, so the repository also supports manual `workflow_dispatch`, external `repository_dispatch`, and a one-shot `.github/daily-brief.force` push trigger.
+
+The job:
 
 1. Installs Python 3.11 and Node 22.
 2. Installs `requirements.txt` and the editable package.
-3. Runs `ai-brief run-daily --delay-days 3 --fallback-days 4` or `ai-brief mock-run` for manual mock dispatch.
+3. Runs `ai-brief run-daily --delay-days 2 --fallback-days 4` or `ai-brief mock-run` for manual mock dispatch.
 4. Runs `pytest -q`.
 5. Builds Astro.
 6. Commits generated `data/`, including `data/reports/runs/`, and `apps/web/public/` artifacts.
 7. Pushes to `main`.
 8. Optionally triggers a Cloudflare Pages deploy hook.
 9. Optionally sends Telegram and Resend email notifications.
-
-Cloudflare Pages should watch the `main` branch and deploy after the push.
 
 Manual run:
 
@@ -225,7 +212,7 @@ GitHub repository
 Useful GitHub CLI commands:
 
 ```bash
-gh workflow run daily-brief.yml -f mode=real -f delay_days=3 -f fallback_days=4
+gh workflow run daily-brief.yml -f mode=real -f delay_days=2 -f fallback_days=4
 gh workflow run daily-brief.yml -f mode=mock
 gh run list --workflow=daily-brief.yml --limit 10
 gh run view --log
@@ -252,8 +239,6 @@ Build command: cd apps/web && npm install && npm run build
 Build output directory: apps/web/dist
 ```
 
-This repository is optimized for the recommended `apps/web` root directory.
-
 Optional Pages deploy hook:
 
 ```text
@@ -269,59 +254,6 @@ Cloudflare Dashboard
 Save the hook URL as GitHub secret `CLOUDFLARE_PAGES_DEPLOY_HOOK`. This is a fallback trigger only; Cloudflare Pages should still listen to pushes on `main`.
 
 For an external scheduler fallback, see [docs/cloudflare-cron-dispatch.md](docs/cloudflare-cron-dispatch.md). Cloudflare Workers Cron should only trigger GitHub Actions; content generation remains inside GitHub Actions.
-
-## Domain Check: aici.ccwu.cc
-
-In the Cloudflare dashboard, open:
-
-```text
-Pages > ai-research > Custom domains
-```
-
-Confirm:
-
-- `aici.ccwu.cc` is attached to the `ai-research` Pages project.
-- DNS status is active.
-- Certificate status is active or pending validation.
-- Latest production deployment is from branch `main`.
-
-If `/zh/` works but RSS is 404, confirm `apps/web/public/zh/feed.xml` was committed and the Pages output directory is correct. If the site is 404, confirm the production branch and build output directory. If the certificate is pending, wait for Cloudflare validation and recheck DNS.
-
-More detail: [docs/deploy-cloudflare.md](docs/deploy-cloudflare.md).
-
-## Optional Email and Telegram Sending
-
-Telegram:
-
-```bash
-export TELEGRAM_BOT_TOKEN=...
-export TELEGRAM_CHAT_ID=...
-export SITE_URL=https://aici.ccwu.cc
-python scripts/notify_telegram.py
-```
-
-Email through Resend:
-
-```bash
-export RESEND_API_KEY=...
-export MAIL_FROM=brief@example.com
-export MAIL_TO=you@example.com
-export SITE_URL=https://aici.ccwu.cc
-python scripts/send_email.py
-```
-
-Missing variables cause scripts to skip and exit successfully.
-
-## Why Workers KV Is Not Needed Now
-
-Current project does not need Workers KV.
-
-1. Content is statically generated and committed to GitHub.
-2. Cloudflare Pages deploys the static Astro site.
-3. Daily state is tracked in `data/processed/YYYY-MM-DD`.
-4. Notification state can initially be inspected through GitHub Actions logs and generated JSON.
-
-Future user subscriptions, send-state storage, online APIs, reading state, or admin dashboards may justify Cloudflare KV, D1, or R2. If a strong-consistency subscription system is needed, evaluate Cloudflare D1 before KV.
 
 ## Data Directories
 
@@ -368,13 +300,11 @@ QA errors fail the CLI and GitHub Actions. Warnings are reported but do not fail
 
 ## FAQ
 
-**Why T+3?** It gives community and repository signals time to appear while still keeping the brief recent. If the T+3 date has no arXiv publications in the configured categories, the production job searches backward up to 4 days and labels the actual data date in the brief and source page.
+**Why T+2?** It gives arXiv metadata and early community signals time to settle while keeping the brief recent. If the T+2 date has no arXiv publications in the configured categories, the production job searches backward up to 4 days and labels the actual data date in the brief and source page.
 
 **Can it run without keys?** Yes. `mock-run` is keyless; production runs can use arXiv-only data when optional enrichers are disabled. If no LLM key is configured, `LLM_PROVIDER=mock` keeps generation deterministic and source-grounded.
 
 **What happens when arXiv is unavailable?** Production generation tries the fallback date window. If no real arXiv data is found, it fails clearly, writes a run report, and does not publish mock content.
-
-**Where are prompts?** Prompt templates are in `packages/prompts/`.
 
 **Can Cloudflare deploy from the generated content only?** Yes. The Pages project builds the Astro site from committed content and public artifacts.
 

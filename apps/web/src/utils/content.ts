@@ -84,6 +84,19 @@ export function topicCounts(lang: string) {
   return counts;
 }
 
+export function displayBriefTitle(title: string | undefined | null) {
+  return String(title || '').replace(/^今日重点[:：]\s*/, '').trim();
+}
+
+export function beijingToday() {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+}
+
 export function markdownToHtml(markdown: string) {
   const lines = markdown.split('\n');
   const out: string[] = [];
@@ -95,7 +108,8 @@ export function markdownToHtml(markdown: string) {
     }
   };
 
-  for (const line of lines) {
+  for (const rawLine of lines) {
+    const line = normalizeDisplayLine(rawLine);
     if (!line.trim()) {
       closeList();
       continue;
@@ -157,6 +171,10 @@ function parseFrontmatter(raw: string) {
 
 function safeReadDir(dir: string) {
   return fs.existsSync(dir) ? fs.readdirSync(dir) : [];
+}
+
+function normalizeDisplayLine(line: string) {
+  return line.replace(/^(#{1,6}\s*)今日重点[:：]\s*/, '$1').replace(/^今日重点[:：]\s*/, '');
 }
 
 function inline(text: string) {

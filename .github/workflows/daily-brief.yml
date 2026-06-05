@@ -2,7 +2,7 @@ name: Daily AI Research Brief
 
 on:
   schedule:
-    - cron: "12 7 * * *"
+    - cron: "12 23 * * *"
   workflow_dispatch:
     inputs:
       mode:
@@ -19,7 +19,7 @@ on:
       delay_days:
         description: "Delay days when date is not provided"
         required: false
-        default: "3"
+        default: "2"
       fallback_days:
         description: "How many days to search backward if target date has no papers"
         required: false
@@ -56,7 +56,7 @@ jobs:
         env:
           MODE_INPUT: ${{ github.event.inputs.mode || github.event.client_payload.mode || 'real' }}
           DATE_INPUT: ${{ github.event.inputs.date || github.event.client_payload.date || '' }}
-          DELAY_DAYS_INPUT: ${{ github.event.inputs.delay_days || github.event.client_payload.delay_days || '3' }}
+          DELAY_DAYS_INPUT: ${{ github.event.inputs.delay_days || github.event.client_payload.delay_days || '2' }}
           FALLBACK_DAYS_INPUT: ${{ github.event.inputs.fallback_days || github.event.client_payload.fallback_days || '4' }}
         run: |
           echo "trigger=${GITHUB_EVENT_NAME}"
@@ -90,14 +90,14 @@ jobs:
           GITHUB_API_TOKEN: ${{ github.token }}
           MODE_INPUT: ${{ github.event.inputs.mode || github.event.client_payload.mode || 'real' }}
           DATE_INPUT: ${{ github.event.inputs.date || github.event.client_payload.date || '' }}
-          DELAY_DAYS_INPUT: ${{ github.event.inputs.delay_days || github.event.client_payload.delay_days || '3' }}
+          DELAY_DAYS_INPUT: ${{ github.event.inputs.delay_days || github.event.client_payload.delay_days || '2' }}
           FALLBACK_DAYS_INPUT: ${{ github.event.inputs.fallback_days || github.event.client_payload.fallback_days || '4' }}
         run: |
           set -euo pipefail
           export LLM_PROVIDER="${LLM_PROVIDER:-mock}"
           MODE="${MODE_INPUT:-real}"
           DATE="${DATE_INPUT:-}"
-          DELAY_DAYS="${DELAY_DAYS_INPUT:-3}"
+          DELAY_DAYS="${DELAY_DAYS_INPUT:-2}"
           FALLBACK_DAYS="${FALLBACK_DAYS_INPUT:-4}"
 
           echo "provider=${LLM_PROVIDER}"

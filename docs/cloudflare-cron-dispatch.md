@@ -77,7 +77,7 @@ async function triggerGitHub(env) {
 
   const inputs = {
     mode: "real",
-    delay_days: "3",
+    delay_days: "2",
     fallback_days: "4",
   };
 
@@ -113,7 +113,7 @@ async function triggerGitHub(env) {
 
 ## wrangler.toml
 
-Run at the same nominal time as GitHub Actions:
+Run at the same nominal time as GitHub Actions. Beijing/Taipei 07:12 is UTC 23:12 on the previous UTC day:
 
 ```toml
 name = "ai-research-daily-dispatch"
@@ -121,17 +121,17 @@ main = "src/index.js"
 compatibility_date = "2026-06-05"
 
 [triggers]
-crons = ["32 6 * * *"]
+crons = ["12 23 * * *"]
 ```
 
 Or run a few minutes later so GitHub's native schedule gets the first chance:
 
 ```toml
 [triggers]
-crons = ["37 6 * * *"]
+crons = ["17 23 * * *"]
 ```
 
-The target time is UTC 06:32, which is 14:32 in Beijing/Taipei time.
+The target time is UTC 23:12, which is 07:12 the next day in Beijing/Taipei time. The production cadence is T+2: each run normally covers arXiv papers from two Beijing/Taipei calendar days earlier.
 
 ## Verification
 
@@ -153,4 +153,4 @@ or, if `DISPATCH_KIND=repository`:
 repository_dispatch
 ```
 
-The workflow logs should show `mode=real`, `delay_days=3`, and `fallback_days=4`.
+The workflow logs should show `mode=real`, `delay_days=2`, and `fallback_days=4`.

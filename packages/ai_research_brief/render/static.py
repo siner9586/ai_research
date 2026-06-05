@@ -9,6 +9,7 @@ from ..config import REPO_ROOT, site_config, topics_config
 
 
 FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n(.*)$", re.S)
+BRIEF_TITLE_PREFIX_RE = re.compile(r"^今日重点[:：]\s*")
 
 
 def read_content_documents(lang: str | None = None) -> list[dict]:
@@ -41,7 +42,7 @@ def build_search_index() -> Path:
         meta = doc["meta"]
         text = _strip_markdown(doc["body"])
         rows.append({
-            "title": meta.get("title", ""),
+            "title": _clean_title(meta.get("title", "")),
             "date": meta.get("date", ""),
             "lang": doc["lang"],
             "url": doc["url"],
@@ -49,9 +50,9 @@ def build_search_index() -> Path:
             "tags": meta.get("tags", []),
             "topics": meta.get("topics", meta.get("tags", [])),
             "authors": _extract_authors(doc["body"]),
-            "content_excerpt": text[:800],
+            "content_excerpt": _clean_title(text[:800]),
             "type": meta.get("page_type", "page"),
-            "text": text[:5000],
+            "text": _clean_title(text[:5000]),
         })
     out = REPO_ROOT / "apps" / "web" / "public" / "search-index.json"
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -114,6 +115,10 @@ def _strip_markdown(text: str) -> str:
     text = re.sub(r"\[(.*?)\]\(.*?\)", r"\1", text)
     text = re.sub(r"[#*_`>-]", " ", text)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def _clean_title(text: str) -> str:
+    return BRIEF_TITLE_PREFIX_RE.sub("", str(text or "")).strip()
 
 
 def _extract_authors(markdown: str) -> list[str]:

@@ -2,7 +2,7 @@ name: Daily AI Research Brief
 
 on:
   schedule:
-    - cron: "30 0 * * *"
+    - cron: "0 3 * * *"
   workflow_dispatch:
     inputs:
       mode:
@@ -12,6 +12,10 @@ on:
 
 permissions:
   contents: write
+
+concurrency:
+  group: daily-ai-research-brief
+  cancel-in-progress: false
 
 jobs:
   daily:
@@ -50,7 +54,8 @@ jobs:
           GITHUB_API_TOKEN: ${{ github.token }}
         run: |
           export LLM_PROVIDER="${LLM_PROVIDER:-mock}"
-          if [ "${{ github.event.inputs.mode }}" = "mock" ]; then
+          MODE="${{ github.event.inputs.mode || 'real' }}"
+          if [ "$MODE" = "mock" ]; then
             ai-brief mock-run
           else
             ai-brief run-daily --delay-days 3
@@ -70,8 +75,13 @@ jobs:
           git config user.name "ai-brief-bot"
           git config user.email "ai-brief-bot@example.com"
           git add data apps/web/public
-          git commit -m "Update daily AI research brief" || echo "No generated changes"
-          git push
+          if git diff --cached --quiet; then
+            echo "No generated changes"
+          else
+            git commit -m "Update daily AI research brief"
+            git pull --rebase origin main
+            git push
+          fi
 
       - name: Send notification
         env:

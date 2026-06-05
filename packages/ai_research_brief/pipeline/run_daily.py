@@ -3,8 +3,9 @@ from __future__ import annotations
 import json
 import logging
 import os
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from ..config import REPO_ROOT, ensure_dirs, site_config
 from ..fetchers.arxiv import fetch_arxiv_categories_with_stats, mock_papers
@@ -21,6 +22,7 @@ from .select import select_papers
 
 logger = logging.getLogger(__name__)
 DEFAULT_ARXIV_CATEGORIES = ["cs.AI", "cs.CL", "cs.LG", "cs.CV", "cs.MA", "cs.IR"]
+PUBLISH_TIMEZONE = "Asia/Shanghai"
 
 
 class FetchResolutionError(RuntimeError):
@@ -160,7 +162,7 @@ def run_daily(
 ):
     pipeline = site_config().get("pipeline", {})
     fallback_days = int(pipeline.get("fallback_days", 0) if fallback_days is None else fallback_days)
-    publish_date = _publication_date(day)
+    publish_date = _publication_date()
     run_report = _base_run_report(day, publish_date=publish_date, mock=mock, fallback_days=fallback_days, trigger=trigger)
     try:
         actual_day, papers, fetch_stats, attempts = _resolve_fetch_day(day, mock=mock, fallback_days=fallback_days)
@@ -332,9 +334,8 @@ def _base_run_report(day: date, publish_date: date, mock: bool, fallback_days: i
     }
 
 
-def _publication_date(target_day: date) -> date:
-    pipeline = site_config().get("pipeline", {})
-    return target_day + timedelta(days=int(pipeline.get("delay_days", 2)))
+def _publication_date() -> date:
+    return datetime.now(ZoneInfo(PUBLISH_TIMEZONE)).date()
 
 
 def _write_run_report(report: dict) -> None:

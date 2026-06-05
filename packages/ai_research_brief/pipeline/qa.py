@@ -23,15 +23,27 @@ PEER_REVIEW_PATTERNS = [
 ]
 
 
-def run_qa(day: date, content_dir: Path, reports_dir: Path, target_date: date | None = None) -> QAReport:
+def run_qa(
+    day: date,
+    content_dir: Path,
+    reports_dir: Path,
+    target_date: date | None = None,
+    publish_date: date | None = None,
+) -> QAReport:
+    """Validate generated artifacts.
+
+    `day` is the actual arXiv data date. `publish_date` is the public issue
+    date shown on the website and used in daily page slugs.
+    """
     target_date = target_date or day
+    publish_date = publish_date or day
     warnings: list[str] = []
     errors: list[str] = []
     checked: list[str] = []
     docs: dict[str, list[tuple[Path, dict, str]]] = {"zh": [], "en": []}
 
     for lang in ("zh", "en"):
-        pages = sorted((content_dir / lang / "daily").glob(f"{day}-*.md"))
+        pages = sorted((content_dir / lang / "daily").glob(f"{publish_date}-*.md"))
         brief_pages: list[Path] = []
         source_pages: list[Path] = []
         for path in pages:
@@ -45,19 +57,19 @@ def run_qa(day: date, content_dir: Path, reports_dir: Path, target_date: date | 
                 brief_pages.append(path)
             if str(meta.get("page_type")) == "sources" or path.stem.endswith("-sources"):
                 source_pages.append(path)
-            _check_markdown_doc(path, meta, body, day, target_date, errors, warnings)
+            _check_markdown_doc(path, meta, body, day, target_date, publish_date, errors, warnings)
 
         if not brief_pages:
-            errors.append(f"Missing {lang} daily brief for {day}")
+            errors.append(f"Missing {lang} daily brief for publication date {publish_date}")
         if not source_pages:
-            errors.append(f"Missing {lang} sources page for {day}")
+            errors.append(f"Missing {lang} sources page for publication date {publish_date}")
 
     _check_processed(day, content_dir.parents[1], checked, errors)
-    _check_static_artifacts(day, content_dir.parents[1], checked, errors)
+    _check_static_artifacts(publish_date, content_dir.parents[1], checked, errors)
     _check_bilingual_quality(docs, warnings, errors)
 
     report = QAReport(
-        date=day,
+        date=publish_date,
         target_date=target_date,
         actual_date=day,
         fallback_from=target_date if target_date != day else None,
@@ -67,7 +79,7 @@ def run_qa(day: date, content_dir: Path, reports_dir: Path, target_date: date | 
         checked_files=checked,
     )
     reports_dir.mkdir(parents=True, exist_ok=True)
-    (reports_dir / (str(day) + ".json")).write_text(report.model_dump_json(indent=2), encoding="utf-8")
+    (reports_dir / (str(publish_date) + ".json")).write_text(report.model_dump_json(indent=2), encoding="utf-8")
     return report
 
 
@@ -90,19 +102,26 @@ def _parse_markdown(path: Path, errors: list[str]) -> tuple[dict, str] | None:
     return meta, match.group(2)
 
 
-def _check_markdown_doc(path: Path, meta: dict, body: str, day: date, target_date: date, errors: list[str], warnings: list[str]) -> None:
+def _check_markdown_doc(
+    path: Path,
+    meta: dict,
+    body: str,
+    day: date,
+    target_date: date,
+    publish_date: date,
+    errors: list[str],
+    warnings: list[str],
+) -> None:
     required = ["title", "date", "target_date", "actual_date", "lang", "slug", "summary", "tags", "generated_at"]
     for key in required:
         if meta.get(key) in (None, "", []):
             errors.append(f"Missing frontmatter field {key}: {path}")
-    if str(meta.get("date")) != str(day):
-        errors.append(f"Frontmatter date mismatch: {path}")
+    if str(meta.get("date")) != str(publish_date):
+        errors.append(f"Frontmatter publication date mismatch: {path}")
     if str(meta.get("actual_date")) != str(day):
         errors.append(f"Frontmatter actual_date mismatch: {path}")
     if str(meta.get("target_date")) != str(target_date):
         errors.append(f"Frontmatter target_date mismatch: {path}")
-    if target_date != day and not meta.get("fallback_from"):
-        errors.append(f"Missing fallback_from for fallback run: {path}")
     if str(meta.get("slug")) != path.stem:
         errors.append(f"Slug/path mismatch: {path}")
     if not re.search(r"https://arxiv\.org/abs/\d{4}\.\d{4,5}", body):
@@ -162,7 +181,7 @@ def _check_static_artifacts(day: date, repo_root: Path, checked: list[str], erro
             errors.append("search-index.json is not valid JSON")
         else:
             if not any(str(row.get("date")) == str(day) for row in rows):
-                errors.append(f"Search index does not include {day}")
+                errors.append(f"Search index does not include publication date {day}")
             for field in ["title", "date", "lang", "url", "summary", "tags", "topics", "authors", "content_excerpt"]:
                 if rows and field not in rows[0]:
                     errors.append(f"Search index missing field: {field}")

@@ -6,7 +6,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     <h1>方法</h1>
     <p>这个站点复现的是一种可验证的信息流水线：从论文源头采集候选，使用多信号规则引擎做排序，生成每日中英双语简报，并把每篇候选的得分原因公开在 sources 页面。</p>
     <h2>采集范围</h2>
-    <p>默认采集 arXiv 的 cs.AI、cs.CL、cs.LG、cs.CV、cs.MA、cs.IR 六个 AI 相关分类。生产模式可通过配置调整分类和每类抓取数量。</p>
+    <p>默认采集 arXiv 的 cs.AI、cs.CL、cs.LG、cs.CV、cs.MA、cs.IR、cs.RO、cs.SD、cs.MM、cs.HC、cs.SE、cs.DC、stat.ML、eess.AS 等 AI 相关分类。生产模式可通过配置调整分类和每类抓取数量。</p>
     <h2>评分信号</h2>
     <ul>
       <li>机构背景：标题或摘要中出现配置中的顶级机构时加分。</li>
@@ -23,7 +23,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       <li>安全、伦理、治理关键词：相关论文获得额外可见性。</li>
     </ul>
     <h2>发布节奏</h2>
-    <p>默认采用 T+3 节奏，让社区信号有时间沉淀。没有外部密钥时，生产流水线使用 arXiv 元数据继续运行；mock-run 使用固定演示数据完成离线验收。</p>
+    <p>默认采用 T+2 节奏：每天北京时间/台北时间 07:12 发布简报，通常抓取并筛选 2 天前的 arXiv 论文。没有外部密钥时，生产流水线使用 arXiv 元数据继续运行；mock-run 只用于固定演示数据和离线验收。</p>
     <h2>透明性</h2>
     <p>每期简报都有对应 sources 页，展示全部候选论文、入选层级、总分、分项得分、关键词、外部信号和降级 warning。</p>
     <h2>局限</h2>

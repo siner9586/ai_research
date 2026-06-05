@@ -7,6 +7,9 @@ export function getStaticPaths() {
 }
 
 const { doc } = Astro.props;
+const body = doc.meta.page_type === 'brief'
+  ? doc.body.replace(/\n\*\*Date\*\*:\s*\d{4}-\d{2}-\d{2}\n\n/, '\n')
+  : doc.body;
 ---
 <BaseLayout lang="en" title={doc.meta.title} description={doc.meta.summary}>
   <article class="prose">
@@ -16,6 +19,6 @@ const { doc } = Astro.props;
       {doc.meta.brief_page && <a href={doc.meta.brief_page}>brief</a>}
       {doc.meta.sources_page && <a href={doc.meta.sources_page}>sources and scoring</a>}
     </div>
-    <Fragment set:html={markdownToHtml(doc.body)} />
+    <Fragment set:html={markdownToHtml(body)} />
   </article>
 </BaseLayout>

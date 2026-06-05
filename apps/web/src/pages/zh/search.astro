@@ -12,12 +12,13 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     const input = document.querySelector('#search-box');
     const results = document.querySelector('#search-results');
     const lang = panel.dataset.lang;
+    const cleanTitle = (title) => String(title || '').replace(/^今日重点[:：]\s*/, '').trim();
     let rows = [];
     fetch('/search-index.json').then((r) => r.json()).then((data) => rows = data.filter((row) => row.lang === lang));
     input.addEventListener('input', () => {
       const q = input.value.trim().toLowerCase();
       const hits = q ? rows.filter((row) => `${row.title} ${row.summary} ${row.text}`.toLowerCase().includes(q)).slice(0, 20) : [];
-      results.innerHTML = hits.map((row) => `<article class="article-card"><h2><a href="${row.url}">${row.title}</a></h2><p>${row.summary}</p></article>`).join('');
+      results.innerHTML = hits.map((row) => `<article class="article-card"><h2><a href="${row.url}">${cleanTitle(row.title)}</a></h2><p>${row.summary}</p></article>`).join('');
     });
   </script>
 </BaseLayout>

@@ -3,6 +3,11 @@ name: Daily AI Research Brief
 on:
   schedule:
     - cron: "12 23 * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - .github/daily-brief.force
   workflow_dispatch:
     inputs:
       mode:

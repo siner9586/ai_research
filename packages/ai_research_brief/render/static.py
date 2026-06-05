@@ -9,7 +9,7 @@ from ..config import REPO_ROOT, site_config, topics_config
 
 
 FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n(.*)$", re.S)
-BRIEF_TITLE_PREFIX_RE = re.compile(r"^今日重点[:：]\s*")
+BRIEF_TITLE_PREFIX_RE = re.compile(r"^(今日重点[:：]\s*|Today's focus:\s*)", re.I)
 
 
 def read_content_documents(lang: str | None = None) -> list[dict]:
@@ -38,7 +38,7 @@ def read_content_documents(lang: str | None = None) -> list[dict]:
 
 def build_search_index() -> Path:
     rows = []
-    for doc in read_content_documents():
+    for doc in _public_briefs(read_content_documents()):
         meta = doc["meta"]
         text = _strip_markdown(doc["body"])
         rows.append({
@@ -83,7 +83,7 @@ def build_sitemap() -> Path:
     for lang in ("zh", "en"):
         for topic in topics_config().get("topics", []):
             topic_paths.append(f"/{lang}/topics/{topic['slug']}/")
-    urls = static_paths + topic_paths + [doc["url"] for doc in read_content_documents()]
+    urls = static_paths + topic_paths + [doc["url"] for doc in _public_briefs(read_content_documents())]
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for url in dict.fromkeys(urls):
         xml += f"  <url><loc>{escape(base_url + url)}</loc></url>\n"
@@ -128,3 +128,26 @@ def _extract_authors(markdown: str) -> list[str]:
         if value and value.lower() not in {"unknown", "未知"}:
             authors.extend([part.strip() for part in value.split(",") if part.strip()])
     return list(dict.fromkeys(authors))[:20]
+
+
+def _public_briefs(docs: list[dict]) -> list[dict]:
+    by_key: dict[tuple[str, str], dict] = {}
+    for doc in docs:
+        meta = doc["meta"]
+        if meta.get("page_type") != "brief":
+            continue
+        key = (doc["lang"], str(meta.get("date", "")))
+        existing = by_key.get(key)
+        if existing is None or _doc_sort_key(doc) > _doc_sort_key(existing):
+            by_key[key] = doc
+    return sorted(by_key.values(), key=_doc_sort_key, reverse=True)
+
+
+def _doc_sort_key(doc: dict) -> tuple:
+    meta = doc["meta"]
+    return (
+        str(meta.get("date", "")),
+        str(meta.get("generated_at", "")),
+        int(meta.get("candidate_count") or 0),
+        str(doc.get("slug", "")),
+    )

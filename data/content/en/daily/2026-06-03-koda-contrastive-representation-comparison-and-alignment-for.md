@@ -1,16 +1,16 @@
 ---
 title: "Strengthen multimodal understanding of charts, documents, and visual evidence, Make agents use tools and reusable skills more reliably, Make RAG retrieval and knowledge-base QA more reliable"
-date: "2026-06-02"
-target_date: "2026-06-02"
+date: "2026-06-03"
+target_date: "2026-06-03"
 actual_date: "2026-06-02"
-fallback_from: ""
+fallback_from: "2026-06-03"
 lang: "en"
-slug: "2026-06-02-koda-contrastive-representation-comparison-and-alignment-for"
+slug: "2026-06-03-koda-contrastive-representation-comparison-and-alignment-for"
 summary: "Today tracks: strengthen multimodal understanding of charts, documents, and visual evidence, make agents use tools and reusable skills more reliably, make RAG retrieval and knowledge-base QA more reliable."
 tags: ["agents", "data-engineering", "evaluation", "multimodal", "rag", "reasoning", "safety", "systems", "training"]
 topics: ["agents", "data-engineering", "evaluation", "multimodal", "rag", "reasoning", "safety", "systems", "training"]
-sources_page: "/en/daily/2026-06-02-koda-contrastive-representation-comparison-and-alignment-for-sources/"
-generated_at: "2026-06-05T16:22:27.334903+00:00"
+sources_page: "/en/daily/2026-06-03-koda-contrastive-representation-comparison-and-alignment-for-sources/"
+generated_at: "2026-06-05T16:22:28.361382+00:00"
 page_type: "brief"
 candidate_count: 264
 featured_count: 5

@@ -51,6 +51,10 @@ def _fetch_stage_with_stats(day: date, mock: bool = False, fail_on_empty: bool =
             "successful_categories": categories,
             "total_papers": len(raw_papers),
             "all_categories_failed": False,
+            "fetch_mode": "mock",
+            "page_stats": {},
+            "page_count": 0,
+            "request_count": 0,
         }
     else:
         raw_papers, stats = fetch_arxiv_categories_with_stats(
@@ -58,6 +62,7 @@ def _fetch_stage_with_stats(day: date, mock: bool = False, fail_on_empty: bool =
             int(pipeline.get("max_results_per_category", 80)),
             day=day,
             request_delay_seconds=float(pipeline.get("arxiv_request_delay_seconds", 3.5)),
+            max_total_results=int(pipeline.get("max_total_results", 0)) or None,
         )
     papers = dedupe_papers(normalize_papers(raw_papers))
     stats["total_candidates"] = len(raw_papers)
@@ -116,6 +121,7 @@ def generate_stage(
     slugs: dict[str, str] = {}
     langs = [lang] if lang in {"zh", "en"} else ["zh", "en"]
     for item_lang in langs:
+        _remove_publication_markdown(item_lang, publish_date or day)
         rendered, slug = render_daily_markdown(
             day,
             item_lang,
@@ -177,6 +183,11 @@ def run_daily(
             "errors": fetch_stats.get("errors", {}),
             "total_candidates": fetch_stats.get("total_candidates", fetch_stats.get("total_papers", 0)),
             "deduped_papers": fetch_stats.get("deduped_papers", len(papers)),
+            "fetch_mode": fetch_stats.get("fetch_mode"),
+            "page_count": fetch_stats.get("page_count", 0),
+            "request_count": fetch_stats.get("request_count", 0),
+            "page_stats": fetch_stats.get("page_stats", {}),
+            "partial_fetch_errors": fetch_stats.get("partial_fetch_errors", {}),
             "warnings": _fetch_warnings(fetch_stats, day, actual_day),
         })
         _log_run_summary("fetch", run_report)
@@ -209,6 +220,11 @@ def run_daily(
             "papers": len(papers),
             "total_candidates": run_report["total_candidates"],
             "deduped_papers": run_report["deduped_papers"],
+            "fetch_mode": run_report["fetch_mode"],
+            "page_count": run_report["page_count"],
+            "request_count": run_report["request_count"],
+            "page_stats": run_report["page_stats"],
+            "partial_fetch_errors": run_report["partial_fetch_errors"],
             "category_counts": run_report["category_counts"],
             "category_errors": run_report["errors"],
             "featured": len(featured),
@@ -228,6 +244,11 @@ def run_daily(
             run_report["errors"] = last_attempt.get("errors", {})
             run_report["total_candidates"] = last_attempt.get("total_candidates", 0)
             run_report["deduped_papers"] = last_attempt.get("deduped_papers", 0)
+            run_report["fetch_mode"] = last_attempt.get("fetch_mode")
+            run_report["page_count"] = last_attempt.get("page_count", 0)
+            run_report["request_count"] = last_attempt.get("request_count", 0)
+            run_report["page_stats"] = last_attempt.get("page_stats", {})
+            run_report["partial_fetch_errors"] = last_attempt.get("partial_fetch_errors", {})
         run_report["status"] = "failed"
         run_report["errors"] = _append_error(run_report.get("errors", {}), "pipeline", str(exc))
         _write_run_report(run_report)
@@ -256,6 +277,14 @@ def _write(path: Path, data):
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def _remove_publication_markdown(lang: str, publish_date: date) -> None:
+    daily_dir = REPO_ROOT / "data" / "content" / lang / "daily"
+    if not daily_dir.exists():
+        return
+    for path in daily_dir.glob(f"{publish_date}-*.md"):
+        path.unlink()
+
+
 def _resolve_fetch_day(day: date, mock: bool, fallback_days: int) -> tuple[date, list[Paper], dict, list[dict]]:
     if mock:
         papers, stats = _fetch_stage_with_stats(day, mock=True)
@@ -275,6 +304,10 @@ def _resolve_fetch_day(day: date, mock: bool, fallback_days: int) -> tuple[date,
                 "errors": {"fetch": str(exc)},
                 "total_candidates": 0,
                 "deduped_papers": 0,
+                "fetch_mode": None,
+                "page_count": 0,
+                "request_count": 0,
+                "partial_fetch_errors": {},
             }
             attempts.append(_attempt_summary(candidate_day, stats, error=str(exc)))
             all_errors[str(candidate_day)] = str(exc)
@@ -320,6 +353,11 @@ def _base_run_report(day: date, publish_date: date, mock: bool, fallback_days: i
         "category_counts": {},
         "total_candidates": 0,
         "deduped_papers": 0,
+        "fetch_mode": None,
+        "page_count": 0,
+        "request_count": 0,
+        "page_stats": {},
+        "partial_fetch_errors": {},
         "featured": 0,
         "mentions": 0,
         "slugs": {},
@@ -351,6 +389,11 @@ def _attempt_summary(day: date, stats: dict, error: str | None = None) -> dict:
         "errors": stats.get("errors", {}),
         "total_candidates": stats.get("total_candidates", stats.get("total_papers", 0)),
         "deduped_papers": stats.get("deduped_papers", 0),
+        "fetch_mode": stats.get("fetch_mode"),
+        "page_count": stats.get("page_count", 0),
+        "request_count": stats.get("request_count", 0),
+        "page_stats": stats.get("page_stats", {}),
+        "partial_fetch_errors": stats.get("partial_fetch_errors", {}),
         "error": error,
     }
 
@@ -361,6 +404,8 @@ def _fetch_warnings(stats: dict, target_day: date, actual_day: date) -> list[str
         warnings.append(f"Fallback used internally: target_date={target_day}, actual_date={actual_day}")
     if stats.get("errors"):
         warnings.append("Partial arXiv category failures: " + "; ".join(f"{key}: {value}" for key, value in stats["errors"].items()))
+    if stats.get("partial_fetch_errors"):
+        warnings.append("Partial arXiv page failures: " + "; ".join(f"{key}: {value}" for key, value in stats["partial_fetch_errors"].items()))
     return warnings
 
 

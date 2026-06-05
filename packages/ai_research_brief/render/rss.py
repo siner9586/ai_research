@@ -6,7 +6,7 @@ from pathlib import Path
 from xml.sax.saxutils import escape
 
 from ..config import REPO_ROOT, site_config
-from .static import read_content_documents
+from .static import _public_briefs, read_content_documents
 
 
 def build_rss(lang: str) -> Path:
@@ -14,10 +14,7 @@ def build_rss(lang: str) -> Path:
     base_url = config.get("base_url", "").rstrip("/")
     site_name = config.get("name", {}).get(lang, "AI Research Brief")
     description = config.get("description", {}).get(lang, "")
-    docs = [
-        doc for doc in read_content_documents(lang)
-        if doc["meta"].get("page_type") == "brief"
-    ][:30]
+    docs = _public_briefs(read_content_documents(lang))[:30]
 
     items = []
     for doc in docs:

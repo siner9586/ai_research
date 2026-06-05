@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { beijingToday, displayBriefTitle, loadBriefs, loadSite } from '../../utils/content';
+import { displayBriefTitle, loadBriefs, loadSite } from '../../utils/content';
 
 const lang = 'zh';
 const site = loadSite()[lang];
@@ -8,7 +8,6 @@ const briefs = loadBriefs(lang);
 const latest = briefs[0];
 const recent = briefs.slice(0, 7);
 const latestTopics = latest?.meta.tags?.slice(0, 6) || [];
-const today = beijingToday();
 const topicNames: Record<string, string> = {
   agents: 'Agent',
   reasoning: '推理',
@@ -28,10 +27,10 @@ const topicNames: Record<string, string> = {
 };
 ---
 <BaseLayout lang={lang} title={site.name} description={site.tagline}>
-  <section class="home-hero">
+  <section class="home-hero compact-home">
     <div class="hero-copy">
-      <h1>每天从海量 AI 论文里，筛出真正值得跟进的研究线索。</h1>
-      <p class="hero-subtitle">覆盖 Agent、推理、训练优化、RAG、多模态、代码智能、图像与视频生成、安全对齐、语音、机器人、评测和数据工程。候选池扩大后，先看全量来源，再看高分重点。</p>
+      <h1>每天从 AI 论文里，筛出值得跟进的研究线索。</h1>
+      <p class="hero-subtitle">覆盖 Agent、推理、训练优化、RAG、多模态、代码智能、生成、安全、语音、机器人、评测、数据工程和系统部署。</p>
       <div class="action-row">
         <a class="button" href={latest?.url || '/zh/archive/'}>阅读最新简报</a>
         <a class="button secondary" href="/zh/search/">搜索论文</a>
@@ -41,13 +40,10 @@ const topicNames: Record<string, string> = {
   </section>
 
   {latest && (
-    <section class="latest-panel">
+    <section class="latest-panel with-topics">
       <div class="latest-main">
-        <p class="section-kicker">最新一期 · {today}</p>
+        <p class="section-kicker">最新一期 · {latest.meta.date}</p>
         <h2><a href={latest.url}>{displayBriefTitle(latest.meta.title)}</a></h2>
-        <div class="article-meta chip-row">
-          <a href={latest.meta.sources_page}>查看完整候选池与评分</a>
-        </div>
       </div>
       <aside class="topic-chips" aria-label="本期主题">
         {latestTopics.map((topic: string) => <span>{topicNames[topic] || topic}</span>)}
@@ -68,13 +64,10 @@ const topicNames: Record<string, string> = {
       <a href="/zh/archive/">查看全部</a>
     </div>
     {briefs.length === 0 && <p>还没有生成内容。运行 <code>ai-brief mock-run</code> 后会出现每日简报。</p>}
-    {recent.map((doc, index) => (
+    {recent.map((doc) => (
       <article class="article-card elevated-card">
-        <p class="section-kicker">{index === 0 ? today : doc.meta.date}</p>
+        <p class="section-kicker">{doc.meta.date}</p>
         <h2><a href={doc.url}>{displayBriefTitle(doc.meta.title)}</a></h2>
-        <div class="article-meta">
-          <a href={doc.meta.sources_page}>来源与评分</a>
-        </div>
       </article>
     ))}
   </section>

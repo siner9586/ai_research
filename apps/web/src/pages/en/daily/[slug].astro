@@ -1,23 +1,22 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { loadDocs, markdownToHtml } from '../../../utils/content';
+import { displayBriefTitle, loadDocs, markdownToHtml } from '../../../utils/content';
 
 export function getStaticPaths() {
   return loadDocs('en').map((doc) => ({ params: { slug: doc.slug }, props: { doc } }));
 }
 
 const { doc } = Astro.props;
+const pageTitle = displayBriefTitle(doc.meta.title);
 const body = doc.meta.page_type === 'brief'
   ? doc.body.replace(/\n\*\*Date\*\*:\s*\d{4}-\d{2}-\d{2}\n\n/, '\n')
   : doc.body;
 ---
-<BaseLayout lang="en" title={doc.meta.title} description={doc.meta.summary}>
+<BaseLayout lang="en" title={pageTitle} description={doc.meta.summary}>
   <article class="prose">
     <div class="article-meta">
       <span>{doc.meta.date}</span>
-      <span>{doc.meta.page_type === 'sources' ? 'source log' : 'daily brief'}</span>
-      {doc.meta.brief_page && <a href={doc.meta.brief_page}>brief</a>}
-      {doc.meta.sources_page && <a href={doc.meta.sources_page}>sources and scoring</a>}
+      <span>daily brief</span>
     </div>
     <Fragment set:html={markdownToHtml(body)} />
   </article>

@@ -161,8 +161,15 @@ jobs:
 
       - name: Commit generated content
         id: commit
+        env:
+          MODE_INPUT: ${{ github.event.inputs.mode || github.event.client_payload.mode || 'real' }}
         run: |
           set -euo pipefail
+          if [ "${MODE_INPUT:-real}" = "mock" ]; then
+            echo "Mock mode is validation-only; generated demo content will not be committed or published."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           git config user.name "ai-brief-bot"
           git config user.email "ai-brief-bot@example.com"
           git add data apps/web/public

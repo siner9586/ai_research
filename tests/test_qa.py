@@ -8,9 +8,15 @@ from ai_research_brief.pipeline.run_daily import run_daily
 
 def test_qa_report_passes_mock_content(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "mock")
-    run_daily(date(2026, 6, 3), mock=True)
-    report = run_qa(date(2026, 6, 3), REPO_ROOT / "data/content", REPO_ROOT / "data/reports/qa")
+    result = run_daily(date(2026, 6, 3), mock=True)
+    report = run_qa(
+        date.fromisoformat(result["actual_date"]),
+        REPO_ROOT / "data/content",
+        REPO_ROOT / "data/reports/qa",
+        target_date=date.fromisoformat(result["target_date"]),
+        publish_date=date.fromisoformat(result["publish_date"]),
+    )
     assert report.passed is True
     assert report.errors == []
-    payload = json.loads((REPO_ROOT / "data/reports/qa/2026-06-03.json").read_text(encoding="utf-8"))
+    payload = json.loads((REPO_ROOT / "data" / "reports" / "qa" / f"{result['publish_date']}.json").read_text(encoding="utf-8"))
     assert payload["passed"] is True

@@ -49,10 +49,10 @@ class MockLLMProvider(LLMProvider):
             focus = _focus(title, abstract, lang)
             if lang == "zh":
                 payload = {
-                    "why_it_matters": f"重点在于：{focus}。摘要给出的直接线索是：{sentence}",
-                    "problem": f"它要解决的问题可以理解为：在真实研究或工程场景中，{focus}仍不稳定、不透明或成本较高。",
-                    "method": "方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。",
-                    "practitioner_takeaway": "从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。",
+                    "why_it_matters": f"{focus}。摘要显示：{sentence}",
+                    "problem": f"{focus}在真实研究或工程场景中仍不稳定、不透明或成本较高。",
+                    "method": "重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。",
+                    "practitioner_takeaway": "任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。",
                     "limitations": "当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。",
                     "bullets": [
                         f"一句话：{focus}。",
@@ -62,10 +62,10 @@ class MockLLMProvider(LLMProvider):
                 }
             else:
                 payload = {
-                    "why_it_matters": f"Core idea: {focus}. The abstract signal is: {sentence}",
-                    "problem": f"The paper targets a concrete bottleneck: {focus} is still unreliable, opaque, costly, or hard to evaluate in real workflows.",
-                    "method": "The method note is constrained to the title, abstract, and public metadata; check how the paper sets up data, evaluation, training, or systems design before trusting the claim.",
-                    "practitioner_takeaway": "First check whether code or data exist, whether the evaluation matches real use, and whether the idea can transfer into your model, RAG, agent, or deployment stack.",
+                    "why_it_matters": f"{focus}. The abstract points to: {sentence}",
+                    "problem": f"{focus} remains unreliable, opaque, costly, or hard to evaluate in real workflows.",
+                    "method": "Check how the paper sets up data, evaluation, training, or systems design before trusting the claim.",
+                    "practitioner_takeaway": "the task setup is realistic, code or data are available, the evaluation covers complex scenarios, and the conclusion can transfer into real systems.",
                     "limitations": "This is an arXiv preprint triage note, not peer-reviewed validation or production evidence.",
                     "bullets": [
                         f"One-line read: {focus}.",

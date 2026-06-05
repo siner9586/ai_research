@@ -21,6 +21,32 @@ PEER_REVIEW_PATTERNS = [
     r"accepted by\s+(NeurIPS|ICML|ICLR|ACL|CVPR|EMNLP)",
     r"被\s*(NeurIPS|ICML|ICLR|ACL|CVPR|EMNLP)\s*接收",
 ]
+USER_VISIBLE_FORBIDDEN_PATTERNS = [
+    r"每日\s*07:12\s*更新",
+    r"Daily\s+07:12",
+    r"T\+2\s+ARXIV",
+    r"T\+2\s+arXiv",
+    r"流水线状态",
+    r"Pipeline status",
+    r"已发布简报",
+    r"published briefs",
+    r"累计候选论文",
+    r"total candidates",
+    r"平均候选/期",
+    r"avg candidates/issue",
+    r"来源与评分",
+    r"sources and scoring",
+    r"完整候选池与评分",
+    r"full candidate pool and scoring",
+    r"完整候选评分",
+    r"Full candidate scores",
+    r"今日重点[:：]",
+    r"Today's focus:",
+    r"关注理由[:：]\s*重点在于",
+    r"摘要给出的直接线索是",
+    r"The abstract signal is",
+    r"\bscore\s+\d+\b",
+]
 
 
 def run_qa(
@@ -126,8 +152,11 @@ def _check_markdown_doc(
         errors.append(f"Slug/path mismatch: {path}")
     if not re.search(r"https://arxiv\.org/abs/\d{4}\.\d{4,5}", body):
         warnings.append(f"No arXiv URL found: {path}")
-    if str(meta.get("page_type")) == "sources" and "Score breakdown:" not in body:
-        errors.append(f"Sources page lacks score breakdown: {path}")
+    if str(meta.get("page_type")) == "brief":
+        visible_text = "\n".join([str(meta.get("title", "")), str(meta.get("summary", "")), body])
+        for pattern in USER_VISIBLE_FORBIDDEN_PATTERNS:
+            if re.search(pattern, visible_text, re.I):
+                errors.append(f"User-visible deprecated wording matched {pattern}: {path}")
     for pattern in FORBIDDEN_PATTERNS:
         if re.search(pattern, body, re.I):
             errors.append(f"Forbidden wording matched {pattern}: {path}")

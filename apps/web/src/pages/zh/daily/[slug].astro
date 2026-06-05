@@ -16,9 +16,7 @@ const body = doc.meta.page_type === 'brief'
   <article class="prose">
     <div class="article-meta">
       <span>{doc.meta.date}</span>
-      <span>{doc.meta.page_type === 'sources' ? '来源页' : '每日简报'}</span>
-      {doc.meta.brief_page && <a href={doc.meta.brief_page}>返回简报</a>}
-      {doc.meta.sources_page && <a href={doc.meta.sources_page}>来源与评分</a>}
+      <span>每日简报</span>
     </div>
     <Fragment set:html={markdownToHtml(body)} />
   </article>

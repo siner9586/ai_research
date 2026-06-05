@@ -1,16 +1,16 @@
 ---
 title: "增强多模态模型理解图表和文档的能力、让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性"
-date: "2026-06-02"
-target_date: "2026-06-02"
+date: "2026-06-03"
+target_date: "2026-06-03"
 actual_date: "2026-06-02"
-fallback_from: ""
+fallback_from: "2026-06-03"
 lang: "zh"
-slug: "2026-06-02-koda-contrastive-representation-comparison-and-alignment-for"
+slug: "2026-06-03-koda-contrastive-representation-comparison-and-alignment-for"
 summary: "今天主要跟进：增强多模态模型理解图表和文档的能力、让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性。"
 tags: ["agents", "data-engineering", "evaluation", "multimodal", "rag", "reasoning", "safety", "systems", "training"]
 topics: ["agents", "data-engineering", "evaluation", "multimodal", "rag", "reasoning", "safety", "systems", "training"]
-sources_page: "/zh/daily/2026-06-02-koda-contrastive-representation-comparison-and-alignment-for-sources/"
-generated_at: "2026-06-05T16:22:26.840534+00:00"
+sources_page: "/zh/daily/2026-06-03-koda-contrastive-representation-comparison-and-alignment-for-sources/"
+generated_at: "2026-06-05T16:22:27.853890+00:00"
 page_type: "brief"
 candidate_count: 264
 featured_count: 5

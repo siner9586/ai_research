@@ -1,1073 +1,242 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0"><channel><title>AI 研究简报</title><link>https://aici.ccwu.cc/zh/</link><description>自动采集、评分、分层入选并生成中英双语简报，保留每期候选论文与评分理由。</description><item><title>今日重点：让 Agent 更可靠地调用工具和复用技能；另含增强多模态模型理解图表和文档的能力、提升模型推理、规划和验证能力</title><link>https://aici.ccwu.cc/zh/daily/2026-06-07-self-evolving-agents-for-tool-use-skills/</link><guid>https://aici.ccwu.cc/zh/daily/2026-06-07-self-evolving-agents-for-tool-use-skills/</guid><description>本期从 18 篇候选论文中筛出 6 篇重点论文和 12 篇补充关注论文。重点不是泛泛列主题，而是围绕：让 Agent 更可靠地调用工具和复用技能、增强多模态模型理解图表和文档的能力、提升模型推理、规划和验证能力。</description><pubDate>Sun, 07 Jun 2026 00:00:00 +0000</pubDate><language>zh</language><content>
-# 今日重点：让 Agent 更可靠地调用工具和复用技能；另含增强多模态模型理解图表和文档的能力、提升模型推理、规划和验证能力
-
-**日期**: 2026-06-07
-
-## 一眼看懂本期
-
-本期从 18 篇候选论文中筛出 6 篇重点论文和 12 篇补充关注论文。重点不是泛泛列主题，而是围绕：让 Agent 更可靠地调用工具和复用技能、增强多模态模型理解图表和文档的能力、提升模型推理、规划和验证能力。
+<rss version="2.0"><channel><title>AI 研究简报</title><link>https://aici.ccwu.cc/zh/</link><description>自动采集、排序并生成轻量中英双语 AI 论文简报。</description><item><title>增强多模态模型理解图表和文档的能力、让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性</title><link>https://aici.ccwu.cc/zh/daily/2026-06-05-koda-contrastive-representation-comparison-and-alignment-for/</link><guid>https://aici.ccwu.cc/zh/daily/2026-06-05-koda-contrastive-representation-comparison-and-alignment-for/</guid><description>今天主要跟进：增强多模态模型理解图表和文档的能力、让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性。</description><pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate><language>zh</language><content>
+# 增强多模态模型理解图表和文档的能力、让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性
 
 ## 今天最值得跟进的方向
 
-今天的高分论文主要指向：让 Agent 更可靠地调用工具和复用技能、增强多模态模型理解图表和文档的能力、提升模型推理、规划和验证能力。建议先看每篇的原文链接、摘要、评测设置和代码/数据是否可用，再决定是否深入复现。
+今天的高分论文主要指向：增强多模态模型理解图表和文档的能力、让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性。建议先看每篇的原文链接、摘要、评测设置和代码/数据是否可用，再决定是否深入复现。
 
 ## 重点论文：题目、看点与核验线索
 
-### 1. 让 Agent 更可靠地调用工具和复用技能
+### 1. 增强多模态模型理解图表和文档的能力
 
-- 原始论文标题: Self Evolving Agents for Tool Use Skills
-- 作者/机构: Alice Chen, Bob Smith
-- 归类: Agent 与工具调用
-- arXiv: [2606.00001](https://arxiv.org/abs/2606.00001)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00001)
-- 一句话看点: 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：Agents learn reusable tool use skills through iterative self improvement, unit tests, execution feedback, and evaluation.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，让 Agent 更可靠地调用工具和复用技能仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：让 Agent 更可靠地调用工具和复用技能。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;KODA: Contrastive Representation Comparison and Alignment for Vision-Language Foundation Models (Youqi Wu, Mohammad Jalali, Farzan Farnia)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.04180"&gt;2606.04180&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.04180"&gt;PDF&lt;/a&gt;&lt;/p&gt;
 
-### 2. 增强多模态模型理解图表和文档的能力
-
-- 原始论文标题: Multimodal Safety Evaluation for Vision Language Models
-- 作者/机构: Eva Green
-- 归类: 安全与对齐
-- arXiv: [2606.00004](https://arxiv.org/abs/2606.00004)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00004)
-- 一句话看点: 重点在于：强化多模态模型对图表、文档和视觉信息的理解。摘要给出的直接线索是：A safety evaluation suite measures multimodal models across risky visual prompts, jailbreak attempts, and alignment failures.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，强化多模态模型对图表、文档和视觉信息的理解仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：强化多模态模型对图表、文档和视觉信息的理解。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
-
-### 3. 提升模型推理、规划和验证能力
-
-- 原始论文标题: Efficient Long Context Inference with Cache Compression
-- 作者/机构: Carol Li
-- 归类: 系统与部署
-- arXiv: [2606.00002](https://arxiv.org/abs/2606.00002)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00002)
-- 一句话看点: 重点在于：改进模型推理、规划或验证过程。摘要给出的直接线索是：A systems method reduces memory and latency during long context model inference while preserving code reasoning accuracy.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，改进模型推理、规划或验证过程仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：改进模型推理、规划或验证过程。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
-
-### 4. 提升 RAG 检索和知识库问答可靠性
-
-- 原始论文标题: RAG Evaluation under Noisy Retrieval
-- 作者/机构: Dan Wang
-- 归类: 基准与评测
-- arXiv: [2606.00003](https://arxiv.org/abs/2606.00003)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00003)
-- 一句话看点: 重点在于：提升检索增强生成和知识库问答的可靠性。摘要给出的直接线索是：A benchmark studies retrieval augmented generation reliability under noisy evidence, missing citations, and adversarial documents.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，提升检索增强生成和知识库问答的可靠性仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：提升检索增强生成和知识库问答的可靠性。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
-
-### 5. 提升代码生成、执行反馈和自动修复能力
-
-- 原始论文标题: Code Model Repair with Execution Feedback
-- 作者/机构: Frank Moore
-- 归类: 代码智能
-- arXiv: [2606.00005](https://arxiv.org/abs/2606.00005)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00005)
-- 一句话看点: 重点在于：提升代码生成、执行反馈和自动修复能力。摘要给出的直接线索是：Code models improve patch generation through execution feedback loops, repository tests, and API-aware repair.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，提升代码生成、执行反馈和自动修复能力仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：提升代码生成、执行反馈和自动修复能力。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
-
-### 6. 改进训练数据筛选、合成和去重流程
-
-- 原始论文标题: Synthetic Data Curation for Post Training
-- 作者/机构: Henry Liu
-- 归类: 数据工程
-- arXiv: [2606.00007](https://arxiv.org/abs/2606.00007)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00007)
-- 一句话看点: 重点在于：改进训练数据筛选、合成和去重流程。摘要给出的直接线索是：A data pipeline selects synthetic instruction data for fine-tuning and post-training with quality filters.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，改进训练数据筛选、合成和去重流程仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：改进训练数据筛选、合成和去重流程。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
-
-## 其他值得关注
-- [让 Agent 更可靠地调用工具和复用技能](https://arxiv.org/abs/2606.00012) - Agent 与工具调用，score 6。关注理由： 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：Post-training with preference optimization reduces harmful tool calls and improves auditability.
-- [识别并缓解模型安全、越狱和对齐风险](https://arxiv.org/abs/2606.00017) - 安全与对齐，score 6。关注理由： 重点在于：发现并缓解模型安全、越狱和对齐风险。摘要给出的直接线索是：A safety study evaluates jailbreak resistance, guardrail routing, and risk classification for open-source models.
-- [提升 RAG 检索和知识库问答可靠性](https://arxiv.org/abs/2606.00013) - 检索与 RAG，score 5。关注理由： 重点在于：提升检索增强生成和知识库问答的可靠性。摘要给出的直接线索是：A retrieval architecture routes queries to native database, graph, and vector indexes instead of flattening all sources.
-- [增强多模态模型理解图表和文档的能力](https://arxiv.org/abs/2606.00014) - 多模态模型，score 5。关注理由： 重点在于：强化多模态模型对图表、文档和视觉信息的理解。摘要给出的直接线索是：A vision-language benchmark measures chart, table, and document understanding in multimodal models.
-- [让 Agent 更可靠地调用工具和复用技能](https://arxiv.org/abs/2606.00015) - Agent 与工具调用，score 5。关注理由： 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：A code intelligence benchmark tests agents that generate executable scripts for procedural 3D modeling.
-- [跟进训练与后训练中的高分研究线索](https://arxiv.org/abs/2606.00018) - 训练与后训练，score 5。关注理由： 重点在于：提供一个值得进一步核验的 AI 研究方向。摘要给出的直接线索是：A training analysis uses LoRA adapters to estimate memorization capacity and decide when full fine-tuning is needed.
-- [解释模型内部表征和行为归因](https://arxiv.org/abs/2606.00008) - 可解释性，score 4。关注理由： 重点在于：解释模型内部表征和行为归因。摘要给出的直接线索是：An interpretability method localizes representations involved in factual editing and model memory.
-- [改进图像生成、视觉理解和可控渲染](https://arxiv.org/abs/2606.00010) - 视频生成，score 4。关注理由： 重点在于：改进图像生成、视觉理解或可控渲染。摘要给出的直接线索是：A video generation evaluation suite probes temporal consistency, motion realism, and causal order.
-- [用新基准和评测方法暴露模型短板](https://arxiv.org/abs/2606.00016) - Agent 与工具调用，score 4。关注理由： 重点在于：用新基准或评测方法暴露模型短板。摘要给出的直接线索是：A data engineering workflow removes near duplicates and measures downstream benchmark contamination.
-- [提升模型推理、规划和验证能力](https://arxiv.org/abs/2606.00006) - 机器人与具身智能，score 3。关注理由： 重点在于：改进模型推理、规划或验证过程。摘要给出的直接线索是：Embodied robot policies use memory, visual observations, and planning to improve manipulation and navigation.
-- [让 Agent 更可靠地调用工具和复用技能](https://arxiv.org/abs/2606.00009) - Agent 与工具调用，score 2。关注理由： 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：A benchmark evaluates speech and audio agents that call tools, transcribe speech, and reason over sound.
-- [降低推理成本并提升部署效率](https://arxiv.org/abs/2606.00011) - 系统与部署，score 2。关注理由： 重点在于：降低推理成本并提升部署效率。摘要给出的直接线索是：A deployment system improves throughput for quantized language models using adaptive batching and cache-aware scheduling.
-
-## 今日关键词
-
-agent, agents, alignment, api, attribution, benchmark, cache, chart, code, compression, curation, data, database, deployment
-
-## 来源页链接
-
-完整候选池、评分规则摘要和每篇 score breakdown 见 [来源透明页](/zh/daily/2026-06-07-self-evolving-agents-for-tool-use-skills-sources/)。
-
-## 阅读边界
-- 自动评分会偏向有社区信号、代码信号和工程关键词的论文。
-- 简报默认基于标题、摘要和公开元数据，不替代全文精读。
-- 外部 API 限流或不可用时，相关信号会降级为空并在来源页保留说明。
-</content></item><item><title>今日重点：让 Agent 更可靠地调用工具和复用技能；另含提升 RAG 检索和知识库问答可靠性、增强多模态模型理解图表和文档的能力</title><link>https://aici.ccwu.cc/zh/daily/2026-06-05-self-evolving-agents-for-tool-use-skills/</link><guid>https://aici.ccwu.cc/zh/daily/2026-06-05-self-evolving-agents-for-tool-use-skills/</guid><description>本期从 18 篇候选论文中筛出 6 篇重点论文和 12 篇补充关注论文。重点不是泛泛列主题，而是围绕：让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性、增强多模态模型理解图表和文档的能力。</description><pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate><language>zh</language><content>
-# 今日重点：让 Agent 更可靠地调用工具和复用技能；另含提升 RAG 检索和知识库问答可靠性、增强多模态模型理解图表和文档的能力
-
-**日期**: 2026-06-05
-
-## 一眼看懂本期
-
-本期从 18 篇候选论文中筛出 6 篇重点论文和 12 篇补充关注论文。重点不是泛泛列主题，而是围绕：让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性、增强多模态模型理解图表和文档的能力。
-
-## 今天最值得跟进的方向
-
-今天的高分论文主要指向：让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性、增强多模态模型理解图表和文档的能力。建议先看每篇的原文链接、摘要、评测设置和代码/数据是否可用，再决定是否深入复现。
-
-## 重点论文：题目、看点与核验线索
-
-### 1. 让 Agent 更可靠地调用工具和复用技能
-
-- 原始论文标题: Self Evolving Agents for Tool Use Skills
-- 作者/机构: Alice Chen, Bob Smith
-- 归类: Agent 与工具调用
-- arXiv: [2606.00001](https://arxiv.org/abs/2606.00001)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00001)
-- 一句话看点: 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：Agents learn reusable tool use skills through iterative self improvement, unit tests, execution feedback, and evaluation.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，让 Agent 更可靠地调用工具和复用技能仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：让 Agent 更可靠地调用工具和复用技能。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
-
-### 2. 提升 RAG 检索和知识库问答可靠性
-
-- 原始论文标题: RAG Evaluation under Noisy Retrieval
-- 作者/机构: Dan Wang
-- 归类: 基准与评测
-- arXiv: [2606.00003](https://arxiv.org/abs/2606.00003)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00003)
-- 一句话看点: 重点在于：提升检索增强生成和知识库问答的可靠性。摘要给出的直接线索是：A benchmark studies retrieval augmented generation reliability under noisy evidence, missing citations, and adversarial documents.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，提升检索增强生成和知识库问答的可靠性仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：提升检索增强生成和知识库问答的可靠性。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
-
-### 3. 增强多模态模型理解图表和文档的能力
-
-- 原始论文标题: Multimodal Safety Evaluation for Vision Language Models
-- 作者/机构: Eva Green
-- 归类: 安全与对齐
-- arXiv: [2606.00004](https://arxiv.org/abs/2606.00004)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00004)
-- 一句话看点: 重点在于：强化多模态模型对图表、文档和视觉信息的理解。摘要给出的直接线索是：A safety evaluation suite measures multimodal models across risky visual prompts, jailbreak attempts, and alignment failures.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，强化多模态模型对图表、文档和视觉信息的理解仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：强化多模态模型对图表、文档和视觉信息的理解。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
-
-### 4. 提升模型推理、规划和验证能力
-
-- 原始论文标题: Efficient Long Context Inference with Cache Compression
-- 作者/机构: Carol Li
-- 归类: 系统与部署
-- arXiv: [2606.00002](https://arxiv.org/abs/2606.00002)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00002)
-- 一句话看点: 重点在于：改进模型推理、规划或验证过程。摘要给出的直接线索是：A systems method reduces memory and latency during long context model inference while preserving code reasoning accuracy.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，改进模型推理、规划或验证过程仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：改进模型推理、规划或验证过程。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
-
-### 5. 提升代码生成、执行反馈和自动修复能力
-
-- 原始论文标题: Code Model Repair with Execution Feedback
-- 作者/机构: Frank Moore
-- 归类: 代码智能
-- arXiv: [2606.00005](https://arxiv.org/abs/2606.00005)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00005)
-- 一句话看点: 重点在于：提升代码生成、执行反馈和自动修复能力。摘要给出的直接线索是：Code models improve patch generation through execution feedback loops, repository tests, and API-aware repair.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，提升代码生成、执行反馈和自动修复能力仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：提升代码生成、执行反馈和自动修复能力。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
-
-### 6. 改进训练数据筛选、合成和去重流程
-
-- 原始论文标题: Synthetic Data Curation for Post Training
-- 作者/机构: Henry Liu
-- 归类: 数据工程
-- arXiv: [2606.00007](https://arxiv.org/abs/2606.00007)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00007)
-- 一句话看点: 重点在于：改进训练数据筛选、合成和去重流程。摘要给出的直接线索是：A data pipeline selects synthetic instruction data for fine-tuning and post-training with quality filters.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，改进训练数据筛选、合成和去重流程仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：改进训练数据筛选、合成和去重流程。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
-
-## 其他值得关注
-- [识别并缓解模型安全、越狱和对齐风险](https://arxiv.org/abs/2606.00017) - 安全与对齐，score 14。关注理由： 重点在于：发现并缓解模型安全、越狱和对齐风险。摘要给出的直接线索是：A safety study evaluates jailbreak resistance, guardrail routing, and risk classification for open-source models.
-- [让 Agent 更可靠地调用工具和复用技能](https://arxiv.org/abs/2606.00012) - Agent 与工具调用，score 13。关注理由： 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：Post-training with preference optimization reduces harmful tool calls and improves auditability.
-- [提升 RAG 检索和知识库问答可靠性](https://arxiv.org/abs/2606.00013) - 检索与 RAG，score 12。关注理由： 重点在于：提升检索增强生成和知识库问答的可靠性。摘要给出的直接线索是：A retrieval architecture routes queries to native database, graph, and vector indexes instead of flattening all sources.
-- [让 Agent 更可靠地调用工具和复用技能](https://arxiv.org/abs/2606.00015) - Agent 与工具调用，score 12。关注理由： 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：A code intelligence benchmark tests agents that generate executable scripts for procedural 3D modeling.
-- [跟进训练与后训练中的高分研究线索](https://arxiv.org/abs/2606.00018) - 训练与后训练，score 12。关注理由： 重点在于：提供一个值得进一步核验的 AI 研究方向。摘要给出的直接线索是：A training analysis uses LoRA adapters to estimate memorization capacity and decide when full fine-tuning is needed.
-- [提升模型推理、规划和验证能力](https://arxiv.org/abs/2606.00006) - 机器人与具身智能，score 10。关注理由： 重点在于：改进模型推理、规划或验证过程。摘要给出的直接线索是：Embodied robot policies use memory, visual observations, and planning to improve manipulation and navigation.
-- [解释模型内部表征和行为归因](https://arxiv.org/abs/2606.00008) - 可解释性，score 10。关注理由： 重点在于：解释模型内部表征和行为归因。摘要给出的直接线索是：An interpretability method localizes representations involved in factual editing and model memory.
-- [增强多模态模型理解图表和文档的能力](https://arxiv.org/abs/2606.00014) - 多模态模型，score 10。关注理由： 重点在于：强化多模态模型对图表、文档和视觉信息的理解。摘要给出的直接线索是：A vision-language benchmark measures chart, table, and document understanding in multimodal models.
-- [改进图像生成、视觉理解和可控渲染](https://arxiv.org/abs/2606.00010) - 视频生成，score 9。关注理由： 重点在于：改进图像生成、视觉理解或可控渲染。摘要给出的直接线索是：A video generation evaluation suite probes temporal consistency, motion realism, and causal order.
-- [降低推理成本并提升部署效率](https://arxiv.org/abs/2606.00011) - 系统与部署，score 9。关注理由： 重点在于：降低推理成本并提升部署效率。摘要给出的直接线索是：A deployment system improves throughput for quantized language models using adaptive batching and cache-aware scheduling.
-- [用新基准和评测方法暴露模型短板](https://arxiv.org/abs/2606.00016) - Agent 与工具调用，score 7。关注理由： 重点在于：用新基准或评测方法暴露模型短板。摘要给出的直接线索是：A data engineering workflow removes near duplicates and measures downstream benchmark contamination.
-- [让 Agent 更可靠地调用工具和复用技能](https://arxiv.org/abs/2606.00009) - Agent 与工具调用，score 5。关注理由： 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：A benchmark evaluates speech and audio agents that call tools, transcribe speech, and reason over sound.
-
-## 今日关键词
-
-agent, agents, alignment, api, attribution, benchmark, cache, chart, code, compression, curation, data, database, deployment
-
-## 来源页链接
-
-完整候选池、评分规则摘要和每篇 score breakdown 见 [来源透明页](/zh/daily/2026-06-05-self-evolving-agents-for-tool-use-skills-sources/)。
-
-## 阅读边界
-- 自动评分会偏向有社区信号、代码信号和工程关键词的论文。
-- 简报默认基于标题、摘要和公开元数据，不替代全文精读。
-- 外部 API 限流或不可用时，相关信号会降级为空并在来源页保留说明。
-</content></item><item><title>今日重点：让 Agent 更可靠地调用工具和复用技能；另含让 Agent 更可靠地调用工具和复用技能、让 Agent 更可靠地调用工具和复用技能</title><link>https://aici.ccwu.cc/zh/daily/2026-06-05-r-aps-compositional-reasoning-and-in-context/</link><guid>https://aici.ccwu.cc/zh/daily/2026-06-05-r-aps-compositional-reasoning-and-in-context/</guid><description>本期从 10 篇候选论文中筛出 5 篇重点论文和 5 篇补充关注论文。重点不是泛泛列主题，而是围绕：让 Agent 更可靠地调用工具和复用技能、让 Agent 更可靠地调用工具和复用技能、让 Agent 更可靠地调用工具和复用技能。</description><pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate><language>zh</language><content>
-# 今日重点：让 Agent 更可靠地调用工具和复用技能；另含让 Agent 更可靠地调用工具和复用技能、让 Agent 更可靠地调用工具和复用技能
-
-**日期**: 2026-06-05
-
-## 一眼看懂本期
-
-本期从 10 篇候选论文中筛出 5 篇重点论文和 5 篇补充关注论文。重点不是泛泛列主题，而是围绕：让 Agent 更可靠地调用工具和复用技能、让 Agent 更可靠地调用工具和复用技能、让 Agent 更可靠地调用工具和复用技能。
-
-## 今天最值得跟进的方向
-
-今天的高分论文主要指向：让 Agent 更可靠地调用工具和复用技能、让 Agent 更可靠地调用工具和复用技能、让 Agent 更可靠地调用工具和复用技能。建议先看每篇的原文链接、摘要、评测设置和代码/数据是否可用，再决定是否深入复现。
-
-## 重点论文：题目、看点与核验线索
-
-### 1. 让 Agent 更可靠地调用工具和复用技能
-
-- 原始论文标题: R-APS: Compositional Reasoning and In-Context Meta-Learning for Constrained Design via Reflective Adversarial Pareto Search
-- 作者/机构: João Pedro Gandarela, Thiago Rios, Stefan Menzel, André Freitas
-- 归类: Agent 与工具调用
-- arXiv: [2606.04823](https://arxiv.org/abs/2606.04823)
-- PDF: [PDF](https://arxiv.org/pdf/2606.04823)
-- 一句话看点: 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：Large language models (LLMs) are fluent on open-ended tasks, yet in agentic settings, where a system must plan, use tools, and act over extended horizons, fluency does not ensure reliable delivery.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，让 Agent 更可靠地调用工具和复用技能仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：让 Agent 更可靠地调用工具和复用技能。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
+增强多模态模型理解图表和文档的能力。摘要显示：Vision-language foundation models such as CLIP and SigLIP provide widely used representations for multimodal learning systems. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
 
 ### 2. 让 Agent 更可靠地调用工具和复用技能
 
-- 原始论文标题: Organizational Control Layer: Governance Infrastructure at the Execution Boundary of LLM Agent Systems
-- 作者/机构: Tianyu Shi, Yang Mo, Yiou Liu, Zhuonan Hao, Yin Wang, Wenzhuo Hu, Nan Yu, Meng Zhou, Jiangbo Yu
-- 归类: Agent 与工具调用
-- arXiv: [2606.04306](https://arxiv.org/abs/2606.04306)
-- PDF: [PDF](https://arxiv.org/pdf/2606.04306)
-- 一句话看点: 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：LLM-based agents are increasingly deployed in workflows where generated outputs may directly trigger state-changing actions.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，让 Agent 更可靠地调用工具和复用技能仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：让 Agent 更可靠地调用工具和复用技能。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;The Impact of Configuring Agentic AI Coding Tools on Build-vs-Buy Decisions: A Study Protocol (Jai Lal Lulla, Matthias Galster, Jie M. Zhang, Sebastian Baltes, Christoph Treude)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.03907"&gt;2606.03907&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.03907"&gt;PDF&lt;/a&gt;&lt;/p&gt;
 
-### 3. 让 Agent 更可靠地调用工具和复用技能
+让 Agent 更可靠地调用工具和复用技能。摘要显示：Agentic AI coding tools write code with increasing autonomy and in doing so decide when to import a library and when to implement functionality from scratch. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
 
-- 原始论文标题: Provably Auditable and Safe LLM Agents from Human-Authored Ontologies
-- 作者/机构: Aaron Sterling
-- 归类: Agent 与工具调用
-- arXiv: [2606.04903](https://arxiv.org/abs/2606.04903)
-- PDF: [PDF](https://arxiv.org/pdf/2606.04903)
-- 一句话看点: 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：We introduce the LLM agent architecture Agentic Redux, intended for use with nontrivial problem domains that require linear auditability.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，让 Agent 更可靠地调用工具和复用技能仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：让 Agent 更可靠地调用工具和复用技能。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
+### 3. 提升 RAG 检索和知识库问答可靠性
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;Automating Information Extraction and Retrieval for Industrial Spare Parts Pooling (Dyuman Bulloni, Rocco Felici, Oliver Avram, Anna Valente)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.03367"&gt;2606.03367&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.03367"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+提升 RAG 检索和知识库问答可靠性。摘要显示：Maintenance organizations in manufacturing try to avoid downtime and unnecessary purchasing by reusing existing assets, but the main obstacle is not a lack of parts but a lack of actionable visibility across sites and partners. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
+
+### 4. 提升 RAG 检索和知识库问答可靠性
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;Stationarity-Aware Retrieval-Augmented Time Series Forecasting (Shiqiao Zhou, Holger Schöner, Zipeng Wu, Edouard Fouché, IAG Wilson, Shuo Wang)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.04135"&gt;2606.04135&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.04135"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+提升 RAG 检索和知识库问答可靠性。摘要显示：Time series forecasting relies on historical patterns, but real-world series often exhibit non-stationarity and regime shifts that challenge fully parametric forecasters. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
+
+### 5. 让 Agent 更可靠地调用工具和复用技能
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;Entropy Gate: Entropy Quenching for Near-Lossless Token Compression in LLM Pipelines (Justice Owusu Agyemang, Jerry John Kponyo, Kwame Opuni-Boachie Obour Agyekum, Francisca Adoma Acheampong, Kwame Agyeman-Prempeh Agyekum, James Dzisi Gadze)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.03739"&gt;2606.03739&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.03739"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+让 Agent 更可靠地调用工具和复用技能。摘要显示：LLM pipelines waste substantial token budgets on low-information content: repeated context, verbose responses, and redundant boilerplate. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
+
+## 其他值得关注
+- [VLESA: Vision-Language Embodied Safety Agent for Human Activity Monitoring](https://arxiv.org/abs/2606.03954)：关注模型安全、护栏路由、风险分类或治理评测，适合跟进安全评测与治理工具链。
+- [MM-BizRAG: Rethinking Multimodal Retrieval-Augmented Generation for General Purpose Enterprise Q&amp;A](https://arxiv.org/abs/2606.04231)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [MimeLens: Position-Agnostic Content-Type Detection for Binary Fragments](https://arxiv.org/abs/2606.04171)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [When Autoregressive Consistency Hurts Safety Alignment](https://arxiv.org/abs/2606.04168)：关注模型安全、护栏路由、风险分类或治理评测，适合跟进安全评测与治理工具链。
+- [End-to-End Text Line Detection and Ordering](https://arxiv.org/abs/2606.04166)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [Expert-Aware Refusal Steering](https://arxiv.org/abs/2606.04160)：关注模型安全、护栏路由、风险分类或治理评测，适合跟进安全评测与治理工具链。
+- [HighTide: An Agent-Curated Open-Source VLSI Benchmark Suite](https://arxiv.org/abs/2606.04126)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [UltraEP: Unleash MoE Training and Inference on Rack-Scale Nodes with Near-Optimal Load Balancing](https://arxiv.org/abs/2606.04101)：关注推理成本、延迟、吞吐和部署约束，适合跟进系统优化。
+- [MAOAM: Unified Object and Material Selection with Vision-Language Models](https://arxiv.org/abs/2606.04880)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [Skill-RM: Unifying Heterogeneous Evaluation Criteria via Agent Skill](https://arxiv.org/abs/2606.03980)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [Agentic Chain-of-Thought Steering for Efficient and Controllable LLM Reasoning](https://arxiv.org/abs/2606.03965)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [AgenticRL: Self-Refining Agentic Reinforcement Learning for Vision-Conditioned UAV Navigation](https://arxiv.org/abs/2606.03963)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [SEAOTTER: Sensor Embedded Autoencoding with One-Time Transcode for Efficient Reconstruction](https://arxiv.org/abs/2606.03940)：关注多模态模型中的新任务、数据或系统线索，适合快速判断是否值得阅读全文。
+- [Visual Instruction Tuning Aligns Modalities through Abstraction](https://arxiv.org/abs/2606.03871)：关注训练与后训练中的新任务、数据或系统线索，适合快速判断是否值得阅读全文。
+- [Leveraging BART to Assess CS1 C++ Programming Assignments using Rubric-based Criteria](https://arxiv.org/abs/2606.03814)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+
+## 阅读边界
+- 自动排序会偏向有社区信号、代码信号和工程关键词的论文。
+- 简报默认基于标题、摘要和公开元数据，不替代全文精读。
+- 外部 API 限流或不可用时，相关信号会降级为空并在内部记录中保留说明。
+</content></item><item><title>增强多模态模型理解图表和文档的能力、让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性</title><link>https://aici.ccwu.cc/zh/daily/2026-06-03-koda-contrastive-representation-comparison-and-alignment-for/</link><guid>https://aici.ccwu.cc/zh/daily/2026-06-03-koda-contrastive-representation-comparison-and-alignment-for/</guid><description>今天主要跟进：增强多模态模型理解图表和文档的能力、让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性。</description><pubDate>Wed, 03 Jun 2026 00:00:00 +0000</pubDate><language>zh</language><content>
+# 增强多模态模型理解图表和文档的能力、让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性
+
+## 今天最值得跟进的方向
+
+今天的高分论文主要指向：增强多模态模型理解图表和文档的能力、让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性。建议先看每篇的原文链接、摘要、评测设置和代码/数据是否可用，再决定是否深入复现。
+
+## 重点论文：题目、看点与核验线索
+
+### 1. 增强多模态模型理解图表和文档的能力
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;KODA: Contrastive Representation Comparison and Alignment for Vision-Language Foundation Models (Youqi Wu, Mohammad Jalali, Farzan Farnia)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.04180"&gt;2606.04180&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.04180"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+增强多模态模型理解图表和文档的能力。摘要显示：Vision-language foundation models such as CLIP and SigLIP provide widely used representations for multimodal learning systems. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
+
+### 2. 让 Agent 更可靠地调用工具和复用技能
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;The Impact of Configuring Agentic AI Coding Tools on Build-vs-Buy Decisions: A Study Protocol (Jai Lal Lulla, Matthias Galster, Jie M. Zhang, Sebastian Baltes, Christoph Treude)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.03907"&gt;2606.03907&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.03907"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+让 Agent 更可靠地调用工具和复用技能。摘要显示：Agentic AI coding tools write code with increasing autonomy and in doing so decide when to import a library and when to implement functionality from scratch. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
+
+### 3. 提升 RAG 检索和知识库问答可靠性
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;Automating Information Extraction and Retrieval for Industrial Spare Parts Pooling (Dyuman Bulloni, Rocco Felici, Oliver Avram, Anna Valente)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.03367"&gt;2606.03367&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.03367"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+提升 RAG 检索和知识库问答可靠性。摘要显示：Maintenance organizations in manufacturing try to avoid downtime and unnecessary purchasing by reusing existing assets, but the main obstacle is not a lack of parts but a lack of actionable visibility across sites and partners. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
+
+### 4. 提升 RAG 检索和知识库问答可靠性
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;Stationarity-Aware Retrieval-Augmented Time Series Forecasting (Shiqiao Zhou, Holger Schöner, Zipeng Wu, Edouard Fouché, IAG Wilson, Shuo Wang)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.04135"&gt;2606.04135&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.04135"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+提升 RAG 检索和知识库问答可靠性。摘要显示：Time series forecasting relies on historical patterns, but real-world series often exhibit non-stationarity and regime shifts that challenge fully parametric forecasters. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
+
+### 5. 让 Agent 更可靠地调用工具和复用技能
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;Entropy Gate: Entropy Quenching for Near-Lossless Token Compression in LLM Pipelines (Justice Owusu Agyemang, Jerry John Kponyo, Kwame Opuni-Boachie Obour Agyekum, Francisca Adoma Acheampong, Kwame Agyeman-Prempeh Agyekum, James Dzisi Gadze)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.03739"&gt;2606.03739&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.03739"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+让 Agent 更可靠地调用工具和复用技能。摘要显示：LLM pipelines waste substantial token budgets on low-information content: repeated context, verbose responses, and redundant boilerplate. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
+
+## 其他值得关注
+- [VLESA: Vision-Language Embodied Safety Agent for Human Activity Monitoring](https://arxiv.org/abs/2606.03954)：关注模型安全、护栏路由、风险分类或治理评测，适合跟进安全评测与治理工具链。
+- [MM-BizRAG: Rethinking Multimodal Retrieval-Augmented Generation for General Purpose Enterprise Q&amp;A](https://arxiv.org/abs/2606.04231)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [MimeLens: Position-Agnostic Content-Type Detection for Binary Fragments](https://arxiv.org/abs/2606.04171)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [When Autoregressive Consistency Hurts Safety Alignment](https://arxiv.org/abs/2606.04168)：关注模型安全、护栏路由、风险分类或治理评测，适合跟进安全评测与治理工具链。
+- [End-to-End Text Line Detection and Ordering](https://arxiv.org/abs/2606.04166)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [Expert-Aware Refusal Steering](https://arxiv.org/abs/2606.04160)：关注模型安全、护栏路由、风险分类或治理评测，适合跟进安全评测与治理工具链。
+- [HighTide: An Agent-Curated Open-Source VLSI Benchmark Suite](https://arxiv.org/abs/2606.04126)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [UltraEP: Unleash MoE Training and Inference on Rack-Scale Nodes with Near-Optimal Load Balancing](https://arxiv.org/abs/2606.04101)：关注推理成本、延迟、吞吐和部署约束，适合跟进系统优化。
+- [MAOAM: Unified Object and Material Selection with Vision-Language Models](https://arxiv.org/abs/2606.04880)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [Skill-RM: Unifying Heterogeneous Evaluation Criteria via Agent Skill](https://arxiv.org/abs/2606.03980)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [Agentic Chain-of-Thought Steering for Efficient and Controllable LLM Reasoning](https://arxiv.org/abs/2606.03965)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [AgenticRL: Self-Refining Agentic Reinforcement Learning for Vision-Conditioned UAV Navigation](https://arxiv.org/abs/2606.03963)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [SEAOTTER: Sensor Embedded Autoencoding with One-Time Transcode for Efficient Reconstruction](https://arxiv.org/abs/2606.03940)：关注多模态模型中的新任务、数据或系统线索，适合快速判断是否值得阅读全文。
+- [Visual Instruction Tuning Aligns Modalities through Abstraction](https://arxiv.org/abs/2606.03871)：关注训练与后训练中的新任务、数据或系统线索，适合快速判断是否值得阅读全文。
+- [Leveraging BART to Assess CS1 C++ Programming Assignments using Rubric-based Criteria](https://arxiv.org/abs/2606.03814)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+
+## 阅读边界
+- 自动排序会偏向有社区信号、代码信号和工程关键词的论文。
+- 简报默认基于标题、摘要和公开元数据，不替代全文精读。
+- 外部 API 限流或不可用时，相关信号会降级为空并在内部记录中保留说明。
+</content></item><item><title>增强多模态模型理解图表和文档的能力、让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性</title><link>https://aici.ccwu.cc/zh/daily/2026-06-02-koda-contrastive-representation-comparison-and-alignment-for/</link><guid>https://aici.ccwu.cc/zh/daily/2026-06-02-koda-contrastive-representation-comparison-and-alignment-for/</guid><description>今天主要跟进：增强多模态模型理解图表和文档的能力、让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性。</description><pubDate>Tue, 02 Jun 2026 00:00:00 +0000</pubDate><language>zh</language><content>
+# 增强多模态模型理解图表和文档的能力、让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性
+
+## 今天最值得跟进的方向
+
+今天的高分论文主要指向：增强多模态模型理解图表和文档的能力、让 Agent 更可靠地调用工具和复用技能、提升 RAG 检索和知识库问答可靠性。建议先看每篇的原文链接、摘要、评测设置和代码/数据是否可用，再决定是否深入复现。
+
+## 重点论文：题目、看点与核验线索
+
+### 1. 增强多模态模型理解图表和文档的能力
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;KODA: Contrastive Representation Comparison and Alignment for Vision-Language Foundation Models (Youqi Wu, Mohammad Jalali, Farzan Farnia)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.04180"&gt;2606.04180&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.04180"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+增强多模态模型理解图表和文档的能力。摘要显示：Vision-language foundation models such as CLIP and SigLIP provide widely used representations for multimodal learning systems. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
+
+### 2. 让 Agent 更可靠地调用工具和复用技能
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;The Impact of Configuring Agentic AI Coding Tools on Build-vs-Buy Decisions: A Study Protocol (Jai Lal Lulla, Matthias Galster, Jie M. Zhang, Sebastian Baltes, Christoph Treude)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.03907"&gt;2606.03907&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.03907"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+让 Agent 更可靠地调用工具和复用技能。摘要显示：Agentic AI coding tools write code with increasing autonomy and in doing so decide when to import a library and when to implement functionality from scratch. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
+
+### 3. 提升 RAG 检索和知识库问答可靠性
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;Automating Information Extraction and Retrieval for Industrial Spare Parts Pooling (Dyuman Bulloni, Rocco Felici, Oliver Avram, Anna Valente)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.03367"&gt;2606.03367&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.03367"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+提升 RAG 检索和知识库问答可靠性。摘要显示：Maintenance organizations in manufacturing try to avoid downtime and unnecessary purchasing by reusing existing assets, but the main obstacle is not a lack of parts but a lack of actionable visibility across sites and partners. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
+
+### 4. 提升 RAG 检索和知识库问答可靠性
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;Stationarity-Aware Retrieval-Augmented Time Series Forecasting (Shiqiao Zhou, Holger Schöner, Zipeng Wu, Edouard Fouché, IAG Wilson, Shuo Wang)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.04135"&gt;2606.04135&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.04135"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+提升 RAG 检索和知识库问答可靠性。摘要显示：Time series forecasting relies on historical patterns, but real-world series often exhibit non-stationarity and regime shifts that challenge fully parametric forecasters. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
+
+### 5. 让 Agent 更可靠地调用工具和复用技能
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;Entropy Gate: Entropy Quenching for Near-Lossless Token Compression in LLM Pipelines (Justice Owusu Agyemang, Jerry John Kponyo, Kwame Opuni-Boachie Obour Agyekum, Francisca Adoma Acheampong, Kwame Agyeman-Prempeh Agyekum, James Dzisi Gadze)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.03739"&gt;2606.03739&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.03739"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+让 Agent 更可靠地调用工具和复用技能。摘要显示：LLM pipelines waste substantial token budgets on low-information content: repeated context, verbose responses, and redundant boilerplate. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
+
+## 其他值得关注
+- [VLESA: Vision-Language Embodied Safety Agent for Human Activity Monitoring](https://arxiv.org/abs/2606.03954)：关注模型安全、护栏路由、风险分类或治理评测，适合跟进安全评测与治理工具链。
+- [MM-BizRAG: Rethinking Multimodal Retrieval-Augmented Generation for General Purpose Enterprise Q&amp;A](https://arxiv.org/abs/2606.04231)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [MimeLens: Position-Agnostic Content-Type Detection for Binary Fragments](https://arxiv.org/abs/2606.04171)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [When Autoregressive Consistency Hurts Safety Alignment](https://arxiv.org/abs/2606.04168)：关注模型安全、护栏路由、风险分类或治理评测，适合跟进安全评测与治理工具链。
+- [End-to-End Text Line Detection and Ordering](https://arxiv.org/abs/2606.04166)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [Expert-Aware Refusal Steering](https://arxiv.org/abs/2606.04160)：关注模型安全、护栏路由、风险分类或治理评测，适合跟进安全评测与治理工具链。
+- [HighTide: An Agent-Curated Open-Source VLSI Benchmark Suite](https://arxiv.org/abs/2606.04126)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [UltraEP: Unleash MoE Training and Inference on Rack-Scale Nodes with Near-Optimal Load Balancing](https://arxiv.org/abs/2606.04101)：关注推理成本、延迟、吞吐和部署约束，适合跟进系统优化。
+- [MAOAM: Unified Object and Material Selection with Vision-Language Models](https://arxiv.org/abs/2606.04880)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [Skill-RM: Unifying Heterogeneous Evaluation Criteria via Agent Skill](https://arxiv.org/abs/2606.03980)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [Agentic Chain-of-Thought Steering for Efficient and Controllable LLM Reasoning](https://arxiv.org/abs/2606.03965)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [AgenticRL: Self-Refining Agentic Reinforcement Learning for Vision-Conditioned UAV Navigation](https://arxiv.org/abs/2606.03963)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [SEAOTTER: Sensor Embedded Autoencoding with One-Time Transcode for Efficient Reconstruction](https://arxiv.org/abs/2606.03940)：关注多模态模型中的新任务、数据或系统线索，适合快速判断是否值得阅读全文。
+- [Visual Instruction Tuning Aligns Modalities through Abstraction](https://arxiv.org/abs/2606.03871)：关注训练与后训练中的新任务、数据或系统线索，适合快速判断是否值得阅读全文。
+- [Leveraging BART to Assess CS1 C++ Programming Assignments using Rubric-based Criteria](https://arxiv.org/abs/2606.03814)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+
+## 阅读边界
+- 自动排序会偏向有社区信号、代码信号和工程关键词的论文。
+- 简报默认基于标题、摘要和公开元数据，不替代全文精读。
+- 外部 API 限流或不可用时，相关信号会降级为空并在内部记录中保留说明。
+</content></item><item><title>让 Agent 更可靠地调用工具和复用技能、识别并缓解模型安全、越狱和对齐风险</title><link>https://aici.ccwu.cc/zh/daily/2026-06-01-cosmos-3-omnimodal-world-models-for-physical/</link><guid>https://aici.ccwu.cc/zh/daily/2026-06-01-cosmos-3-omnimodal-world-models-for-physical/</guid><description>今天主要跟进：让 Agent 更可靠地调用工具和复用技能、让 Agent 更可靠地调用工具和复用技能、识别并缓解模型安全、越狱和对齐风险。</description><pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate><language>zh</language><content>
+# 让 Agent 更可靠地调用工具和复用技能、识别并缓解模型安全、越狱和对齐风险
+
+## 今天最值得跟进的方向
+
+今天的高分论文主要指向：让 Agent 更可靠地调用工具和复用技能、让 Agent 更可靠地调用工具和复用技能、识别并缓解模型安全、越狱和对齐风险。建议先看每篇的原文链接、摘要、评测设置和代码/数据是否可用，再决定是否深入复现。
+
+## 重点论文：题目、看点与核验线索
+
+### 1. 让 Agent 更可靠地调用工具和复用技能
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;Cosmos 3: Omnimodal World Models for Physical AI (Aditi, Niket Agarwal, Arslan Ali, Jon Allen, Martin Antolini, Adeline Aubame, et al.)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.02800"&gt;2606.02800&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.02800"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+让 Agent 更可靠地调用工具和复用技能。摘要显示：We introduce Cosmos 3, a family of omnimodal world models designed to jointly process and generate language, image, video, audio, and action sequences within a unified mixture-of-transformers architecture. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
+
+### 2. 让 Agent 更可靠地调用工具和复用技能
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;Thinking Past the Answer: Evaluating Harmful Overthinking in Large Reasoning Models (Simone Caldarella, Davide Talon, Rahaf Aljundi, Elisa Ricci, Massimiliano Mancini)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.02835"&gt;2606.02835&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.02835"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+让 Agent 更可靠地调用工具和复用技能。摘要显示：Large Reasoning Models (LRMs) improve performance by generating explicit intermediate reasoning traces through increased test-time compute, yet the assumption that longer reasoning is consistently beneficial remains under-examined. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
+
+### 3. 识别并缓解模型安全、越狱和对齐风险
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;Breaking the Information Silo: Semantic Personas for Cross-Domain Recommendation (Jonathan Mayo, Moshe Unger, Konstantin Bauman)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.01783"&gt;2606.01783&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.01783"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+识别并缓解模型安全、越狱和对齐风险。摘要显示：Digital platforms increasingly operate as isolated information silos, limiting their ability to construct comprehensive user representations across domains. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
 
 ### 4. 让 Agent 更可靠地调用工具和复用技能
 
-- 原始论文标题: Streaming Communication in Multi-Agent Reasoning
-- 作者/机构: Zhen Yang, Xiaogang Xu, Wen Wang, Cong Chen, Xander Xu, Ying-Cong Chen
-- 归类: Agent 与工具调用
-- arXiv: [2606.05158](https://arxiv.org/abs/2606.05158)
-- PDF: [PDF](https://arxiv.org/pdf/2606.05158)
-- 一句话看点: 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：Multi-agent reasoning systems adopt a "generate-then-transfer" paradigm that forces end-to-end latency to scale linearly with pipeline depth.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，让 Agent 更可靠地调用工具和复用技能仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：让 Agent 更可靠地调用工具和复用技能。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;KForge: LLM-Driven Cross-Platform Kernel Generation for AI Accelerators (Taras Sereda, Burak Bartan, Ankita Nayak, Tom St. John, Natalie Serrino, Zain Asgar)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.02963"&gt;2606.02963&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.02963"&gt;PDF&lt;/a&gt;&lt;/p&gt;
 
-### 5. 用新基准和评测方法暴露模型短板
+让 Agent 更可靠地调用工具和复用技能。摘要显示：Production inference increasingly targets a heterogeneous mix of accelerators. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
 
-- 原始论文标题: When Freshness Is Not Enough: Distribution-Aware Age of Information for Networked LQR Control
-- 作者/机构: Abdullah Y. Etcibasi, C. Emre Koksal, Eylem Ekici
-- 归类: 基准与评测
-- arXiv: [2606.04361](https://arxiv.org/abs/2606.04361)
-- PDF: [PDF](https://arxiv.org/pdf/2606.04361)
-- 一句话看点: 重点在于：用新基准或评测方法暴露模型短板。摘要给出的直接线索是：Age of Information (AoI) has become a central metric for the design of wireless update systems, especially in applications where fresh measurements support tracking, estimation, and control.
-- 它想解决什么: 它要解决的问题可以理解为：在真实研究或工程场景中，用新基准或评测方法暴露模型短板仍不稳定、不透明或成本较高。
-- 大致怎么做: 方法线索来自标题、摘要和公开元数据；重点看它如何设计数据、评测、训练或系统流程，而不把摘要扩展成未验证结论。
-- 可以怎样跟进: 从业者可优先检查三点：是否有可复现资产，评测是否贴近真实场景，以及方案是否能迁移到自己的模型、检索、Agent 或部署链路。
-- 注意事项: 当前只是基于 arXiv 预印本元数据的筛选判断，不代表论文结论已经被同行评审或生产环境验证。
-- 快速判断:
-  - 一句话：用新基准或评测方法暴露模型短板。
-  - 看点：摘要是否给出清晰任务、数据、评测或系统收益。
-  - 核验：优先打开原文确认实验设置、基线和代码/数据是否可用。
+### 5. 提升代码生成、执行反馈和自动修复能力
+
+&lt;p class="paper-meta-line"&gt;&lt;span&gt;EntangleCodec: A Unified Discrete Audio Tokenizer via Semantic-Acoustic Entanglement (Hui Li, Yangfan Gao, Junlin Shang, Changhao Jiang, Tao Gui, Qi Zhang, et al.)&lt;/span&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/abs/2606.02739"&gt;2606.02739&lt;/a&gt; &lt;a class="paper-meta-link" href="https://arxiv.org/pdf/2606.02739"&gt;PDF&lt;/a&gt;&lt;/p&gt;
+
+提升代码生成、执行反馈和自动修复能力。摘要显示：Audio tokenizers serve as the discrete interface between continuous audio and Audio Language Models (ALMs), but existing tokenizers often struggle to support both understanding and generation. 重点核验：任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论是否能迁移到实际系统。
 
 ## 其他值得关注
-- [让 Agent 更可靠地调用工具和复用技能](https://arxiv.org/abs/2606.04484) - Agent 与工具调用，score 6。关注理由： 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：We present AgentJet, a distributed swarm training framework for large language model (LLM) agent reinforcement learning.
-- [让 Agent 更可靠地调用工具和复用技能](https://arxiv.org/abs/2606.05476) - Agent 与工具调用，score 5。关注理由： 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：Security misconfigurations remain a leading cause of OS-level compromise, and manually keeping systems compliant with standards like Defense Information Systems Agency (DISA) Security Technical Implementation Guides (STIGs) is a tedious and expensive process.
-- [让 Agent 更可靠地调用工具和复用技能](https://arxiv.org/abs/2606.04896) - Agent 与工具调用，score 5。关注理由： 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：Multi-agent AI orchestration systems increasingly rely on persistent memory to maintain context across sessions, agents, and tasks.
-- [让 Agent 更可靠地调用工具和复用技能](https://arxiv.org/abs/2606.04628) - Agent 与工具调用，score 4。关注理由： 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：RAMPART is a compile-time memory model and pure in-RAM block registry for LLM-based agents.
-- [让 Agent 更可靠地调用工具和复用技能](https://arxiv.org/abs/2606.05390) - Agent 与工具调用，score 2。关注理由： 重点在于：让 Agent 更可靠地调用工具和复用技能。摘要给出的直接线索是：An interaction protocol formalizes how the agents in a multiagent system interact, which facilitates implementing agents.
-
-## 今日关键词
-
-agent, agents, benchmark, code, database, dataset, deployment, fine-tuning, latency, memory, metric, rag, robotics, safety
-
-## 来源页链接
-
-完整候选池、评分规则摘要和每篇 score breakdown 见 [来源透明页](/zh/daily/2026-06-05-r-aps-compositional-reasoning-and-in-context-sources/)。
-
-## 阅读边界
-- 自动评分会偏向有社区信号、代码信号和工程关键词的论文。
-- 简报默认基于标题、摘要和公开元数据，不替代全文精读。
-- 外部 API 限流或不可用时，相关信号会降级为空并在来源页保留说明。
-</content></item><item><title>AI 研究简报：Agent 与工具调用、安全与对齐、系统与部署</title><link>https://aici.ccwu.cc/zh/daily/2026-06-04-self-evolving-agents-for-tool-use-skills/</link><guid>https://aici.ccwu.cc/zh/daily/2026-06-04-self-evolving-agents-for-tool-use-skills/</guid><description>本期从 18 篇候选论文中筛出 5 篇重点论文和 13 篇也值得关注论文，主要覆盖 Agent 与工具调用、安全与对齐、系统与部署。</description><pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate><language>zh</language><content>
-# AI 研究简报：Agent 与工具调用、安全与对齐、系统与部署
-
-**日期**: 2026-06-04
-**数据日期说明**: 原始目标日期为 2026-06-05，该日期未找到可用 arXiv 论文，本期使用最近可用数据日期 2026-06-04。
-
-## 今日概览
-
-本期从 18 篇候选论文中筛出 5 篇重点论文和 13 篇也值得关注论文，主要覆盖 Agent 与工具调用、安全与对齐、系统与部署。
-
-## 今日趋势观察
-
-今天的高分论文集中在 Agent 与工具调用、安全与对齐、系统与部署。这些信号更适合作为选题和工程跟进线索，而不是对论文结论的最终背书。
-
-## 重点论文
-
-### 1. Self Evolving Agents for Tool Use Skills
-
-- 原始论文标题: Self Evolving Agents for Tool Use Skills
-- 作者/机构: Alice Chen, Bob Smith
-- 主题: Agent 与工具调用
-- arXiv: [2606.00001](https://arxiv.org/abs/2606.00001)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00001)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Agents learn reusable tool use skills through iterative self improvement, unit tests, execution feedback, and evaluation
-- 它解决了什么问题: 论文试图处理的问题是：Agents learn reusable tool use skills through iterative self improvement, unit tests, execution feedback, and evaluation
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 2. Multimodal Safety Evaluation for Vision Language Models
-
-- 原始论文标题: Multimodal Safety Evaluation for Vision Language Models
-- 作者/机构: Eva Green
-- 主题: 安全与对齐
-- arXiv: [2606.00004](https://arxiv.org/abs/2606.00004)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00004)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A safety evaluation suite measures multimodal models across risky visual prompts, jailbreak attempts, and alignment failures.
-- 它解决了什么问题: 论文试图处理的问题是：A safety evaluation suite measures multimodal models across risky visual prompts, jailbreak attempts, and alignment failures.
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 3. Efficient Long Context Inference with Cache Compression
-
-- 原始论文标题: Efficient Long Context Inference with Cache Compression
-- 作者/机构: Carol Li
-- 主题: 系统与部署
-- arXiv: [2606.00002](https://arxiv.org/abs/2606.00002)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00002)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A systems method reduces memory and latency during long context model inference while preserving code reasoning accuracy.
-- 它解决了什么问题: 论文试图处理的问题是：A systems method reduces memory and latency during long context model inference while preserving code reasoning accuracy.
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 4. RAG Evaluation under Noisy Retrieval
-
-- 原始论文标题: RAG Evaluation under Noisy Retrieval
-- 作者/机构: Dan Wang
-- 主题: 基准与评测
-- arXiv: [2606.00003](https://arxiv.org/abs/2606.00003)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00003)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A benchmark studies retrieval augmented generation reliability under noisy evidence, missing citations, and adversarial documents.
-- 它解决了什么问题: 论文试图处理的问题是：A benchmark studies retrieval augmented generation reliability under noisy evidence, missing citations, and adversarial documents.
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 5. Synthetic Data Curation for Post Training
-
-- 原始论文标题: Synthetic Data Curation for Post Training
-- 作者/机构: Henry Liu
-- 主题: 数据工程
-- arXiv: [2606.00007](https://arxiv.org/abs/2606.00007)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00007)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A data pipeline selects synthetic instruction data for fine-tuning and post-training with quality filters.
-- 它解决了什么问题: 论文试图处理的问题是：A data pipeline selects synthetic instruction data for fine-tuning and post-training with quality filters.
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-## 也值得关注
-- [Preference Optimization for Safer Tool Agents](https://arxiv.org/abs/2606.00012) - Agent 与工具调用, score 6. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Post-training with preference optimization reduces harmful tool calls and improves auditability.
-- [Red Teaming Open Source LLM Guardrails](https://arxiv.org/abs/2606.00017) - 安全与对齐, score 6. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A safety study evaluates jailbreak resistance, guardrail routing, and risk classification for open-source models.
-- [Code Model Repair with Execution Feedback](https://arxiv.org/abs/2606.00005) - 代码智能, score 5. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Code models improve patch generation through execution feedback loops, repository tests, and API-aware repair.
-- [Database Native Retrieval for Enterprise RAG](https://arxiv.org/abs/2606.00013) - 检索与 RAG, score 5. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A retrieval architecture routes queries to native database, graph, and vector indexes instead of flattening all sources.
-- [Chart Understanding for Vision Language Models](https://arxiv.org/abs/2606.00014) - 多模态模型, score 5. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A vision-language benchmark measures chart, table, and document understanding in multimodal models.
-- [Agentic 3D Modeling through Code Execution](https://arxiv.org/abs/2606.00015) - Agent 与工具调用, score 5. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A code intelligence benchmark tests agents that generate executable scripts for procedural 3D modeling.
-- [Low Rank Adapters as Model Memory Probes](https://arxiv.org/abs/2606.00018) - 训练与后训练, score 5. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A training analysis uses LoRA adapters to estimate memorization capacity and decide when full fine-tuning is needed.
-- [Mechanistic Attribution for Factual Editing](https://arxiv.org/abs/2606.00008) - 可解释性, score 4. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：An interpretability method localizes representations involved in factual editing and model memory.
-- [Video Diffusion Models Need Temporal Tests](https://arxiv.org/abs/2606.00010) - 视频生成, score 4. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A video generation evaluation suite probes temporal consistency, motion realism, and causal order.
-- [Training Data Deduplication for Foundation Models](https://arxiv.org/abs/2606.00016) - Agent 与工具调用, score 4. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A data engineering workflow removes near duplicates and measures downstream benchmark contamination.
-- [Robotics Policies with Memory Grounded Planning](https://arxiv.org/abs/2606.00006) - 机器人与具身智能, score 3. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Embodied robot policies use memory, visual observations, and planning to improve manipulation and navigation.
-- [Open Speech Agent Benchmark](https://arxiv.org/abs/2606.00009) - Agent 与工具调用, score 2. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A benchmark evaluates speech and audio agents that call tools, transcribe speech, and reason over sound.
-- [Serving Quantized Models with Adaptive Batching](https://arxiv.org/abs/2606.00011) - 系统与部署, score 2. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A deployment system improves throughput for quantized language models using adaptive batching and cache-aware scheduling.
-
-## 今日关键词
-
-agent, agents, alignment, api, attribution, benchmark, cache, chart, code, compression, curation, data, database, deployment
-
-## 来源页链接
-
-完整候选池、评分规则摘要和每篇 score breakdown 见 [来源透明页](/zh/daily/2026-06-04-self-evolving-agents-for-tool-use-skills-sources/)。
+- [Large AI Models in Dental Healthcare: From General-Purpose Systems to Domain-Specific Foundation Models](https://arxiv.org/abs/2606.02914)：关注任务设置、指标和失效案例，适合补充模型评测与回归测试。
+- [GloResNet: A lightweight 3D CNN with global topological features for preterm brain injury prediction](https://arxiv.org/abs/2606.02498)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [MASER: Modality-Adaptive Specialist Routing for Embodied 3D Spatial Intelligence](https://arxiv.org/abs/2606.02463)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [AgentRedBench: Dynamic Redteaming and Integration-Aware Defense for LLM Agents over SaaS Integrations](https://arxiv.org/abs/2606.02240)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [OpenWebRL: Demystifying Online Multi-turn Reinforcement Learning for Visual Web Agents](https://arxiv.org/abs/2606.02031)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [What Benchmarks Don't Measure: The Case for Evaluating Abstention Competence in Autonomous Agents](https://arxiv.org/abs/2606.02965)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [ATLAS: A Large-Scale Evaluation Benchmark for Adversarial LiDAR Perception](https://arxiv.org/abs/2606.02924)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [Tiny Collaborative Inference for Occlusion-Robust Object Detection](https://arxiv.org/abs/2606.02894)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [Do Transformers Need Three Projections? Systematic Study of QKV Variants](https://arxiv.org/abs/2606.04032)：关注推理成本、延迟、吞吐和部署约束，适合跟进系统优化。
+- [Pathway-Structured Privileged Distillation for Deployable Computational Pathology](https://arxiv.org/abs/2606.02877)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [RRISE: Robust Radius Inference via a Surrogate Estimator](https://arxiv.org/abs/2606.02876)：关注任务设置、指标和失效案例，适合补充模型评测与回归测试。
+- [Toward a Modular Architecture for Embedded AI Agent Systems at the Edge](https://arxiv.org/abs/2606.02862)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [Which Defense Closes Which Threat? Attributing OWASP-LLM-Top-10 Coverage and Its Brittleness Under Paraphrasing](https://arxiv.org/abs/2606.02822)：关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。
+- [Traj-Evolve: A Self-Evolving Multi-Agent System for Patient Trajectory Modeling in Lung Cancer Early Detection](https://arxiv.org/abs/2606.02812)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
+- [Acceptance-Test-Driven Evaluation Protocols for Business-Centric LLM Systems](https://arxiv.org/abs/2606.02755)：关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。
 
 ## 阅读边界
-- 自动评分会偏向有社区信号、代码信号和工程关键词的论文。
+- 自动排序会偏向有社区信号、代码信号和工程关键词的论文。
 - 简报默认基于标题、摘要和公开元数据，不替代全文精读。
-- 外部 API 限流或不可用时，相关信号会降级为空并在来源页保留说明。
-</content></item><item><title>AI 研究简报：训练与后训练、代码智能、系统与部署</title><link>https://aici.ccwu.cc/zh/daily/2026-06-03-trust-but-don-t-verify-epistemic-blind/</link><guid>https://aici.ccwu.cc/zh/daily/2026-06-03-trust-but-don-t-verify-epistemic-blind/</guid><description>本期从 80 篇候选论文中筛出 5 篇重点论文和 15 篇也值得关注论文，主要覆盖 训练与后训练、代码智能、系统与部署。</description><pubDate>Wed, 03 Jun 2026 00:00:00 +0000</pubDate><language>zh</language><content>
-# AI 研究简报：训练与后训练、代码智能、系统与部署
-
-**日期**: 2026-06-03
-
-
-## 今日概览
-
-本期从 80 篇候选论文中筛出 5 篇重点论文和 15 篇也值得关注论文，主要覆盖 训练与后训练、代码智能、系统与部署。
-
-## 今日趋势观察
-
-今天的高分论文集中在 训练与后训练、代码智能、系统与部署。这些信号更适合作为选题和工程跟进线索，而不是对论文结论的最终背书。
-
-## 重点论文
-
-### 1. Trust, but Don't Verify: Epistemic Blind Spots in LLM Source Evaluation
-
-- 原始论文标题: Trust, but Don't Verify: Epistemic Blind Spots in LLM Source Evaluation
-- 作者/机构: Rohan N. Pradhan, Steve Goley
-- 主题: 训练与后训练
-- arXiv: [2606.05403](https://arxiv.org/abs/2606.05403)
-- PDF: [PDF](https://arxiv.org/pdf/2606.05403)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Language models increasingly act as epistemic proxies, synthesizing evidence from multiple sources to inform decisions
-- 它解决了什么问题: 论文试图处理的问题是：Language models increasingly act as epistemic proxies, synthesizing evidence from multiple sources to inform decisions
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 2. Self-Reflective APIs: Structure Beats Verbosity for AI Agent Recovery
-
-- 原始论文标题: Self-Reflective APIs: Structure Beats Verbosity for AI Agent Recovery
-- 作者/机构: Arquimedes Canedo, Grama Chethan
-- 主题: 代码智能
-- arXiv: [2606.05037](https://arxiv.org/abs/2606.05037)
-- PDF: [PDF](https://arxiv.org/pdf/2606.05037)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：When an AI agent calls an API and hits a validation error, it needs more than what went wrong -- it needs what to do next
-- 它解决了什么问题: 论文试图处理的问题是：When an AI agent calls an API and hits a validation error, it needs more than what went wrong -- it needs what to do next
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 3. Minimizing the Hidden Cost of Scales: Graph-Guided Ultra-Low-Bit Quantization for Large Language Models
-
-- 原始论文标题: Minimizing the Hidden Cost of Scales: Graph-Guided Ultra-Low-Bit Quantization for Large Language Models
-- 作者/机构: Rayyan Abdalla, Amir Hussein, Min Wu, Dinesh Manocha
-- 主题: 系统与部署
-- arXiv: [2606.05429](https://arxiv.org/abs/2606.05429)
-- PDF: [PDF](https://arxiv.org/pdf/2606.05429)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Post-training quantization (PTQ) is critical for the efficient deployment of large language models (LLMs)
-- 它解决了什么问题: 论文试图处理的问题是：Post-training quantization (PTQ) is critical for the efficient deployment of large language models (LLMs)
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 4. Willing but Unable: Separating Refusal from Capability in Code LLMs via Abliteration
-
-- 原始论文标题: Willing but Unable: Separating Refusal from Capability in Code LLMs via Abliteration
-- 作者/机构: Cristina Carleo, Pietro Liguori, Naghmeh Ivaki, Domenico Cotroneo
-- 主题: Agent 与工具调用
-- arXiv: [2606.05396](https://arxiv.org/abs/2606.05396)
-- PDF: [PDF](https://arxiv.org/pdf/2606.05396)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Producing a labeled vulnerable code at scale is a recurring obstacle for learning-based vulnerability detection: mined corpora carry substantial label noise, and existing LLM-based augmentation propagates these inaccuracies because it trans
-- 它解决了什么问题: 论文试图处理的问题是：Producing a labeled vulnerable code at scale is a recurring obstacle for learning-based vulnerability detection: mined corpora carry substantial label noise, and existing LLM-based augmentation propagates these inaccuracies because it trans
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 5. GITCO: Gated Inference-Time Context Optimization in TSFMs
-
-- 原始论文标题: GITCO: Gated Inference-Time Context Optimization in TSFMs
-- 作者/机构: Manya Pandey, Dhruv Kumar, Murari Mandal, Saurabh Deshpande
-- 主题: 基准与评测
-- arXiv: [2606.05332](https://arxiv.org/abs/2606.05332)
-- PDF: [PDF](https://arxiv.org/pdf/2606.05332)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Patch-based Time Series Foundation Models (TSFMs) suffer from context poisoning: structurally anomalous patches capture disproportionate attention and silently degrade zero-shot forecast quality
-- 它解决了什么问题: 论文试图处理的问题是：Patch-based Time Series Foundation Models (TSFMs) suffer from context poisoning: structurally anomalous patches capture disproportionate attention and silently degrade zero-shot forecast quality
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-## 也值得关注
-- [NIV: Neural Axis Variations for Variable Font Generation](https://arxiv.org/abs/2606.05261) - 基准与评测, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Variable fonts enable continuous variation of glyph geometry along semantic design axes such as weight, width, slant, and optical size
-- [PSEBench: A Controllable and Verifiable Benchmark for Evaluating LLMs in Patient Safety Event Triage](https://arxiv.org/abs/2606.05463) - 基准与评测, score 8. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Patient safety event triage, determining whether a clinical event is reportable under jurisdiction-specific policy, is a high-stakes task typically performed manually by patient safety experts
-- [GOTabPFN: From Feature Ordering to Compact Tokenization for Tabular Foundation Models on High-Dimensional Data](https://arxiv.org/abs/2606.05441) - 训练与后训练, score 8. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：We investigate how to make small tabular foundation models effective for High-Dimensional, Low-Sample Size (HDLSS) tabular prediction without retraining large backbones
-- [When Evidence is Sparse: Weakly Supervised Early Failure Alerting in Dialogs and LLM-Agent Trajectories](https://arxiv.org/abs/2606.05414) - Agent 与工具调用, score 8. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Early failure alerting requires deciding, while a dialog or agent trajectory is still unfolding, whether to flag it as likely to fail
-- [Harnessing Generalist Agents for Contextualized Time Series](https://arxiv.org/abs/2606.05404) - Agent 与工具调用, score 8. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Time series are often embedded in rich contexts that are essential for holistic modeling
-- [ReasoningFlow: Discourse Structures for Understanding LLM Reasoning Traces](https://arxiv.org/abs/2606.05402) - 训练与后训练, score 8. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Large reasoning models (LRMs) produce reasoning traces with non-linear structures, such as backtracking and self-correction, that complicate the evaluation and monitoring of the reasoning process
-- [What Should Agents Say? Action-state Communication for Efficient Multi-Agent Systems](https://arxiv.org/abs/2606.05304) - 代码智能, score 8. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Multi-agent systems (MAS) built on large language models are typically organized around roles, pipelines, and turn schedules, while the content that agents pass to one another is often left as unconstrained natural language
-- [Agentic Monte Carlo: Simulating Reinforcement Learning for Black-Box Agents](https://arxiv.org/abs/2606.05296) - Agent 与工具调用, score 8. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：LLM agents operate in two distinct regimes: open-weight agents amenable to reinforcement learning (RL) and black-box agents whose behaviour must be controlled purely at test time
-- [Towards Efficient and Evidence-grounded Mobility Prediction with LLM-Driven Agent](https://arxiv.org/abs/2606.05130) - Agent 与工具调用, score 8. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Individual-level mobility prediction is central to urban simulation, transportation planning, and policy analysis
-- [Invariant Gradient Alignment for Robust Reasoning Distillation](https://arxiv.org/abs/2606.05025) - 推理与规划, score 8. 关注理由：</content></item><item><title>AI 研究简报：Agent 与工具调用、基准与评测、安全与对齐</title><link>https://aici.ccwu.cc/zh/daily/2026-06-03-self-evolving-agents-for-tool-use-skills/</link><guid>https://aici.ccwu.cc/zh/daily/2026-06-03-self-evolving-agents-for-tool-use-skills/</guid><description>本期从 18 篇候选论文中筛出 5 篇重点论文和 13 篇也值得关注论文，主要覆盖 Agent 与工具调用、基准与评测、安全与对齐。</description><pubDate>Wed, 03 Jun 2026 00:00:00 +0000</pubDate><language>zh</language><content>
-# AI 研究简报：Agent 与工具调用、基准与评测、安全与对齐
-
-**日期**: 2026-06-03
-
-
-## 今日概览
-
-本期从 18 篇候选论文中筛出 5 篇重点论文和 13 篇也值得关注论文，主要覆盖 Agent 与工具调用、基准与评测、安全与对齐。
-
-## 今日趋势观察
-
-今天的高分论文集中在 Agent 与工具调用、基准与评测、安全与对齐。这些信号更适合作为选题和工程跟进线索，而不是对论文结论的最终背书。
-
-## 重点论文
-
-### 1. Self Evolving Agents for Tool Use Skills
-
-- 原始论文标题: Self Evolving Agents for Tool Use Skills
-- 作者/机构: Alice Chen, Bob Smith
-- 主题: Agent 与工具调用
-- arXiv: [2606.00001](https://arxiv.org/abs/2606.00001)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00001)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Agents learn reusable tool use skills through iterative self improvement, unit tests, execution feedback, and evaluation
-- 它解决了什么问题: 论文试图处理的问题是：Agents learn reusable tool use skills through iterative self improvement, unit tests, execution feedback, and evaluation
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 2. RAG Evaluation under Noisy Retrieval
-
-- 原始论文标题: RAG Evaluation under Noisy Retrieval
-- 作者/机构: Dan Wang
-- 主题: 基准与评测
-- arXiv: [2606.00003](https://arxiv.org/abs/2606.00003)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00003)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A benchmark studies retrieval augmented generation reliability under noisy evidence, missing citations, and adversarial documents.
-- 它解决了什么问题: 论文试图处理的问题是：A benchmark studies retrieval augmented generation reliability under noisy evidence, missing citations, and adversarial documents.
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 3. Multimodal Safety Evaluation for Vision Language Models
-
-- 原始论文标题: Multimodal Safety Evaluation for Vision Language Models
-- 作者/机构: Eva Green
-- 主题: 安全与对齐
-- arXiv: [2606.00004](https://arxiv.org/abs/2606.00004)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00004)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A safety evaluation suite measures multimodal models across risky visual prompts, jailbreak attempts, and alignment failures.
-- 它解决了什么问题: 论文试图处理的问题是：A safety evaluation suite measures multimodal models across risky visual prompts, jailbreak attempts, and alignment failures.
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 4. Efficient Long Context Inference with Cache Compression
-
-- 原始论文标题: Efficient Long Context Inference with Cache Compression
-- 作者/机构: Carol Li
-- 主题: 系统与部署
-- arXiv: [2606.00002](https://arxiv.org/abs/2606.00002)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00002)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A systems method reduces memory and latency during long context model inference while preserving code reasoning accuracy.
-- 它解决了什么问题: 论文试图处理的问题是：A systems method reduces memory and latency during long context model inference while preserving code reasoning accuracy.
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 5. Code Model Repair with Execution Feedback
-
-- 原始论文标题: Code Model Repair with Execution Feedback
-- 作者/机构: Frank Moore
-- 主题: 代码智能
-- arXiv: [2606.00005](https://arxiv.org/abs/2606.00005)
-- PDF: [PDF](https://arxiv.org/pdf/2606.00005)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Code models improve patch generation through execution feedback loops, repository tests, and API-aware repair.
-- 它解决了什么问题: 论文试图处理的问题是：Code models improve patch generation through execution feedback loops, repository tests, and API-aware repair.
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-## 也值得关注
-- [Red Teaming Open Source LLM Guardrails](https://arxiv.org/abs/2606.00017) - 安全与对齐, score 14. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A safety study evaluates jailbreak resistance, guardrail routing, and risk classification for open-source models.
-- [Preference Optimization for Safer Tool Agents](https://arxiv.org/abs/2606.00012) - Agent 与工具调用, score 13. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Post-training with preference optimization reduces harmful tool calls and improves auditability.
-- [Synthetic Data Curation for Post Training](https://arxiv.org/abs/2606.00007) - 数据工程, score 12. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A data pipeline selects synthetic instruction data for fine-tuning and post-training with quality filters.
-- [Database Native Retrieval for Enterprise RAG](https://arxiv.org/abs/2606.00013) - 检索与 RAG, score 12. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A retrieval architecture routes queries to native database, graph, and vector indexes instead of flattening all sources.
-- [Agentic 3D Modeling through Code Execution](https://arxiv.org/abs/2606.00015) - Agent 与工具调用, score 12. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A code intelligence benchmark tests agents that generate executable scripts for procedural 3D modeling.
-- [Low Rank Adapters as Model Memory Probes](https://arxiv.org/abs/2606.00018) - 训练与后训练, score 12. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A training analysis uses LoRA adapters to estimate memorization capacity and decide when full fine-tuning is needed.
-- [Robotics Policies with Memory Grounded Planning](https://arxiv.org/abs/2606.00006) - 机器人与具身智能, score 10. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Embodied robot policies use memory, visual observations, and planning to improve manipulation and navigation.
-- [Mechanistic Attribution for Factual Editing](https://arxiv.org/abs/2606.00008) - 可解释性, score 10. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：An interpretability method localizes representations involved in factual editing and model memory.
-- [Chart Understanding for Vision Language Models](https://arxiv.org/abs/2606.00014) - 多模态模型, score 10. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A vision-language benchmark measures chart, table, and document understanding in multimodal models.
-- [Video Diffusion Models Need Temporal Tests](https://arxiv.org/abs/2606.00010) - 视频生成, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A video generation evaluation suite probes temporal consistency, motion realism, and causal order.
-- [Serving Quantized Models with Adaptive Batching](https://arxiv.org/abs/2606.00011) - 系统与部署, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A deployment system improves throughput for quantized language models using adaptive batching and cache-aware scheduling.
-- [Training Data Deduplication for Foundation Models](https://arxiv.org/abs/2606.00016) - Agent 与工具调用, score 7. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A data engineering workflow removes near duplicates and measures downstream benchmark contamination.
-- [Open Speech Agent Benchmark](https://arxiv.org/abs/2606.00009) - Agent 与工具调用, score 5. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：A benchmark evaluates speech and audio agents that call tools, transcribe speech, and reason over sound.
-
-## 今日关键词
-
-agent, agents, alignment, api, attribution, benchmark, cache, chart, code, compression, curation, data, database, deployment
-
-## 来源页链接
-
-完整候选池、评分规则摘要和每篇 score breakdown 见 [来源透明页](/zh/daily/2026-06-03-self-evolving-agents-for-tool-use-skills-sources/)。
-
-## 阅读边界
-- 自动评分会偏向有社区信号、代码信号和工程关键词的论文。
-- 简报默认基于标题、摘要和公开元数据，不替代全文精读。
-- 外部 API 限流或不可用时，相关信号会降级为空并在来源页保留说明。
-</content></item><item><title>AI 研究简报：多模态模型、Agent 与工具调用、检索与 RAG</title><link>https://aici.ccwu.cc/zh/daily/2026-06-02-koda-contrastive-representation-comparison-and-alignment-for/</link><guid>https://aici.ccwu.cc/zh/daily/2026-06-02-koda-contrastive-representation-comparison-and-alignment-for/</guid><description>本期从 264 篇候选论文中筛出 5 篇重点论文和 15 篇也值得关注论文，主要覆盖 多模态模型、Agent 与工具调用、检索与 RAG。</description><pubDate>Tue, 02 Jun 2026 00:00:00 +0000</pubDate><language>zh</language><content>
-# AI 研究简报：多模态模型、Agent 与工具调用、检索与 RAG
-
-**日期**: 2026-06-02
-
-
-## 今日概览
-
-本期从 264 篇候选论文中筛出 5 篇重点论文和 15 篇也值得关注论文，主要覆盖 多模态模型、Agent 与工具调用、检索与 RAG。
-
-## 今日趋势观察
-
-今天的高分论文集中在 多模态模型、Agent 与工具调用、检索与 RAG。这些信号更适合作为选题和工程跟进线索，而不是对论文结论的最终背书。
-
-## 重点论文
-
-### 1. KODA: Contrastive Representation Comparison and Alignment for Vision-Language Foundation Models
-
-- 原始论文标题: KODA: Contrastive Representation Comparison and Alignment for Vision-Language Foundation Models
-- 作者/机构: Youqi Wu, Mohammad Jalali, Farzan Farnia
-- 主题: 多模态模型
-- arXiv: [2606.04180](https://arxiv.org/abs/2606.04180)
-- PDF: [PDF](https://arxiv.org/pdf/2606.04180)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Vision-language foundation models such as CLIP and SigLIP provide widely used representations for multimodal learning systems
-- 它解决了什么问题: 论文试图处理的问题是：Vision-language foundation models such as CLIP and SigLIP provide widely used representations for multimodal learning systems
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 2. The Impact of Configuring Agentic AI Coding Tools on Build-vs-Buy Decisions: A Study Protocol
-
-- 原始论文标题: The Impact of Configuring Agentic AI Coding Tools on Build-vs-Buy Decisions: A Study Protocol
-- 作者/机构: Jai Lal Lulla, Matthias Galster, Jie M. Zhang, Sebastian Baltes, Christoph Treude
-- 主题: Agent 与工具调用
-- arXiv: [2606.03907](https://arxiv.org/abs/2606.03907)
-- PDF: [PDF](https://arxiv.org/pdf/2606.03907)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Agentic AI coding tools write code with increasing autonomy and in doing so decide when to import a library and when to implement functionality from scratch
-- 它解决了什么问题: 论文试图处理的问题是：Agentic AI coding tools write code with increasing autonomy and in doing so decide when to import a library and when to implement functionality from scratch
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 3. Automating Information Extraction and Retrieval for Industrial Spare Parts Pooling
-
-- 原始论文标题: Automating Information Extraction and Retrieval for Industrial Spare Parts Pooling
-- 作者/机构: Dyuman Bulloni, Rocco Felici, Oliver Avram, Anna Valente
-- 主题: 检索与 RAG
-- arXiv: [2606.03367](https://arxiv.org/abs/2606.03367)
-- PDF: [PDF](https://arxiv.org/pdf/2606.03367)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Maintenance organizations in manufacturing try to avoid downtime and unnecessary purchasing by reusing existing assets, but the main obstacle is not a lack of parts but a lack of actionable visibility across sites and partners
-- 它解决了什么问题: 论文试图处理的问题是：Maintenance organizations in manufacturing try to avoid downtime and unnecessary purchasing by reusing existing assets, but the main obstacle is not a lack of parts but a lack of actionable visibility across sites and partners
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 4. Stationarity-Aware Retrieval-Augmented Time Series Forecasting
-
-- 原始论文标题: Stationarity-Aware Retrieval-Augmented Time Series Forecasting
-- 作者/机构: Shiqiao Zhou, Holger Schöner, Zipeng Wu, Edouard Fouché, IAG Wilson, Shuo Wang
-- 主题: 基准与评测
-- arXiv: [2606.04135](https://arxiv.org/abs/2606.04135)
-- PDF: [PDF](https://arxiv.org/pdf/2606.04135)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Time series forecasting relies on historical patterns, but real-world series often exhibit non-stationarity and regime shifts that challenge fully parametric forecasters
-- 它解决了什么问题: 论文试图处理的问题是：Time series forecasting relies on historical patterns, but real-world series often exhibit non-stationarity and regime shifts that challenge fully parametric forecasters
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 5. Entropy Gate: Entropy Quenching for Near-Lossless Token Compression in LLM Pipelines
-
-- 原始论文标题: Entropy Gate: Entropy Quenching for Near-Lossless Token Compression in LLM Pipelines
-- 作者/机构: Justice Owusu Agyemang, Jerry John Kponyo, Kwame Opuni-Boachie Obour Agyekum, Francisca Adoma Acheampong, Kwame Agyeman-Prempeh Agyekum, James Dzisi Gadze
-- 主题: 系统与部署
-- arXiv: [2606.03739](https://arxiv.org/abs/2606.03739)
-- PDF: [PDF](https://arxiv.org/pdf/2606.03739)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：LLM pipelines waste substantial token budgets on low-information content: repeated context, verbose responses, and redundant boilerplate
-- 它解决了什么问题: 论文试图处理的问题是：LLM pipelines waste substantial token budgets on low-information content: repeated context, verbose responses, and redundant boilerplate
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-## 也值得关注
-- [VLESA: Vision-Language Embodied Safety Agent for Human Activity Monitoring](https://arxiv.org/abs/2606.03954) - 基准与评测, score 10. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：As AI systems increasingly assist humans in physical tasks, ensuring safety becomes paramount -- physical actions carry immediate and irreversible consequences that digital errors do not
-- [MM-BizRAG: Rethinking Multimodal Retrieval-Augmented Generation for General Purpose Enterprise Q&amp;A](https://arxiv.org/abs/2606.04231) - 多模态模型, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Recent advances in multimodal retrieval-augmented generation (MM-RAG) have shifted toward minimal parsing, relying on page-level images for producing retriever embeddings and for answer generation
-- [MimeLens: Position-Agnostic Content-Type Detection for Binary Fragments](https://arxiv.org/abs/2606.04171) - 检索与 RAG, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：File-type classification underlies many workflows like malware triage, forensic carving, packet inspection, and storage indexing
-- [When Autoregressive Consistency Hurts Safety Alignment](https://arxiv.org/abs/2606.04168) - 训练与后训练, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Safety alignment in large language models (LLMs) is fragile in part because it is often shallow: fine-tuning mainly reshapes the model's behavior near the first few output tokens
-- [End-to-End Text Line Detection and Ordering](https://arxiv.org/abs/2606.04166) - 训练与后训练, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Practical text-recognition pipelines for historical documents typically decompose layout analysis into line detection followed by a separate reading-order step, with the latter most often handled by a hand-coded geometric heuristic that str
-- [Expert-Aware Refusal Steering](https://arxiv.org/abs/2606.04160) - 安全与对齐, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Safety alignment in instruction-tuned large language models (LLMs) depends on a model's ability to reliably refuse to respond to harmful or disallowed requests
-- [HighTide: An Agent-Curated Open-Source VLSI Benchmark Suite](https://arxiv.org/abs/2606.04126) - Agent 与工具调用, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：We introduce HighTide, an evolving AI-assisted benchmark suite
-- [UltraEP: Unleash MoE Training and Inference on Rack-Scale Nodes with Near-Optimal Load Balancing](https://arxiv.org/abs/2606.04101) - 系统与部署, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Large-scale expert parallelism (EP) is becoming pivotal for training and serving frontier MoE models, but it also amplifies device-level expert load imbalance into compute stragglers, token all-to-all bottlenecks, and activation-memory spik
-- [MAOAM: Unified Object and Material Selection with Vision-Language Models](https://arxiv.org/abs/2606.04880) - 数据工程, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，</content></item><item><title>AI 研究简报：系统与部署、多模态模型、安全与对齐</title><link>https://aici.ccwu.cc/zh/daily/2026-06-02-entropy-gate-entropy-quenching-for-near-lossless/</link><guid>https://aici.ccwu.cc/zh/daily/2026-06-02-entropy-gate-entropy-quenching-for-near-lossless/</guid><description>本期从 80 篇候选论文中筛出 5 篇重点论文和 15 篇也值得关注论文，主要覆盖 系统与部署、多模态模型、安全与对齐。</description><pubDate>Tue, 02 Jun 2026 00:00:00 +0000</pubDate><language>zh</language><content>
-# AI 研究简报：系统与部署、多模态模型、安全与对齐
-
-**日期**: 2026-06-02
-
-
-## 今日概览
-
-本期从 80 篇候选论文中筛出 5 篇重点论文和 15 篇也值得关注论文，主要覆盖 系统与部署、多模态模型、安全与对齐。
-
-## 今日趋势观察
-
-今天的高分论文集中在 系统与部署、多模态模型、安全与对齐。这些信号更适合作为选题和工程跟进线索，而不是对论文结论的最终背书。
-
-## 重点论文
-
-### 1. Entropy Gate: Entropy Quenching for Near-Lossless Token Compression in LLM Pipelines
-
-- 原始论文标题: Entropy Gate: Entropy Quenching for Near-Lossless Token Compression in LLM Pipelines
-- 作者/机构: Justice Owusu Agyemang, Jerry John Kponyo, Kwame Opuni-Boachie Obour Agyekum, Francisca Adoma Acheampong, Kwame Agyeman-Prempeh Agyekum, James Dzisi Gadze
-- 主题: 系统与部署
-- arXiv: [2606.03739](https://arxiv.org/abs/2606.03739)
-- PDF: [PDF](https://arxiv.org/pdf/2606.03739)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：LLM pipelines waste substantial token budgets on low-information content: repeated context, verbose responses, and redundant boilerplate
-- 它解决了什么问题: 论文试图处理的问题是：LLM pipelines waste substantial token budgets on low-information content: repeated context, verbose responses, and redundant boilerplate
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 2. MM-BizRAG: Rethinking Multimodal Retrieval-Augmented Generation for General Purpose Enterprise Q&amp;A
-
-- 原始论文标题: MM-BizRAG: Rethinking Multimodal Retrieval-Augmented Generation for General Purpose Enterprise Q&amp;A
-- 作者/机构: Hanoz Bhathena, Parin Rajesh Jhaveri, Rohan Mittal, Prateek Singh, Aymen Kallala, Rachneet Kaur, Yiqiao Jin, Zhen Zeng, Adwait Ratnaparkhi, Denis Kochedykov
-- 主题: 多模态模型
-- arXiv: [2606.04231](https://arxiv.org/abs/2606.04231)
-- PDF: [PDF](https://arxiv.org/pdf/2606.04231)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Recent advances in multimodal retrieval-augmented generation (MM-RAG) have shifted toward minimal parsing, relying on page-level images for producing retriever embeddings and for answer generation
-- 它解决了什么问题: 论文试图处理的问题是：Recent advances in multimodal retrieval-augmented generation (MM-RAG) have shifted toward minimal parsing, relying on page-level images for producing retriever embeddings and for answer generation
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 3. Expert-Aware Refusal Steering
-
-- 原始论文标题: Expert-Aware Refusal Steering
-- 作者/机构: Anna C. Marbut, Daniel R. Olson, Travis J. Wheeler
-- 主题: 安全与对齐
-- arXiv: [2606.04160](https://arxiv.org/abs/2606.04160)
-- PDF: [PDF](https://arxiv.org/pdf/2606.04160)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Safety alignment in instruction-tuned large language models (LLMs) depends on a model's ability to reliably refuse to respond to harmful or disallowed requests
-- 它解决了什么问题: 论文试图处理的问题是：Safety alignment in instruction-tuned large language models (LLMs) depends on a model's ability to reliably refuse to respond to harmful or disallowed requests
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 4. Skill-RM: Unifying Heterogeneous Evaluation Criteria via Agent Skill
-
-- 原始论文标题: Skill-RM: Unifying Heterogeneous Evaluation Criteria via Agent Skill
-- 作者/机构: Tao Chen, Gangwei Jiang, Pengyu Cheng, Siyuan Huang, Yihao Liu, Jingwei Ni, Jiaqi Guo, Mengyu Zhou, Kai Tang, Junling Liu, Qinliang Su, Xiaoxi Jiang, Guanjun Jiang
-- 主题: 训练与后训练
-- arXiv: [2606.03980](https://arxiv.org/abs/2606.03980)
-- PDF: [PDF](https://arxiv.org/pdf/2606.03980)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Reward models (RMs) provide critical feedback signals for LLM post-training, notably in reinforced fine-tuning (RFT) and reinforcement learning (RL) pipelines
-- 它解决了什么问题: 论文试图处理的问题是：Reward models (RMs) provide critical feedback signals for LLM post-training, notably in reinforced fine-tuning (RFT) and reinforcement learning (RL) pipelines
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 5. Agentic Chain-of-Thought Steering for Efficient and Controllable LLM Reasoning
-
-- 原始论文标题: Agentic Chain-of-Thought Steering for Efficient and Controllable LLM Reasoning
-- 作者/机构: Yu Xia, Zhouhang Xie, Xin Xu, Byungkyu Kang, Prarit Lamba, Xiang Gao, Julian McAuley
-- 主题: 推理与规划
-- arXiv: [2606.03965](https://arxiv.org/abs/2606.03965)
-- PDF: [PDF](https://arxiv.org/pdf/2606.03965)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Large language models improve final-answer accuracy through extended chain-of-thought reasoning, but often spend tokens inefficiently and offer little inference-time control
-- 它解决了什么问题: 论文试图处理的问题是：Large language models improve final-answer accuracy through extended chain-of-thought reasoning, but often spend tokens inefficiently and offer little inference-time control
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-## 也值得关注
-- [Visual Instruction Tuning Aligns Modalities through Abstraction](https://arxiv.org/abs/2606.03871) - 训练与后训练, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Visual instruction tuning effectively adapts a pre-trained Large Language Model (LLM) to process image information alongside text
-- [Exploring Adversarial Robustness and Safety Alignment in Multilingual Multi-Modal Large Language Models](https://arxiv.org/abs/2606.03793) - 安全与对齐, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Multimodal Large Language Models integrate visual perception into language reasoning, introducing a continuous attack surface susceptible to adversarial attacks
-- [World Models Meet Language Models: On the Complementarity of Concrete and Abstract Reasoning](https://arxiv.org/abs/2606.03603) - 基准与评测, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：World models and multimodal large language models (MLLMs) provide complementary capabilities for predicting future outcomes from static visual observations
-- [CauTion: Knowing When to Trust LLMs for Ensemble Causal Discovery](https://arxiv.org/abs/2606.03602) - 数据工程, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Causal discovery from observational data remains challenging due to the fundamental limitations of purely statistical methods, such as statistical distinguishability within equivalence classes and sensitivity to finite sample sizes
-- [Selective Token-Level Cryptographic Redaction for Privacy-Preserving Clinical Deployment of Large Language Models](https://arxiv.org/abs/2606.03399) - 数据工程, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：While large language models (LLMs) are increasingly used for clinical applications, many existing pipelines require sending raw sensitive health information to remote servers for processing, which heightens the risk of privacy leakage
-- [Speech Emotion Recognition using Attention-based LSTM-Network with Residual Connection](https://arxiv.org/abs/2606.03359) - 视频生成, score 9. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Speech emotion recognition is an important component of modern human-computer interaction systems
-- [DetectZoo: A Unified Toolkit for AI-Generated Content Detection Across Text, Audio, and Image Modalities](https://arxiv.org/abs/2606.04205) - 基准与评测, score 8. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：The growing popularity and capacity of generative models have eroded the distinction between human and machine-generated content, motivating a growing body of work on detection across text, images, and audio
-- [Quantifying Faithful Confidence Expression in Large Reasoning Models](https://arxiv.org/abs/2606.03969) - 基准与评测, score 8. 关注理由： 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Reliable uncertainty communication is critical to the trustworthiness of LLMs, yet faithful calibration </content></item><item><title>AI 研究简报：基准与评测、检索与 RAG、Agent 与工具调用</title><link>https://aici.ccwu.cc/zh/daily/2026-06-01-cosmos-3-omnimodal-world-models-for-physical/</link><guid>https://aici.ccwu.cc/zh/daily/2026-06-01-cosmos-3-omnimodal-world-models-for-physical/</guid><description>本期从 273 篇候选论文中筛出 5 篇重点论文和 15 篇也值得关注论文，主要覆盖 基准与评测、基准与评测、检索与 RAG。</description><pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate><language>zh</language><content>
-# AI 研究简报：基准与评测、检索与 RAG、Agent 与工具调用
-
-**日期**: 2026-06-01
-
-## 今日概览
-
-本期从 273 篇候选论文中筛出 5 篇重点论文和 15 篇也值得关注论文，主要覆盖 基准与评测、基准与评测、检索与 RAG。
-
-## 今日趋势观察
-
-今天的高分论文集中在 基准与评测、基准与评测、检索与 RAG。这些信号更适合作为选题和工程跟进线索，而不是对论文结论的最终背书。
-
-## 重点论文
-
-### 1. Cosmos 3: Omnimodal World Models for Physical AI
-
-- 原始论文标题: Cosmos 3: Omnimodal World Models for Physical AI
-- 作者/机构: Aditi, Niket Agarwal, Arslan Ali, Jon Allen, Martin Antolini, Adeline Aubame, Alisson Azzolini, Junjie Bai, Maciej Bala, Yogesh Balaji, Josh Bapst, Aarti Basant, Mukesh Beladiya, Mohammad Qazim Bhat, Zaid Pervaiz Bhat, Dan Blick, Vanni Brighella, Han Cai, Tiffany Cai, Eric Cameracci, Jiaxin Cao, Yulong Cao, Mark Carlson, Carlos Casanova, Ting-Yun Chang, Yan Chang, Yu-Wei Chao, Prithvijit Chattopadhyay, Roshan Chaudhari, Chieh-Yun Chen, Junyu Chen, Ke Chen, Qizhi Chen, Wenkai Chen, Xiaotong Chen, Yu Chen, An-Chieh Cheng, Click Cheng, Xiu Chia, Jeana Choi, Chaeyeon Chung, Wenyan Cong, Yin Cui, Magdalena Dadela, Nalin Dadhich, Wenliang Dai, Joyjit Daw, Alperen Degirmenci, Rodrigo Vieira Del Monte, Robert Denomme, Sameer Dharur, Marco Di Lucca, Ke Ding, Wenhao Ding, Yifan Ding, Yuzhu Dong, Nicole Drumheller, Yilun Du, Aigul Dzhumamuratova, Aleksandr Efitorov, Hamid Eghbalzadeh, Naomi Eigbe, Imad El Hanafi, Hassan Eslami, Benedikt Falk, Jiaojiao Fan, Jim Fan, Amol Fasale, Sergiy Fefilatyev, Liang Feng, Francesco Ferroni, Sanja Fidler, Xiao Fu, Vikram Fugro, Prashant Gaikwad, TJ Galda, Katelyn Gao, Yihuai Gao, Wenhang Ge, Sreyan Ghosh, Arushi Goel, Vivek Goel, Akash Gokul, Rama Govindaraju, Jinwei Gu, Miguel Guerrero, Elfie Guo, Aryaman Gupta, Siddharth Gururani, Hugo Hadfield, Song Han, Ankur Handa, Zekun Hao, Mohammad Harrim, Ali Hassani, Nathan Hayes-Roth, Yufan He, Chris Helvig, Cyrus Hogg, Madison Huang, Michael Huang, Sophia Huang, Yufan Huang, Jacob Huffman, DeLesley Hutchins, Suneel Indupuru, Boris Ivanovic, Arihant Jain, Joel Jang, Ryan Ji, Yanan Jian, Dongfu Jiang, Jingyi Jin, Atharva Joshi, Nikhilesh Joshi, Pranjali Joshi, Jaehun Jung, Weiwei Kang, Scott Kassekert, Jan Kautz, Ashna Khetan, Julia Kiczka, Slawek Kierat, Gwanghyun Kim, Kuno Kim, Sunny Kim, Kezhi Kong, Xin Kong, Zhifeng Kong, Tomasz Kornuta, Egor Krivov, Hui Kuang, Saurav Kumar, Chia-Wen Kuo, George Kurian, Wojciech Kutak, JF Lafleche, Himangshu Lahkar, Omar Laymoun, Jayjun Lee, Sanggil Lee, Gabriele Leone, Boyi Li, Freya Li, Jiajun Li, Jinfeng Li, Ling Li, Pengcheng Li, Shangru Li, Tingle Li, Xiaolong Li, Xuan Li, Zhaoshuo Li, Zhiqi Li, Hao Liang, Maosheng Liao, Chen-Hsuan Lin, Tsung-Yi Lin, Ming-Yu Liu, Sifei Liu, Zihan Liu, Hai Loc Lu, Xiangyu Lu, Alice Luo, Ruipu Luo, Wenjie Luo, Jiangran Lyu, Martin Ding Ma, Nic Ma, Qianli Ma, Dawid Majchrowski, Louis Marcoux, Miguel Martin, Qing Miao, Ashkan Mirzaei, Shreyas Misra, Kaichun Mo, Durra Mohsin, Hyejin Moon, Pawel Morkisz, Saeid Motiian, Kirill Motkov, Seungjun Nah, Yashraj Narang, Deepak Narayanan, Thabang Ngazimbi, Julian Ouyang, David Page, Yatian Pang, Sehwi Park, Mahesh Patekar, Mostofa Patwary, Marco Pavone, Trung Pham, Wei Ping, Soha Pouya, Shrimai Prabhumoye, Varun Praveen, Delin Qu, Hesam Rabeti, Morteza Ramezanali, Marilyn Reeb, Xuanchi Ren, Kristen Rumley, Wojciech Rymer, Jun Saito, Yeongho Seol, John Shao, Piyush Shekdar, Tianwei Shen, Humphrey Shi, Min Shi, Stella Shi, Kevin Shih, Mohammad Shoeybi, Mateusz Sieniawski, Shuran Song, Alexander Sotelo, Amir Sotoodeh, Sunil Srinivasa, Vignesh Srinivasakumar, Bartosz Stefaniak, Rahul Heinrich Steiger, Shangkun Sun, Jiaxiang Tang, Shitao Tang, Yangyang Tang, Yue Tang, Tolou Tavakkoli, Kayley Ting, Krzysztof Tomala, Wei-Cheng Tseng, Jibin Varghese, Sergei Vasilev, Thomas Volk, Raju Wagwani, Roger Waleffe, Andrew Z. Wang, Boxiang Wang, Haoxiang Wang, Qiao Wang, Shihao Wang, Shijie Wang, Ting-Chun Wang, Yan Wang, Yu Wang, David Wehr, Fangyin Wei, Xinshuo Weng, Jay Zhangjie Wu, Kedi Wu, Hongchi Xia, Summer Xiao, Tianjun Xiao, Kevin Xie, Daguang Xu, Jiashu Xu, Mengyao Xu, Ruqing Xu, Xingqian Xu, Yao Xu, Dinghao Yang, Dong Yang, Hans Yang, Xiaodong Yang, Xuning Yang, Yichu Yang, Yurong You, Zhiding Yu, Hao Yuan, Simon Yuen, Xiaohui Zeng, Pengcuo Zeren, Cindy Zha, Haotian Zhang, Jenny Zhang, Jing Zhang, Liangkai Zhang, Paris Zhang, Shun Zhang, Xuanmeng Zhang, Zhizheng Zhang, Ann Zhao, Yilin Zhao, Yuliya Zhautouskaya, Charles Zhou, Fengzhe Zhou, Shilin Zhu, Yuke Zhu, Dima Zhylko, Artur Zolkowski
-- 主题: 基准与评测
-- arXiv: [2606.02800](https://arxiv.org/abs/2606.02800)
-- PDF: [PDF](https://arxiv.org/pdf/2606.02800)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：We introduce Cosmos 3, a family of omnimodal world models designed to jointly process and generate language, image, video, audio, and action sequences within a unified mixture-of-transformers architecture
-- 它解决了什么问题: 论文试图处理的问题是：We introduce Cosmos 3, a family of omnimodal world models designed to jointly process and generate language, image, video, audio, and action sequences within a unified mixture-of-transformers architecture
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 2. Thinking Past the Answer: Evaluating Harmful Overthinking in Large Reasoning Models
-
-- 原始论文标题: Thinking Past the Answer: Evaluating Harmful Overthinking in Large Reasoning Models
-- 作者/机构: Simone Caldarella, Davide Talon, Rahaf Aljundi, Elisa Ricci, Massimiliano Mancini
-- 主题: 基准与评测
-- arXiv: [2606.02835](https://arxiv.org/abs/2606.02835)
-- PDF: [PDF](https://arxiv.org/pdf/2606.02835)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Large Reasoning Models (LRMs) improve performance by generating explicit intermediate reasoning traces through increased test-time compute, yet the assumption that longer reasoning is consistently beneficial remains under-examined
-- 它解决了什么问题: 论文试图处理的问题是：Large Reasoning Models (LRMs) improve performance by generating explicit intermediate reasoning traces through increased test-time compute, yet the assumption that longer reasoning is consistently beneficial remains under-examined
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 3. Breaking the Information Silo: Semantic Personas for Cross-Domain Recommendation
-
-- 原始论文标题: Breaking the Information Silo: Semantic Personas for Cross-Domain Recommendation
-- 作者/机构: Jonathan Mayo, Moshe Unger, Konstantin Bauman
-- 主题: 检索与 RAG
-- arXiv: [2606.01783](https://arxiv.org/abs/2606.01783)
-- PDF: [PDF](https://arxiv.org/pdf/2606.01783)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Digital platforms increasingly operate as isolated information silos, limiting their ability to construct comprehensive user representations across domains
-- 它解决了什么问题: 论文试图处理的问题是：Digital platforms increasingly operate as isolated information silos, limiting their ability to construct comprehensive user representations across domains
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈现。
-  - 评分只是筛选信号，不是论文质量定论。
-
-### 4. KForge: LLM-Driven Cross-Platform Kernel Generation for AI Accelerators
-
-- 原始论文标题: KForge: LLM-Driven Cross-Platform Kernel Generation for AI Accelerators
-- 作者/机构: Taras Sereda, Burak Bartan, Ankita Nayak, Tom St. John, Natalie Serrino, Zain Asgar
-- 主题: Agent 与工具调用
-- arXiv: [2606.02963](https://arxiv.org/abs/2606.02963)
-- PDF: [PDF](https://arxiv.org/pdf/2606.02963)
-- 为什么重要: 它围绕可验证的 AI 研究问题展开，摘要中的核心线索是：Production inference increasingly targets a heterogeneous mix of accelerators
-- 它解决了什么问题: 论文试图处理的问题是：Production inference increasingly targets a heterogeneous mix of accelerators
-- 方法简述: 方法描述来自标题、摘要和公开元数据；在阅读全文前不扩展为未经验证的结论。
-- 从业者启发: 从业者可以重点核查其评测设置、数据假设和是否有可复现实验资产。
-- 局限与风险: 当前判断基于 arXiv 预印本元数据，不代表结论已经被同行评审确认。
-- 三条要点:
-  - 保留原始 arXiv 链接作为事实来源。
-  - 代码链接只在输入已验证时呈</content></item></channel></rss>
+- 外部 API 限流或不可用时，相关信号会降级为空并在内部记录中保留说明。
+</content></item></channel></rss>

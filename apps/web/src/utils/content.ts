@@ -11,6 +11,8 @@ export type Doc = {
   lang: string;
   slug: string;
   url: string;
+  filePath: string;
+  mtimeMs: number;
 };
 
 export function loadSite() {
@@ -44,30 +46,40 @@ export function loadTopics() {
   return rows;
 }
 
-export function loadDocs(lang?: string): Doc[] {
+export function loadDocs(lang?: string, options: { includeInternal?: boolean } = {}): Doc[] {
   const langs = lang ? [lang] : safeReadDir(contentRoot);
   const docs: Doc[] = [];
   for (const itemLang of langs) {
     const dir = path.join(contentRoot, itemLang, 'daily');
     for (const file of safeReadDir(dir)) {
       if (!file.endsWith('.md')) continue;
-      const raw = fs.readFileSync(path.join(dir, file), 'utf-8');
+      const filePath = path.join(dir, file);
+      const raw = fs.readFileSync(filePath, 'utf-8');
       const { meta, body } = parseFrontmatter(raw);
       const slug = meta.slug || file.replace(/\.md$/, '');
+      const isInternal = meta.page_type === 'sources' || slug.endsWith('-sources');
+      if (isInternal && !options.includeInternal) continue;
+      const stat = fs.statSync(filePath);
       docs.push({
         meta,
         body,
         lang: itemLang,
         slug,
         url: `/${itemLang}/daily/${slug}/`,
+        filePath,
+        mtimeMs: stat.mtimeMs,
       });
     }
   }
-  return docs.sort((a, b) => String(b.meta.date).localeCompare(String(a.meta.date)) || b.slug.localeCompare(a.slug));
+  return docs.sort(compareDocs);
 }
 
 export function loadBriefs(lang: string) {
-  return loadDocs(lang).filter((doc) => doc.meta.page_type === 'brief');
+  return dedupeBriefsByDate(
+    loadDocs(lang)
+      .filter((doc) => doc.meta.page_type === 'brief')
+      .filter((doc) => String(doc.meta.date || '') <= beijingToday())
+  );
 }
 
 export function loadDoc(lang: string, slug: string) {
@@ -85,7 +97,10 @@ export function topicCounts(lang: string) {
 }
 
 export function displayBriefTitle(title: string | undefined | null) {
-  return String(title || '').replace(/^今日重点[:：]\s*/, '').trim();
+  return String(title || '')
+    .replace(/^今日重点[:：]\s*/, '')
+    .replace(/^Today's focus:\s*/i, '')
+    .trim();
 }
 
 export function beijingToday() {
@@ -112,6 +127,11 @@ export function markdownToHtml(markdown: string) {
     const line = normalizeDisplayLine(rawLine);
     if (!line.trim()) {
       closeList();
+      continue;
+    }
+    if (line.startsWith('<p class="paper-meta-line">')) {
+      closeList();
+      out.push(line);
       continue;
     }
     if (line.startsWith('|')) {
@@ -174,13 +194,20 @@ function safeReadDir(dir: string) {
 }
 
 function normalizeDisplayLine(line: string) {
-  return line.replace(/^(#{1,6}\s*)今日重点[:：]\s*/, '$1').replace(/^今日重点[:：]\s*/, '');
+  return line
+    .replace(/^(#{1,6}\s*)今日重点[:：]\s*/, '$1')
+    .replace(/^(#{1,6}\s*)Today's focus:\s*/i, '$1')
+    .replace(/^今日重点[:：]\s*/, '')
+    .replace(/^Today's focus:\s*/i, '');
 }
 
 function inline(text: string) {
   return escapeHtml(text)
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
+    .replace(/\[(.*?)\]\((.*?)\)/g, (_match, label, href) => {
+      const className = isPaperLink(label, href) ? ' class="paper-meta-link"' : '';
+      return `<a${className} href="${href}">${label}</a>`;
+    });
 }
 
 function escapeHtml(text: string) {
@@ -188,4 +215,33 @@ function escapeHtml(text: string) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+}
+
+export function dedupeBriefsByDate(docs: Doc[]) {
+  const byDate = new Map<string, Doc>();
+  for (const doc of docs.sort(compareDocs)) {
+    const date = String(doc.meta.date || '');
+    if (!date) continue;
+    const existing = byDate.get(date);
+    if (!existing || compareDocs(doc, existing) < 0) {
+      byDate.set(date, doc);
+    }
+  }
+  return Array.from(byDate.values()).sort(compareDocs);
+}
+
+function compareDocs(a: Doc, b: Doc) {
+  const dateCompare = String(b.meta.date || '').localeCompare(String(a.meta.date || ''));
+  if (dateCompare) return dateCompare;
+  const generatedCompare = String(b.meta.generated_at || '').localeCompare(String(a.meta.generated_at || ''));
+  if (generatedCompare) return generatedCompare;
+  const countCompare = Number(b.meta.candidate_count || 0) - Number(a.meta.candidate_count || 0);
+  if (countCompare) return countCompare;
+  const mtimeCompare = b.mtimeMs - a.mtimeMs;
+  if (mtimeCompare) return mtimeCompare;
+  return b.slug.localeCompare(a.slug);
+}
+
+function isPaperLink(label: string, href: string) {
+  return label === 'PDF' || /arxiv\.org\/(abs|pdf)\//.test(href) || /^\d{4}\.\d{4,5}$/.test(label);
 }

@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { loadBriefs } from '../../utils/content';
+import { displayBriefTitle, loadBriefs } from '../../utils/content';
 const briefs = loadBriefs('en');
 ---
 <BaseLayout lang="en" title="Archive">
@@ -8,8 +8,8 @@ const briefs = loadBriefs('en');
   <section class="article-list">
     {briefs.map((doc) => (
       <article class="article-card">
-        <h2><a href={doc.url}>{doc.meta.title}</a></h2>
-        <div class="article-meta"><span>{doc.meta.date}</span><span>{doc.meta.candidate_count} candidates</span><a href={doc.meta.sources_page}>source log</a></div>
+        <h2><a href={doc.url}>{displayBriefTitle(doc.meta.title)}</a></h2>
+        <div class="article-meta"><span>{doc.meta.date}</span></div>
       </article>
     ))}
   </section>

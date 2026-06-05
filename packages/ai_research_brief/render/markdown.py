@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import date
 from functools import lru_cache
+from html import escape as html_escape
 
 from ..config import REPO_ROOT, load_yaml
 from ..llm import get_provider
@@ -63,12 +65,7 @@ def build_daily_brief(
     labels = _labels(lang)
     focus_names = [_focus_phrase(row, lang) for row in featured[:3]]
     topic_text = "、".join(focus_names) if lang == "zh" else ", ".join(focus_names)
-    overview = labels["overview"].format(
-        candidates=len(candidates),
-        featured=len(featured),
-        mentions=len(mentions),
-        topics=topic_text,
-    )
+    overview = labels["overview"].format(topics=topic_text)
     trend = labels["trend"].format(topics=topic_text)
     title = _brief_title(lang, featured)
     keywords = sorted({keyword for row in featured + mentions for keyword in (row.matched_keywords or [row.topic_slug])})[:14]
@@ -119,10 +116,6 @@ def _brief_markdown(
         "",
         f"# {brief.title}",
         "",
-        f"## {labels['overview_heading']}",
-        "",
-        brief.overview,
-        "",
         f"## {labels['trend_heading']}",
         "",
         brief.trend_observation,
@@ -134,18 +127,7 @@ def _brief_markdown(
     lines.extend(["", f"## {labels['mentions_heading']}"])
     for paper in brief.honorable_mentions:
         lines.extend(_mention_lines(paper, lang))
-    lines.extend([
-        "",
-        f"## {labels['keywords_heading']}",
-        "",
-        ", ".join(brief.keywords) if brief.keywords else labels["no_keywords"],
-        "",
-        f"## {labels['sources_heading']}",
-        "",
-        labels["sources_sentence"].format(url=f"/{lang}/daily/{brief.slug}-sources/"),
-        "",
-        f"## {labels['disclaimer_heading']}",
-    ])
+    lines.extend(["", f"## {labels['disclaimer_heading']}"])
     for item in load_yaml("editorial_rules.yaml").get("known_limits", {}).get(lang, []):
         lines.append(f"- {item}")
     return "\n".join(lines)
@@ -175,8 +157,8 @@ def _sources_markdown(
             "lang": lang,
             "slug": f"{slug}-sources",
             "summary": labels["sources_summary"].format(count=len(candidates)),
-            "tags": ["sources", "scoring"],
-            "topics": ["sources"],
+            "tags": ["internal"],
+            "topics": ["internal"],
             "brief_page": f"/{lang}/daily/{slug}/",
             "generated_at": generated_at,
             "page_type": "sources",
@@ -187,30 +169,12 @@ def _sources_markdown(
         "",
         f"# {labels['sources_title']}",
         "",
-        labels["sources_intro"].format(
-            count=len(candidates),
-            featured=len(featured),
-            mentions=len(mentions),
-            generated_at=generated_at,
-            fetched_at=fetched_at,
-        ),
+        labels["sources_intro"].format(generated_at=generated_at, fetched_at=fetched_at),
         "",
-        f"## {labels['scoring_rules_heading']}",
+        f"## {labels['selected_heading']}",
         "",
-        labels["scoring_rules"],
-        "",
-        f"## {labels['featured_table_heading']}",
-        "",
-        _summary_table(featured, lang),
-        "",
-        f"## {labels['mentions_table_heading']}",
-        "",
-        _summary_table(mentions, lang),
-        "",
-        f"## {labels['all_candidates_heading']}",
+        _summary_table(featured + mentions, lang),
     ]
-    for row in candidates:
-        lines.extend(_source_block(row, lang))
     return "\n".join(lines)
 
 
@@ -233,16 +197,16 @@ def _brief_paper(row: ScoredPaper, lang: str) -> BriefPaper:
     focus = _focus_phrase(row, lang)
     llm_payload = _llm_payload(row, lang)
     if lang == "zh":
-        why = f"重点是：{focus}。摘要中的直接线索是：{abstract_sentence}"
-        problem = f"它要解决的问题是：{focus}在真实研究或工程场景中仍不稳定、不透明或成本较高。"
-        method = "方法线索来自标题、摘要和公开元数据；重点看论文如何设计数据、评测、训练或系统流程。"
-        takeaway = "从业者可先核查是否有代码/数据、评测是否贴近真实场景，以及方案是否能迁移到自己的模型或业务链路。"
+        why = f"{focus}。{_verification_sentence(row, lang, abstract_sentence)}"
+        problem = f"{focus}在真实研究或工程场景中仍不稳定、不透明或成本较高。"
+        method = "重点看论文如何设计数据、评测、训练或系统流程。"
+        takeaway = "优先核查任务设置是否真实，是否有代码或数据，评测是否覆盖复杂场景，结论能否迁移到实际系统。"
         limitations = "这是 arXiv 预印本简报，只能作为跟进线索；结论、实验细节和可复现性仍需阅读全文确认。"
     else:
-        why = f"Core idea: {focus}. The abstract signal is: {abstract_sentence}"
-        problem = f"The paper targets a concrete bottleneck: {focus} is still unreliable, opaque, costly, or hard to evaluate in real research and engineering workflows."
-        method = "The method note is constrained to the title, abstract, and metadata; inspect how the paper sets up data, evaluation, training, or systems design before trusting the claim."
-        takeaway = "First check whether code or data exist, whether the evaluation matches real use, and whether the idea can transfer into your model, RAG, agent, or deployment stack."
+        why = f"{focus}. {_verification_sentence(row, lang, abstract_sentence)}"
+        problem = f"{focus} remains unreliable, opaque, costly, or hard to evaluate in real research and engineering workflows."
+        method = "Inspect how the paper sets up data, evaluation, training, or systems design before trusting the claim."
+        takeaway = "Verify whether the task setup is realistic, whether code or data are available, whether the evaluation covers complex scenarios, and whether the result can transfer into real systems."
         limitations = "This is an arXiv preprint triage note. Treat it as a follow-up lead, not as peer-reviewed validation or production evidence."
     if llm_payload:
         why = llm_payload.get("why_it_matters") or why
@@ -302,37 +266,89 @@ def _provider():
 
 def _paper_section(index: int, paper: BriefPaper, lang: str, featured: bool = True) -> list[str]:
     labels = _labels(lang)
+    authors = ", ".join(paper.authors[:6]) if paper.authors else labels["unknown"]
+    if len(paper.authors) > 6:
+        authors += ", et al."
+    explanation = _compact_explanation(paper, lang)
+    meta_text = html_escape(f"{paper.original_title} ({authors})")
+    abs_url = html_escape(paper.abs_url, quote=True)
+    pdf_url = html_escape(paper.pdf_url, quote=True)
     lines = [
         "",
         f"### {index}. {paper.short_title}",
         "",
-        f"- {labels['original_title']}: {paper.original_title}",
-        f"- {labels['authors']}: {', '.join(paper.authors) if paper.authors else labels['unknown']}",
-        f"- {labels['topic']}: {paper.topic}",
-        f"- arXiv: [{paper.arxiv_id}]({paper.abs_url})",
-        f"- PDF: [PDF]({paper.pdf_url})",
+        f"<p class=\"paper-meta-line\"><span>{meta_text}</span> <a class=\"paper-meta-link\" href=\"{abs_url}\">{html_escape(paper.arxiv_id)}</a> <a class=\"paper-meta-link\" href=\"{pdf_url}\">PDF</a></p>",
+        "",
+        explanation,
     ]
     if paper.code_url:
-        lines.append(f"- {labels['code']}: [{paper.code_url}]({paper.code_url})")
-    lines.extend([
-        f"- {labels['why']}: {paper.why_it_matters}",
-        f"- {labels['problem']}: {paper.problem}",
-        f"- {labels['method']}: {paper.method}",
-        f"- {labels['takeaway']}: {paper.practitioner_takeaway}",
-        f"- {labels['limits']}: {paper.limitations}",
-        f"- {labels['bullets']}:",
-    ])
-    for bullet in paper.bullets[:3]:
-        lines.append(f"  - {bullet}")
+        code_url = html_escape(paper.code_url, quote=True)
+        lines.append(f"<p class=\"paper-meta-line\"><a class=\"paper-meta-link\" href=\"{code_url}\">{labels['code']}</a></p>")
     return lines
 
 
 def _mention_lines(paper: BriefPaper, lang: str) -> list[str]:
-    labels = _labels(lang)
-    title = paper.short_title
     if lang == "zh":
-        return [f"- [{title}]({paper.abs_url}) - {paper.topic}，score {paper.score}。{labels['mention_reason']} {paper.why_it_matters}"]
-    return [f"- [{title}]({paper.abs_url}) - {paper.topic}, score {paper.score}. {labels['mention_reason']} {paper.why_it_matters}"]
+        reason = _mention_reason(paper, lang)
+        return [f"- [{paper.original_title}]({paper.abs_url})：{reason}"]
+    reason = _mention_reason(paper, lang)
+    return [f"- [{paper.original_title}]({paper.abs_url}): {reason}"]
+
+
+def _compact_explanation(paper: BriefPaper, lang: str) -> str:
+    why = _clean_note(paper.why_it_matters, lang)
+    follow = _clean_note(paper.practitioner_takeaway, lang)
+    if lang == "zh":
+        return f"{why} 重点核验：{follow}"
+    return f"{why} Verify whether {follow[0].lower() + follow[1:] if follow else 'the task setup is realistic and the evidence transfers to real workflows'}"
+
+
+def _mention_reason(paper: BriefPaper, lang: str) -> str:
+    title = f"{paper.original_title} {paper.short_title} {paper.topic}".lower()
+    if lang == "zh":
+        if any(word in title for word in ("safety", "alignment", "jailbreak", "guardrail", "red team", "安全", "对齐")):
+            return "关注模型安全、护栏路由、风险分类或治理评测，适合跟进安全评测与治理工具链。"
+        if any(word in title for word in ("rag", "retrieval", "database", "检索")):
+            return "关注检索、知识库问答与证据可靠性，适合跟进 RAG 评测和企业知识系统。"
+        if any(word in title for word in ("agent", "tool", "workflow", "trajectory")):
+            return "关注工具调用、执行反馈和可复用能力，适合跟进 Agent 工作流和工程可靠性。"
+        if any(word in title for word in ("benchmark", "evaluation", "eval", "评测", "基准")):
+            return "关注任务设置、指标和失效案例，适合补充模型评测与回归测试。"
+        if any(word in title for word in ("inference", "serving", "latency", "cache", "quantization", "部署")):
+            return "关注推理成本、延迟、吞吐和部署约束，适合跟进系统优化。"
+        return f"关注{paper.topic}中的新任务、数据或系统线索，适合快速判断是否值得阅读全文。"
+    if any(word in title for word in ("safety", "alignment", "jailbreak", "guardrail", "red team")):
+        return "Tracks model safety, guardrail routing, risk classification, or governance evaluation; useful for safety and policy workflows."
+    if any(word in title for word in ("rag", "retrieval", "database")):
+        return "Tracks retrieval, knowledge-base QA, and evidence reliability; useful for RAG evaluation and enterprise knowledge systems."
+    if any(word in title for word in ("agent", "tool", "workflow", "trajectory")):
+        return "Tracks tool use, execution feedback, and reusable capabilities; useful for agent workflow reliability."
+    if any(word in title for word in ("benchmark", "evaluation", "eval")):
+        return "Tracks task design, metrics, and failure cases; useful for model evaluation and regression testing."
+    if any(word in title for word in ("inference", "serving", "latency", "cache", "quantization", "deployment")):
+        return "Tracks inference cost, latency, throughput, and deployment constraints; useful for systems optimization."
+    return f"Tracks a concrete {paper.topic.lower()} signal; useful for deciding whether the full paper deserves follow-up."
+
+
+def _verification_sentence(row: ScoredPaper, lang: str, abstract_sentence: str) -> str:
+    topic = _topic_label(row, lang)
+    if lang == "zh":
+        return (
+            f"这篇论文值得跟进，因为{topic}仍需要更真实的任务、更可靠的评测和更清楚的可复现资产。"
+        )
+    return (
+        f"The paper is worth tracking because {topic.lower()} still needs realistic tasks, reliable evaluation, and clearer reproducible assets."
+    )
+
+
+def _clean_note(text: str, lang: str) -> str:
+    value = re.sub(r"\s+", " ", text or "").strip()
+    value = re.sub(r"^(重点在于|重点是|Core idea|Why track)\s*[:：]\s*", "", value, flags=re.I)
+    value = re.sub(r"(摘要给出的直接线索是|摘要中的直接线索是|The abstract signal is)\s*[:：]\s*", "", value, flags=re.I)
+    value = re.sub(r"^(It matters because|It targets a verifiable AI research question\.?)\s*", "", value, flags=re.I)
+    if not value:
+        return "优先阅读全文核验任务、数据、评测和代码资产。" if lang == "zh" else "Check the full paper for task design, data, evaluation, and code assets."
+    return value[0].upper() + value[1:] if lang == "en" else value
 
 
 def _summary_table(rows: list[ScoredPaper], lang: str) -> str:
@@ -340,67 +356,23 @@ def _summary_table(rows: list[ScoredPaper], lang: str) -> str:
     if not rows:
         return labels["empty_table"]
     lines = [
-        f"| {labels['rank']} | {labels['paper']} | {labels['topic']} | Score | arXiv |",
-        "|---:|---|---|---:|---|",
+        f"| {labels['rank']} | {labels['paper']} | {labels['topic']} | arXiv |",
+        "|---:|---|---|---|",
     ]
     for row in rows:
         title = _focus_phrase(row, lang)
-        lines.append(f"| {row.rank} | {title} | {_topic_label(row, lang)} | {row.total_score} | [{row.paper.arxiv_id}]({row.paper.abs_url}) |")
+        lines.append(f"| {row.rank} | {title} | {_topic_label(row, lang)} | [{row.paper.arxiv_id}]({row.paper.abs_url}) |")
     return "\n".join(lines)
-
-
-def _source_block(row: ScoredPaper, lang: str) -> list[str]:
-    labels = _labels(lang)
-    signal = row.signal
-    signals = []
-    if signal.hf_daily:
-        signals.append(f"HF Daily ({signal.hf_upvotes} upvotes)")
-    if signal.code_url:
-        signals.append(f"Code: {signal.code_url}")
-    elif signal.has_code:
-        signals.append("Code signal present, URL not verified")
-    if signal.github_stars:
-        signals.append(f"GitHub {signal.github_stars} stars / {signal.github_forks} forks")
-    if signal.citation_count:
-        signals.append(f"Semantic Scholar {signal.citation_count} citations")
-    if signal.top_conference:
-        signals.append(signal.top_conference)
-    if signal.top_institution:
-        signals.append(", ".join(signal.institutions) or "top institution")
-    warnings = "; ".join(signal.warnings) if signal.warnings else "none"
-    display_title = _focus_phrase(row, lang)
-    return [
-        "",
-        f"### #{row.rank} {display_title}",
-        "",
-        f"- Tier: {row.selection_tier}",
-        f"- Score: {row.total_score}",
-        f"- Topic: {_topic_label(row, lang)}",
-        f"- Original title: {row.paper.title}",
-        f"- Authors: {', '.join(row.paper.authors) if row.paper.authors else labels['unknown']}",
-        f"- arXiv: [{row.paper.arxiv_id}]({row.paper.abs_url})",
-        f"- PDF: [PDF]({row.paper.pdf_url})",
-        f"- Code URL: {signal.code_url or 'none verified'}",
-        f"- Score breakdown: {json.dumps(row.score_breakdown, ensure_ascii=False, sort_keys=True)}",
-        f"- Selected reason: {row.selected_reason}",
-        f"- Matched keywords: {', '.join(row.matched_keywords) if row.matched_keywords else 'none'}",
-        f"- Signals: {', '.join(signals) if signals else 'arXiv metadata only'}",
-        f"- Warnings: {warnings}",
-    ]
 
 
 def _brief_title(lang: str, featured: list[ScoredPaper]) -> str:
     if not featured:
         return "今日 AI 论文简报" if lang == "zh" else "Daily AI Research Brief"
-    first = _focus_phrase(featured[0], lang)
-    rest = [_focus_phrase(row, lang) for row in featured[1:3]]
+    phrases = list(dict.fromkeys(_focus_phrase(row, lang) for row in featured[:4]))
+    phrases = phrases[:3]
     if lang == "zh":
-        if rest:
-            return f"今日重点：{first}；另含{'、'.join(rest)}"
-        return f"今日重点：{first}"
-    if rest:
-        return f"Today's focus: {first}; also {', '.join(rest)}"
-    return f"Today's focus: {first}"
+        return "、".join(phrases)
+    return ", ".join(phrase[:1].upper() + phrase[1:] for phrase in phrases)
 
 
 def _focus_phrase(row: ScoredPaper, lang: str) -> str:
@@ -438,75 +410,39 @@ def _topic_label(row: ScoredPaper, lang: str) -> str:
 
 def _labels(lang: str) -> dict[str, str]:
     zh = {
-        "overview_heading": "一眼看懂本期",
         "trend_heading": "今天最值得跟进的方向",
         "featured_heading": "重点论文：题目、看点与核验线索",
         "mentions_heading": "其他值得关注",
-        "keywords_heading": "今日关键词",
-        "sources_heading": "来源页链接",
         "disclaimer_heading": "阅读边界",
-        "overview": "本期从 {candidates} 篇候选论文中筛出 {featured} 篇重点论文和 {mentions} 篇补充关注论文。重点不是泛泛列主题，而是围绕：{topics}。",
+        "overview": "今天主要跟进：{topics}。",
         "trend": "今天的高分论文主要指向：{topics}。建议先看每篇的原文链接、摘要、评测设置和代码/数据是否可用，再决定是否深入复现。",
-        "sources_sentence": "完整候选池、评分规则摘要和每篇 score breakdown 见 [来源透明页]({url})。",
-        "original_title": "原始论文标题",
-        "authors": "作者/机构",
-        "topic": "归类",
-        "code": "代码链接",
-        "why": "一句话看点",
-        "problem": "它想解决什么",
-        "method": "大致怎么做",
-        "takeaway": "可以怎样跟进",
-        "limits": "注意事项",
-        "bullets": "快速判断",
-        "mention_reason": "关注理由：",
-        "sources_title": "论文来源与评分",
-        "sources_summary": "候选池 {count} 篇论文的来源与评分记录",
-        "sources_intro": "本页公开 {count} 篇候选论文的来源与评分。抓取时间：{fetched_at}。生成时间：{generated_at}。其中重点论文 {featured} 篇，也值得关注 {mentions} 篇。",
-        "scoring_rules_heading": "评分规则摘要",
-        "scoring_rules": "评分综合机构背景、HF Daily Papers、HF upvotes、顶会信息、代码、从业者关键词、Semantic Scholar 引用、GitHub 热度、arXiv 分类权重、新颖性/重复惩罚、最近主题重复惩罚，以及安全/伦理/治理关键词。外部 API 不可用时对应信号留空。",
-        "featured_table_heading": "重点论文表格",
-        "mentions_table_heading": "也值得关注论文表格",
-        "all_candidates_heading": "完整候选评分",
+        "code": "代码",
+        "sources_title": "内部生成记录",
+        "sources_summary": "内部生成元数据",
+        "sources_intro": "内部生成记录。抓取时间 {fetched_at}，生成时间 {generated_at}；机器可读明细保留在 data/processed 与 data/reports。",
+        "selected_heading": "入选论文",
         "rank": "排名",
         "paper": "看点",
+        "topic": "主题",
         "unknown": "未知",
         "empty_table": "无。",
-        "no_keywords": "无明确关键词。",
     }
     en = {
-        "overview_heading": "Quick read",
         "trend_heading": "What is worth tracking today",
         "featured_heading": "Featured papers: title, takeaway, and verification trail",
         "mentions_heading": "Other papers worth tracking",
-        "keywords_heading": "Keywords",
-        "sources_heading": "Source page",
         "disclaimer_heading": "Reading boundaries",
-        "overview": "This issue filters {featured} featured papers and {mentions} additional picks from {candidates} candidates. Rather than broad topic labels, the focus is: {topics}.",
+        "overview": "Today tracks: {topics}.",
         "trend": "Today’s high-signal papers point to: {topics}. Open the original paper, check the abstract, evaluation setup, and code/data availability before deciding whether to reproduce or adopt the idea.",
-        "sources_sentence": "See the [source transparency page]({url}) for the full candidate pool, scoring summary, and per-paper score breakdown.",
-        "original_title": "Original paper title",
-        "authors": "Authors / institutions",
-        "topic": "Category",
-        "code": "Code link",
-        "why": "One-line takeaway",
-        "problem": "Problem it targets",
-        "method": "How it appears to work",
-        "takeaway": "How to follow up",
-        "limits": "Cautions",
-        "bullets": "Fast checks",
-        "mention_reason": "Why track:",
-        "sources_title": "Sources and Scoring",
-        "sources_summary": "Source and scoring log for {count} candidate papers",
-        "sources_intro": "This page exposes sources and scores for {count} candidate papers. Fetched at {fetched_at}. Generated at {generated_at}. Featured: {featured}; additional picks: {mentions}.",
-        "scoring_rules_heading": "Scoring rule summary",
-        "scoring_rules": "The score combines institution background, HF Daily Papers, HF upvotes, conference signal, code availability, practitioner keywords, Semantic Scholar citations, GitHub heat, arXiv category weight, novelty/duplicate penalties, recent topic repetition penalties, and safety/ethics/governance keywords. Optional external signals remain empty when APIs are unavailable.",
-        "featured_table_heading": "Featured paper table",
-        "mentions_table_heading": "Additional paper table",
-        "all_candidates_heading": "Full candidate scores",
+        "code": "Code",
+        "sources_title": "Internal Generation Record",
+        "sources_summary": "Internal generation metadata",
+        "sources_intro": "Internal generation record. Fetched at {fetched_at}. Generated at {generated_at}. Machine-readable details stay under data/processed and data/reports.",
+        "selected_heading": "Selected papers",
         "rank": "Rank",
         "paper": "Takeaway",
+        "topic": "Topic",
         "unknown": "Unknown",
         "empty_table": "None.",
-        "no_keywords": "No explicit keywords.",
     }
     return zh if lang == "zh" else en

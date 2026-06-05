@@ -1,16 +1,16 @@
 ---
 title: "Internal Generation Record"
-date: "2026-06-02"
-target_date: "2026-06-02"
+date: "2026-06-05"
+target_date: "2026-06-03"
 actual_date: "2026-06-02"
-fallback_from: ""
+fallback_from: "2026-06-03"
 lang: "en"
-slug: "2026-06-02-koda-contrastive-representation-comparison-and-alignment-for-sources"
+slug: "2026-06-05-koda-contrastive-representation-comparison-and-alignment-for-sources"
 summary: "Internal generation metadata"
 tags: ["internal"]
 topics: ["internal"]
-brief_page: "/en/daily/2026-06-02-koda-contrastive-representation-comparison-and-alignment-for/"
-generated_at: "2026-06-05T16:22:27.336714+00:00"
+brief_page: "/en/daily/2026-06-05-koda-contrastive-representation-comparison-and-alignment-for/"
+generated_at: "2026-06-05T16:22:29.414413+00:00"
 page_type: "sources"
 candidate_count: 264
 featured_count: 5
@@ -19,7 +19,7 @@ mentions_count: 15
 
 # Internal Generation Record
 
-Internal generation record. Fetched at 2026-06-05T08:04:12.359544+00:00. Generated at 2026-06-05T16:22:27.336714+00:00. Machine-readable details stay under data/processed and data/reports.
+Internal generation record. Fetched at 2026-06-05T08:04:12.359544+00:00. Generated at 2026-06-05T16:22:29.414413+00:00. Machine-readable details stay under data/processed and data/reports.
 
 ## Selected papers
 

@@ -1,54 +1,56 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { loadBriefs, loadSite } from '../utils/content';
+import { displayBriefTitle, loadBriefs, loadSite } from '../utils/content';
 
 const lang = 'zh';
 const site = loadSite()[lang];
 const briefs = loadBriefs(lang);
 const latest = briefs[0];
-const previous = briefs.slice(1);
+const recent = briefs.slice(0, 7);
 ---
 <BaseLayout lang={lang} title={site.name} description={site.tagline}>
-  <section class="hero home-hero">
-    <div>
-      <h1>{site.name}</h1>
-      <p>{site.tagline}</p>
+  <section class="home-hero compact-home">
+    <div class="hero-copy">
+      <h1>每天从 AI 论文里，筛出值得跟进的研究线索。</h1>
+      <p class="hero-subtitle">覆盖 Agent、推理、训练优化、RAG、多模态、代码智能、生成、安全、语音、机器人、评测、数据工程和系统部署。</p>
       <div class="action-row">
-        <a class="button" href="/zh/">中文首页</a>
+        <a class="button" href={latest?.url || '/zh/archive/'}>阅读最新简报</a>
         <a class="button secondary" href="/en/">English</a>
-        <a class="button secondary" href="/zh/archive/">全部往期</a>
+        <a class="button secondary" href="/zh/search/">搜索论文</a>
       </div>
     </div>
   </section>
 
   {latest ? (
-    <section class="latest-issue">
-      <p class="section-kicker">最近一次精选</p>
-      <h2><a href={latest.url}>{latest.meta.title}</a></h2>
-      <div class="article-meta">
-        <span>{latest.meta.date}</span>
-        <span>候选 {latest.meta.candidate_count} 篇</span>
-        <span>重点 {latest.meta.featured_count} 篇</span>
-        <a href={latest.meta.sources_page}>来源与评分</a>
+    <section class="latest-panel">
+      <div class="latest-main">
+        <p class="section-kicker">最新一期 · {latest.meta.date}</p>
+        <h2><a href={latest.url}>{displayBriefTitle(latest.meta.title)}</a></h2>
       </div>
-      <p>{latest.meta.summary}</p>
     </section>
   ) : (
     <p class="muted">还没有生成简报。运行 <code>ai-brief mock-run</code> 后会显示最近一期。</p>
   )}
+
+  <section class="quick-nav">
+    <a href="/zh/archive/">全部往期</a>
+    <a href="/zh/topics/">专题索引</a>
+    <a href="/zh/feed.xml">RSS 订阅</a>
+    <a href="/zh/privacy/">隐私说明</a>
+  </section>
 
   <section class="archive-links">
     <div class="section-head">
       <h2>往期简报</h2>
       <a href="/zh/archive/">查看全部</a>
     </div>
-    {previous.length === 0 ? (
+    {recent.length === 0 ? (
       <p class="muted">暂无更早简报。</p>
     ) : (
       <ul>
-        {previous.map((doc) => (
+        {recent.map((doc, index) => (
           <li>
-            <a href={doc.url}>{doc.meta.title}</a>
+            <a href={doc.url}>{displayBriefTitle(doc.meta.title)}</a>
             <span>{doc.meta.date}</span>
           </li>
         ))}

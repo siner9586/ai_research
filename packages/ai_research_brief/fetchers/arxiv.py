@@ -21,24 +21,50 @@ def fetch_arxiv_category(category: str, max_results: int = 50, day: date | None 
         return fetch_arxiv_rss_category(category, max_results)
 
 
-@retry(stop=stop_after_attempt(4), wait=wait_exponential(multiplier=4, min=4, max=30))
+@retry(stop=stop_after_attempt(4), wait=wait_exponential(multiplier=5, min=5, max=45))
 def _fetch_arxiv_api(category: str, max_results: int = 50, day: date | None = None) -> list[Paper]:
     query_text = f"cat:{category}"
     if day:
         stamp = day.strftime("%Y%m%d")
         query_text += f" AND submittedDate:[{stamp}0000 TO {stamp}2359]"
+    return _fetch_arxiv_query(query_text, max_results=max_results)
+
+
+@retry(stop=stop_after_attempt(4), wait=wait_exponential(multiplier=5, min=5, max=45))
+def _fetch_arxiv_combined_api(categories: list[str], max_results: int = 1000, day: date | None = None) -> list[Paper]:
+    category_query = " OR ".join(f"cat:{category}" for category in categories)
+    query_text = f"({category_query})"
+    if day:
+        stamp = day.strftime("%Y%m%d")
+        query_text += f" AND submittedDate:[{stamp}0000 TO {stamp}2359]"
+    return _fetch_arxiv_query(query_text, max_results=max_results)
+
+
+def _fetch_arxiv_query(query_text: str, max_results: int = 50) -> list[Paper]:
     query = quote(query_text)
-    url = f'https://export.arxiv.org/api/query?search_query={query}&sortBy=submittedDate&sortOrder=descending&start=0&max_results={max_results}'
-    r = httpx.get(url, timeout=30, follow_redirects=True, headers={'User-Agent': DEFAULT_USER_AGENT})
+    url = f"https://export.arxiv.org/api/query?search_query={query}&sortBy=submittedDate&sortOrder=descending&start=0&max_results={max_results}"
+    r = httpx.get(url, timeout=45, follow_redirects=True, headers={"User-Agent": DEFAULT_USER_AGENT})
     r.raise_for_status()
     feed = feedparser.parse(r.text)
     papers = []
     for e in feed.entries:
-        arxiv_id = normalize_arxiv_id(e.id.split('/abs/')[-1])
-        cats = [t['term'] for t in getattr(e, 'tags', [])]
+        arxiv_id = normalize_arxiv_id(e.id.split("/abs/")[-1])
+        cats = [t["term"] for t in getattr(e, "tags", [])]
         published = datetime(*e.published_parsed[:6], tzinfo=timezone.utc)
         updated = datetime(*e.updated_parsed[:6], tzinfo=timezone.utc)
-        papers.append(Paper(id=arxiv_id, arxiv_id=arxiv_id, title=e.title.replace('\n',' ').strip(), abstract=e.summary.replace('\n',' ').strip(), authors=[a.name for a in getattr(e,'authors',[])], primary_category=cats[0] if cats else category, categories=cats or [category], published_at=published, updated_at=updated, abs_url=f"https://arxiv.org/abs/{arxiv_id}", pdf_url=f"https://arxiv.org/pdf/{arxiv_id}"))
+        papers.append(Paper(
+            id=arxiv_id,
+            arxiv_id=arxiv_id,
+            title=e.title.replace("\n", " ").strip(),
+            abstract=e.summary.replace("\n", " ").strip(),
+            authors=[a.name for a in getattr(e, "authors", [])],
+            primary_category=cats[0] if cats else "cs.AI",
+            categories=cats or ["cs.AI"],
+            published_at=published,
+            updated_at=updated,
+            abs_url=f"https://arxiv.org/abs/{arxiv_id}",
+            pdf_url=f"https://arxiv.org/pdf/{arxiv_id}",
+        ))
     return papers
 
 
@@ -76,14 +102,38 @@ def fetch_arxiv_rss_category(category: str, max_results: int = 50) -> list[Paper
 
 def fetch_arxiv_categories_with_stats(
     categories: list[str],
-    max_results_per_category: int = 80,
+    max_results_per_category: int = 250,
     day: date | None = None,
-    request_delay_seconds: float = 3.5,
+    request_delay_seconds: float = 6.0,
+    max_total_results: int | None = None,
 ) -> tuple[list[Paper], dict]:
     papers: list[Paper] = []
     errors: dict[str, str] = {}
-    category_counts: dict[str, int] = {}
+    category_counts: dict[str, int] = {category: 0 for category in categories}
     target = str(day) if day else "latest"
+
+    combined_error = ""
+    if categories and day is not None:
+        try:
+            combined_limit = max_total_results or max(max_results_per_category * len(categories), 1000)
+            papers = _fetch_arxiv_combined_api(categories, max_results=combined_limit, day=day)
+            category_counts = _count_by_category(papers, categories)
+            stats = {
+                "target": target,
+                "categories": categories,
+                "category_counts": category_counts,
+                "errors": {},
+                "failed_categories": [],
+                "successful_categories": [category for category in categories if category_counts.get(category, 0) > 0],
+                "total_papers": len(papers),
+                "all_categories_failed": False,
+                "fetch_mode": "combined_query",
+            }
+            return papers, stats
+        except Exception as exc:
+            combined_error = _format_fetch_error(exc)
+            logger.warning("Combined arXiv fetch failed for %s on %s: %s", categories, target, combined_error)
+
     for index, category in enumerate(categories):
         failed = False
         try:
@@ -101,7 +151,10 @@ def fetch_arxiv_categories_with_stats(
         papers.extend(rows)
         if index < len(categories) - 1 and request_delay_seconds > 0:
             time_module.sleep(request_delay_seconds)
+
     error_messages = [f"{category}: {message}" for category, message in errors.items()]
+    if combined_error:
+        errors["combined_query"] = combined_error
     if errors:
         logger.warning("Partial arXiv category failures: %s", "; ".join(error_messages))
     stats = {
@@ -112,12 +165,13 @@ def fetch_arxiv_categories_with_stats(
         "failed_categories": sorted(errors),
         "successful_categories": [category for category in categories if category not in errors],
         "total_papers": len(papers),
-        "all_categories_failed": bool(categories) and len(errors) == len(categories),
+        "all_categories_failed": bool(categories) and all(category in errors for category in categories),
+        "fetch_mode": "per_category",
     }
     return papers, stats
 
 
-def fetch_arxiv_categories(categories: list[str], max_results_per_category: int = 80, day: date | None = None) -> list[Paper]:
+def fetch_arxiv_categories(categories: list[str], max_results_per_category: int = 250, day: date | None = None) -> list[Paper]:
     papers, stats = fetch_arxiv_categories_with_stats(categories, max_results_per_category, day=day)
     if stats["all_categories_failed"]:
         messages = [f"{category}: {message}" for category, message in stats["errors"].items()]
@@ -148,6 +202,16 @@ def mock_papers() -> list[Paper]:
         ('2606.00018', 'Low Rank Adapters as Model Memory Probes', 'A training analysis uses LoRA adapters to estimate memorization capacity and decide when full fine-tuning is needed.', ['Sam Taylor'], 'cs.LG'),
     ]
     return [Paper(id=i, arxiv_id=i, title=t, abstract=a, authors=au, primary_category=c, categories=[c], published_at=now, updated_at=now, abs_url=f'https://arxiv.org/abs/{i}', pdf_url=f'https://arxiv.org/pdf/{i}') for i,t,a,au,c in rows]
+
+
+def _count_by_category(papers: list[Paper], categories: list[str]) -> dict[str, int]:
+    counts = {category: 0 for category in categories}
+    for paper in papers:
+        for category in paper.categories:
+            if category in counts:
+                counts[category] += 1
+                break
+    return counts
 
 
 def _clean_rss_description(text: str) -> str:

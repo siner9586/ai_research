@@ -72,7 +72,7 @@ a:hover { color: var(--accent-2); }
 .nav-links a { text-decoration: none; }
 .nav-links a:hover { text-decoration: underline; }
 
-.nav-wechat { position: relative; display: inline-flex; align-items: center; }
+.nav-wechat { position: relative; display: inline-flex; align-items: center; justify-content: center; }
 .nav-wechat-trigger {
   border: 0;
   padding: 0;
@@ -90,22 +90,24 @@ a:hover { color: var(--accent-2); }
 .wechat-popover {
   position: absolute;
   top: calc(100% + 1em);
-  right: -1.2em;
+  left: 50%;
+  right: auto;
   z-index: 100;
-  width: 340px;
-  max-width: calc(100vw - 32px);
+  width: min(340px, calc(100vw - 32px));
   border: 1px solid var(--line);
   border-radius: 16px;
   background: var(--paper);
   box-shadow: 0 24px 70px rgba(32, 33, 36, 0.22);
   padding: 28px 28px 30px;
   text-align: center;
+  transform: translateX(-50%);
 }
 .wechat-popover[hidden] { display: none; }
 .wechat-popover::before,
 .wechat-popover::after {
-  position: absolute; right: 42px; width: 0; height: 0; content: "";
+  position: absolute; left: 50%; right: auto; width: 0; height: 0; content: "";
   border-right: 10px solid transparent; border-left: 10px solid transparent;
+  transform: translateX(-50%);
 }
 .wechat-popover::before { top: -11px; border-bottom: 11px solid var(--line); }
 .wechat-popover::after { top: -10px; border-bottom: 11px solid var(--paper); }

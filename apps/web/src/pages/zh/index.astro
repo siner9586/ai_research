@@ -8,55 +8,91 @@ const briefs = loadBriefs(lang);
 const latest = briefs[0];
 const recent = briefs.slice(0, 7);
 const totalCandidates = briefs.reduce((sum, doc) => sum + Number(doc.meta.candidate_count || 0), 0);
+const avgCandidates = briefs.length ? Math.round(totalCandidates / briefs.length) : 0;
+const latestTopics = latest?.meta.tags?.slice(0, 6) || [];
+const topicNames: Record<string, string> = {
+  agents: 'Agent',
+  reasoning: '推理',
+  training: '训练优化',
+  rag: 'RAG',
+  multimodal: '多模态',
+  code: '代码智能',
+  'vision-generation': '图像生成',
+  'video-generation': '视频生成',
+  safety: '安全对齐',
+  'speech-audio': '语音音频',
+  robotics: '机器人',
+  interpretability: '可解释性',
+  evaluation: '评测',
+  'data-engineering': '数据工程',
+  systems: '系统部署',
+};
 ---
 <BaseLayout lang={lang} title={site.name} description={site.tagline}>
-  <section class="hero">
-    <div>
-      <h1>{site.name}</h1>
-      <p>{site.tagline}</p>
+  <section class="home-hero">
+    <div class="hero-copy">
+      <p class="eyebrow">每日 07:12 更新 · T+2 arXiv 精选</p>
+      <h1>每天从海量 AI 论文里，筛出真正值得跟进的研究线索。</h1>
+      <p class="hero-subtitle">覆盖 Agent、推理、训练优化、RAG、多模态、代码智能、图像与视频生成、安全对齐、语音、机器人、评测和数据工程。候选池扩大后，先看全量来源，再看高分重点。</p>
       <div class="action-row">
-        <a class="button" href="/zh/methodology/">方法论</a>
-        <a class="button secondary" href="/zh/search/">搜索</a>
-        <a class="button secondary" href="/zh/archive/">往期</a>
+        <a class="button" href={latest?.url || '/zh/archive/'}>阅读最新简报</a>
+        <a class="button secondary" href="/zh/search/">搜索论文</a>
+        <a class="button secondary" href="/zh/methodology/">查看方法</a>
       </div>
     </div>
-    <div class="metrics">
-      <div class="metric"><strong>{briefs.length}</strong><span>期简报</span></div>
-      <div class="metric"><strong>{totalCandidates}</strong><span>篇候选</span></div>
-      <div class="metric"><strong>15</strong><span>个专题</span></div>
+    <div class="dashboard-card">
+      <span class="section-kicker">流水线状态</span>
+      <div class="metric-stack">
+        <div><strong>{briefs.length}</strong><span>已发布简报</span></div>
+        <div><strong>{totalCandidates}</strong><span>累计候选论文</span></div>
+        <div><strong>{avgCandidates}</strong><span>平均候选/期</span></div>
+      </div>
+      <p>默认抓取 2 天前 arXiv 数据，按多信号规则排序，并保留来源与评分页。</p>
     </div>
   </section>
+
   {latest && (
-    <section class="latest-issue">
-      <p class="section-kicker">最新一期</p>
-      <h2><a href={latest.url}>{latest.meta.title}</a></h2>
-      <div class="article-meta">
-        <span>{latest.meta.date}</span>
-        <span>候选 {latest.meta.candidate_count} 篇</span>
-        <span>重点 {latest.meta.featured_count} 篇</span>
-        <a href={latest.meta.sources_page}>来源与评分</a>
+    <section class="latest-panel">
+      <div class="latest-main">
+        <p class="section-kicker">最新一期 · {latest.meta.date}</p>
+        <h2><a href={latest.url}>{latest.meta.title}</a></h2>
+        <p>{latest.meta.summary}</p>
+        <div class="article-meta chip-row">
+          <span>候选 {latest.meta.candidate_count} 篇</span>
+          <span>重点 {latest.meta.featured_count} 篇</span>
+          <span>补充关注 {latest.meta.mentions_count} 篇</span>
+          <a href={latest.meta.sources_page}>查看完整候选池与评分</a>
+        </div>
       </div>
-      <p>{latest.meta.summary}</p>
+      <aside class="topic-chips" aria-label="本期主题">
+        {latestTopics.map((topic: string) => <span>{topicNames[topic] || topic}</span>)}
+      </aside>
     </section>
   )}
-  <section class="subscribe-strip">
-    <span>入口</span>
+
+  <section class="quick-nav">
     <a href="/zh/archive/">全部往期</a>
-    <a href="/zh/topics/">专题</a>
-    <a href="/zh/privacy/">隐私</a>
+    <a href="/zh/topics/">专题索引</a>
+    <a href="/zh/feed.xml">RSS 订阅</a>
+    <a href="/zh/privacy/">隐私说明</a>
   </section>
-  <section class="article-list">
+
+  <section class="article-list refined-list">
+    <div class="section-head clean">
+      <h2>最近更新</h2>
+      <a href="/zh/archive/">查看全部</a>
+    </div>
     {briefs.length === 0 && <p>还没有生成内容。运行 <code>ai-brief mock-run</code> 后会出现每日简报。</p>}
     {recent.map((doc) => (
-      <article class="article-card">
+      <article class="article-card elevated-card">
+        <p class="section-kicker">{doc.meta.date} · 候选 {doc.meta.candidate_count} 篇</p>
         <h2><a href={doc.url}>{doc.meta.title}</a></h2>
+        <p>{doc.meta.summary}</p>
         <div class="article-meta">
-          <span>{doc.meta.date}</span>
-          <span>候选 {doc.meta.candidate_count} 篇</span>
           <span>重点 {doc.meta.featured_count} 篇</span>
+          <span>也值得关注 {doc.meta.mentions_count} 篇</span>
           <a href={doc.meta.sources_page}>来源与评分</a>
         </div>
-        <p>{doc.meta.summary}</p>
       </article>
     ))}
   </section>

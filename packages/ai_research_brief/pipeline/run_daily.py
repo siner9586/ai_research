@@ -104,6 +104,7 @@ def generate_stage(
     lang: str | None = None,
     target_date: date | None = None,
     fallback_from: date | None = None,
+    publish_date: date | None = None,
 ) -> tuple[list[str], dict[str, str]]:
     scored = _read_scored(day)
     selected = _read_selected(day)
@@ -121,6 +122,7 @@ def generate_stage(
             scored,
             target_date=target_date or day,
             fallback_from=fallback_from,
+            publish_date=publish_date or day,
         )
         files.extend(rendered)
         slugs[item_lang] = slug
@@ -136,10 +138,16 @@ def build_static_stage() -> list[str]:
     ]
 
 
-def qa_stage(day: date, allow_warnings: bool = False, target_date: date | None = None):
-    report = run_qa(day, REPO_ROOT / "data" / "content", REPO_ROOT / "data" / "reports" / "qa", target_date=target_date)
+def qa_stage(day: date, allow_warnings: bool = False, target_date: date | None = None, publish_date: date | None = None):
+    report = run_qa(
+        day,
+        REPO_ROOT / "data" / "content",
+        REPO_ROOT / "data" / "reports" / "qa",
+        target_date=target_date,
+        publish_date=publish_date,
+    )
     if report.errors:
-        raise RuntimeError(f"QA failed for {day}: {len(report.errors)} errors, {len(report.warnings)} warnings")
+        raise RuntimeError(f"QA failed for data date {day}: {len(report.errors)} errors, {len(report.warnings)} warnings")
     return report
 
 
@@ -152,7 +160,8 @@ def run_daily(
 ):
     pipeline = site_config().get("pipeline", {})
     fallback_days = int(pipeline.get("fallback_days", 0) if fallback_days is None else fallback_days)
-    run_report = _base_run_report(day, mock=mock, fallback_days=fallback_days, trigger=trigger)
+    publish_date = _publication_date(day)
+    run_report = _base_run_report(day, publish_date=publish_date, mock=mock, fallback_days=fallback_days, trigger=trigger)
     try:
         actual_day, papers, fetch_stats, attempts = _resolve_fetch_day(day, mock=mock, fallback_days=fallback_days)
         fallback_from = day if actual_day != day else None
@@ -172,9 +181,9 @@ def run_daily(
 
         enrich_stage(actual_day, mock=mock)
         scored, featured, mentions = score_stage(actual_day)
-        generated, slugs = generate_stage(actual_day, target_date=day, fallback_from=fallback_from)
+        generated, slugs = generate_stage(actual_day, target_date=day, fallback_from=fallback_from, publish_date=publish_date)
         static_files = build_static_stage()
-        qa_report = qa_stage(actual_day, allow_warnings=allow_qa_warnings, target_date=day)
+        qa_report = qa_stage(actual_day, allow_warnings=allow_qa_warnings, target_date=day, publish_date=publish_date)
 
         run_report.update({
             "status": "success",
@@ -188,7 +197,8 @@ def run_daily(
         _write_run_report(run_report)
         _log_run_summary("complete", run_report)
         return {
-            "date": str(actual_day),
+            "date": str(publish_date),
+            "publish_date": str(publish_date),
             "target_date": str(day),
             "actual_date": str(actual_day),
             "fallback_used": actual_day != day,
@@ -291,11 +301,13 @@ def _resolve_fetch_day(day: date, mock: bool, fallback_days: int) -> tuple[date,
     )
 
 
-def _base_run_report(day: date, mock: bool, fallback_days: int, trigger: str | None) -> dict:
+def _base_run_report(day: date, publish_date: date, mock: bool, fallback_days: int, trigger: str | None) -> dict:
     pipeline = site_config().get("pipeline", {})
     categories = pipeline.get("arxiv_categories", DEFAULT_ARXIV_CATEGORIES)
     return {
         "trigger": trigger or os.environ.get("GITHUB_EVENT_NAME") or "local",
+        "date": str(publish_date),
+        "publish_date": str(publish_date),
         "target_date": str(day),
         "actual_date": None,
         "fallback_days": fallback_days,
@@ -316,8 +328,13 @@ def _base_run_report(day: date, mock: bool, fallback_days: int, trigger: str | N
         "qa_warnings": [],
         "status": "running",
         "attempts": [],
-        "report_path": str((_reports_dir() / f"{day}.json").relative_to(REPO_ROOT)),
+        "report_path": str((_reports_dir() / f"{publish_date}.json").relative_to(REPO_ROOT)),
     }
+
+
+def _publication_date(target_day: date) -> date:
+    pipeline = site_config().get("pipeline", {})
+    return target_day + timedelta(days=int(pipeline.get("delay_days", 2)))
 
 
 def _write_run_report(report: dict) -> None:
@@ -340,7 +357,7 @@ def _attempt_summary(day: date, stats: dict, error: str | None = None) -> dict:
 def _fetch_warnings(stats: dict, target_day: date, actual_day: date) -> list[str]:
     warnings: list[str] = []
     if actual_day != target_day:
-        warnings.append(f"Fallback used: target_date={target_day}, actual_date={actual_day}")
+        warnings.append(f"Fallback used internally: target_date={target_day}, actual_date={actual_day}")
     if stats.get("errors"):
         warnings.append("Partial arXiv category failures: " + "; ".join(f"{key}: {value}" for key, value in stats["errors"].items()))
     return warnings

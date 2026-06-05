@@ -6,7 +6,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     <h1>Method</h1>
     <p>This project implements a verifiable information pipeline: collect candidate papers from primary sources, rank them with a multi-signal rules engine, generate bilingual daily briefs, and expose candidate-level scoring on source pages.</p>
     <h2>Collection</h2>
-    <p>The default collector covers six arXiv categories: cs.AI, cs.CL, cs.LG, cs.CV, cs.MA, and cs.IR. Categories and limits are configuration-driven.</p>
+    <p>The default collector covers AI-related arXiv categories including cs.AI, cs.CL, cs.LG, cs.CV, cs.MA, cs.IR, cs.RO, cs.SD, cs.MM, cs.HC, cs.SE, cs.DC, stat.ML, and eess.AS. Categories and limits are configuration-driven.</p>
     <h2>Scoring Signals</h2>
     <ul>
       <li>Institution background from configured top institutions.</li>
@@ -23,7 +23,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       <li>Safety, ethics, and governance keywords for additional visibility.</li>
     </ul>
     <h2>Cadence</h2>
-    <p>The default cadence is T+3 so community signals can mature. Without external API keys, production runs continue with arXiv metadata; mock-run uses fixed demo data for offline validation.</p>
+    <p>The default cadence is T+2: the site publishes every day at 07:12 Beijing/Taipei time and normally collects, scores, and briefs arXiv papers from two days earlier. Without external API keys, production runs continue with arXiv metadata; mock-run is reserved for fixed demo data and offline validation.</p>
     <h2>Transparency</h2>
     <p>Every issue has a source page listing all candidates, selection tiers, total scores, score breakdowns, matched keywords, external signals, and degradation warnings.</p>
     <h2>Limits</h2>

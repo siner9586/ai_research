@@ -68,9 +68,9 @@ const topicNames: Record<string, string> = {
       <a href="/zh/archive/">查看全部</a>
     </div>
     {briefs.length === 0 && <p>还没有生成内容。运行 <code>ai-brief mock-run</code> 后会出现每日简报。</p>}
-    {recent.map((doc) => (
+    {recent.map((doc, index) => (
       <article class="article-card elevated-card">
-        <p class="section-kicker">{doc.meta.date}</p>
+        <p class="section-kicker">{index === 0 ? today : doc.meta.date}</p>
         <h2><a href={doc.url}>{displayBriefTitle(doc.meta.title)}</a></h2>
         <div class="article-meta">
           <a href={doc.meta.sources_page}>来源与评分</a>

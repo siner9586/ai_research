@@ -20,19 +20,43 @@ def render_daily_markdown(
     candidates: list[ScoredPaper],
     target_date: date | None = None,
     fallback_from: date | None = None,
+    publish_date: date | None = None,
 ) -> tuple[list[str], str]:
+    """Render one daily issue.
+
+    `day` is the actual arXiv data date. `publish_date` is the public issue
+    date shown on the website and used in the URL slug. For the T+2 cadence,
+    a 2026-06-05 issue normally uses 2026-06-03 arXiv data.
+    """
     content_dir = REPO_ROOT / "data" / "content" / lang / "daily"
     content_dir.mkdir(parents=True, exist_ok=True)
 
+    target_date = target_date or day
+    publish_date = publish_date or day
     base_title = featured[0].paper.title if featured else "AI research brief"
-    slug = f"{day}-{slugify(base_title, max_words=7)}"
+    slug = f"{publish_date}-{slugify(base_title, max_words=7)}"
     brief_path = content_dir / f"{slug}.md"
     sources_path = content_dir / f"{slug}-sources.md"
-    target_date = target_date or day
-    brief = build_daily_brief(day, lang, slug, str(sources_path.relative_to(REPO_ROOT)), featured, mentions, candidates)
+    brief = build_daily_brief(publish_date, lang, slug, str(sources_path.relative_to(REPO_ROOT)), featured, mentions, candidates)
 
-    brief_path.write_text(_brief_markdown(brief, candidates, target_date=target_date, fallback_from=fallback_from) + "\n", encoding="utf-8")
-    sources_path.write_text(_sources_markdown(day, lang, slug, featured, mentions, candidates, target_date=target_date, fallback_from=fallback_from) + "\n", encoding="utf-8")
+    brief_path.write_text(
+        _brief_markdown(brief, candidates, data_date=day, target_date=target_date, fallback_from=fallback_from) + "\n",
+        encoding="utf-8",
+    )
+    sources_path.write_text(
+        _sources_markdown(
+            day,
+            lang,
+            slug,
+            featured,
+            mentions,
+            candidates,
+            publish_date=publish_date,
+            target_date=target_date,
+            fallback_from=fallback_from,
+        ) + "\n",
+        encoding="utf-8",
+    )
     return [str(brief_path), str(sources_path)], slug
 
 
@@ -72,7 +96,13 @@ def build_daily_brief(
     )
 
 
-def _brief_markdown(brief: DailyBrief, candidates: list[ScoredPaper], target_date: date, fallback_from: date | None) -> str:
+def _brief_markdown(
+    brief: DailyBrief,
+    candidates: list[ScoredPaper],
+    data_date: date,
+    target_date: date,
+    fallback_from: date | None,
+) -> str:
     lang = brief.lang
     labels = _labels(lang)
     tags = sorted({paper.topic_slug for paper in brief.featured_papers + brief.honorable_mentions if paper.topic_slug != "other"})
@@ -82,7 +112,7 @@ def _brief_markdown(brief: DailyBrief, candidates: list[ScoredPaper], target_dat
             "title": brief.title,
             "date": str(brief.date),
             "target_date": str(target_date),
-            "actual_date": str(brief.date),
+            "actual_date": str(data_date),
             "fallback_from": str(fallback_from) if fallback_from else "",
             "lang": lang,
             "slug": brief.slug,
@@ -100,7 +130,6 @@ def _brief_markdown(brief: DailyBrief, candidates: list[ScoredPaper], target_dat
         f"# {brief.title}",
         "",
         f"**{labels['date']}**: {brief.date}",
-        _fallback_note(labels, target_date, brief.date, fallback_from),
         "",
         f"## {labels['overview_heading']}",
         "",
@@ -144,6 +173,7 @@ def _sources_markdown(
     featured: list[ScoredPaper],
     mentions: list[ScoredPaper],
     candidates: list[ScoredPaper],
+    publish_date: date,
     target_date: date,
     fallback_from: date | None,
 ) -> str:
@@ -153,7 +183,7 @@ def _sources_markdown(
     lines = [
         *_frontmatter({
             "title": labels["sources_title"],
-            "date": str(day),
+            "date": str(publish_date),
             "target_date": str(target_date),
             "actual_date": str(day),
             "fallback_from": str(fallback_from) if fallback_from else "",
@@ -179,7 +209,6 @@ def _sources_markdown(
             generated_at=generated_at,
             fetched_at=fetched_at,
         ),
-        _fallback_note(labels, target_date, day, fallback_from),
         "",
         f"## {labels['scoring_rules_heading']}",
         "",
@@ -214,9 +243,7 @@ def _frontmatter(values: dict) -> list[str]:
 
 
 def _fallback_note(labels: dict[str, str], target_date: date, actual_date: date, fallback_from: date | None) -> str:
-    if not fallback_from or target_date == actual_date:
-        return ""
-    return labels["fallback_note"].format(target_date=target_date, actual_date=actual_date)
+    return ""
 
 
 def _brief_paper(row: ScoredPaper, lang: str) -> BriefPaper:
@@ -258,10 +285,10 @@ def _brief_paper(row: ScoredPaper, lang: str) -> BriefPaper:
         method=method,
         practitioner_takeaway=takeaway,
         limitations=limitations,
-        bullets=(llm_payload.get("bullets") if llm_payload else None) or [
-            row.selected_reason,
+        bullets=llm_payload.get("bullets") if isinstance(llm_payload.get("bullets"), list) else [
             f"{_topic_label(row, lang)} / score {row.total_score}",
-            "Source links are kept with the original arXiv record.",
+            "保留原始 arXiv 链接作为事实来源。" if lang == "zh" else "Source links are kept with the original arXiv record.",
+            "评分只是筛选信号，不是论文质量定论。" if lang == "zh" else "The score is a triage signal, not a final quality judgment.",
         ],
     )
 
@@ -400,7 +427,7 @@ def _topic_label(row: ScoredPaper, lang: str) -> str:
 def _labels(lang: str) -> dict[str, str]:
     zh = {
         "date": "日期",
-        "fallback_note": "**数据日期说明**: 原始目标日期为 {target_date}，该日期未找到可用 arXiv 论文，本期使用最近可用数据日期 {actual_date}。",
+        "fallback_note": "",
         "overview_heading": "今日概览",
         "trend_heading": "今日趋势观察",
         "featured_heading": "重点论文",
@@ -438,7 +465,7 @@ def _labels(lang: str) -> dict[str, str]:
     }
     en = {
         "date": "Date",
-        "fallback_note": "**Data date note**: The original target date was {target_date}. No usable arXiv papers were found for that date, so this issue uses the nearest available data date, {actual_date}.",
+        "fallback_note": "",
         "overview_heading": "Overview",
         "trend_heading": "Trend Observation",
         "featured_heading": "Featured Papers",

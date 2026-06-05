@@ -112,6 +112,9 @@ class DailyBriefMeta(BaseModel):
 
 class QAReport(BaseModel):
     date: date
+    target_date: date | None = None
+    actual_date: date | None = None
+    fallback_from: date | None = None
     passed: bool
     warnings: list[str]
     errors: list[str]

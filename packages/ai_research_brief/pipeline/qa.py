@@ -23,7 +23,8 @@ PEER_REVIEW_PATTERNS = [
 ]
 
 
-def run_qa(day: date, content_dir: Path, reports_dir: Path) -> QAReport:
+def run_qa(day: date, content_dir: Path, reports_dir: Path, target_date: date | None = None) -> QAReport:
+    target_date = target_date or day
     warnings: list[str] = []
     errors: list[str] = []
     checked: list[str] = []
@@ -44,7 +45,7 @@ def run_qa(day: date, content_dir: Path, reports_dir: Path) -> QAReport:
                 brief_pages.append(path)
             if str(meta.get("page_type")) == "sources" or path.stem.endswith("-sources"):
                 source_pages.append(path)
-            _check_markdown_doc(path, meta, body, day, errors, warnings)
+            _check_markdown_doc(path, meta, body, day, target_date, errors, warnings)
 
         if not brief_pages:
             errors.append(f"Missing {lang} daily brief for {day}")
@@ -55,7 +56,16 @@ def run_qa(day: date, content_dir: Path, reports_dir: Path) -> QAReport:
     _check_static_artifacts(day, content_dir.parents[1], checked, errors)
     _check_bilingual_quality(docs, warnings, errors)
 
-    report = QAReport(date=day, passed=not errors, warnings=warnings, errors=errors, checked_files=checked)
+    report = QAReport(
+        date=day,
+        target_date=target_date,
+        actual_date=day,
+        fallback_from=target_date if target_date != day else None,
+        passed=not errors,
+        warnings=warnings,
+        errors=errors,
+        checked_files=checked,
+    )
     reports_dir.mkdir(parents=True, exist_ok=True)
     (reports_dir / (str(day) + ".json")).write_text(report.model_dump_json(indent=2), encoding="utf-8")
     return report
@@ -80,13 +90,19 @@ def _parse_markdown(path: Path, errors: list[str]) -> tuple[dict, str] | None:
     return meta, match.group(2)
 
 
-def _check_markdown_doc(path: Path, meta: dict, body: str, day: date, errors: list[str], warnings: list[str]) -> None:
-    required = ["title", "date", "lang", "slug", "summary", "tags", "generated_at"]
+def _check_markdown_doc(path: Path, meta: dict, body: str, day: date, target_date: date, errors: list[str], warnings: list[str]) -> None:
+    required = ["title", "date", "target_date", "actual_date", "lang", "slug", "summary", "tags", "generated_at"]
     for key in required:
         if meta.get(key) in (None, "", []):
             errors.append(f"Missing frontmatter field {key}: {path}")
     if str(meta.get("date")) != str(day):
         errors.append(f"Frontmatter date mismatch: {path}")
+    if str(meta.get("actual_date")) != str(day):
+        errors.append(f"Frontmatter actual_date mismatch: {path}")
+    if str(meta.get("target_date")) != str(target_date):
+        errors.append(f"Frontmatter target_date mismatch: {path}")
+    if target_date != day and not meta.get("fallback_from"):
+        errors.append(f"Missing fallback_from for fallback run: {path}")
     if str(meta.get("slug")) != path.stem:
         errors.append(f"Slug/path mismatch: {path}")
     if not re.search(r"https://arxiv\.org/abs/\d{4}\.\d{4,5}", body):

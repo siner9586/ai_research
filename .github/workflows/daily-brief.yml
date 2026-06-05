@@ -6,15 +6,33 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "mock or real"
+        description: "real or mock"
         required: false
         default: "real"
+        type: choice
+        options:
+          - real
+          - mock
+      date:
+        description: "Optional YYYY-MM-DD data date"
+        required: false
+      delay_days:
+        description: "Delay days when date is not provided"
+        required: false
+        default: "3"
+      fallback_days:
+        description: "How many days to search backward if target date has no papers"
+        required: false
+        default: "4"
+  repository_dispatch:
+    types: [daily-brief]
 
 permissions:
   contents: write
+  actions: read
 
 concurrency:
-  group: daily-ai-research-brief
+  group: daily-ai-research-brief-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -34,6 +52,24 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Print trigger summary
+        env:
+          MODE_INPUT: ${{ github.event.inputs.mode || github.event.client_payload.mode || 'real' }}
+          DATE_INPUT: ${{ github.event.inputs.date || github.event.client_payload.date || '' }}
+          DELAY_DAYS_INPUT: ${{ github.event.inputs.delay_days || github.event.client_payload.delay_days || '3' }}
+          FALLBACK_DAYS_INPUT: ${{ github.event.inputs.fallback_days || github.event.client_payload.fallback_days || '4' }}
+        run: |
+          echo "trigger=${GITHUB_EVENT_NAME}"
+          echo "workflow=${GITHUB_WORKFLOW}"
+          echo "ref=${GITHUB_REF}"
+          echo "sha=${GITHUB_SHA}"
+          echo "mode=${MODE_INPUT}"
+          echo "date=${DATE_INPUT:-<not set>}"
+          echo "delay_days=${DELAY_DAYS_INPUT}"
+          echo "fallback_days=${FALLBACK_DAYS_INPUT}"
+          echo "utc_now=$(date -u '+%Y-%m-%d %H:%M:%S %Z')"
+          TZ=Asia/Shanghai date '+beijing_taipei_now=%Y-%m-%d %H:%M:%S %Z'
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
@@ -52,14 +88,62 @@ jobs:
           AI_RESEARCH_EXTERNAL_SIGNALS: ${{ secrets.AI_RESEARCH_EXTERNAL_SIGNALS }}
           GITHUB_TOKEN: ${{ github.token }}
           GITHUB_API_TOKEN: ${{ github.token }}
+          MODE_INPUT: ${{ github.event.inputs.mode || github.event.client_payload.mode || 'real' }}
+          DATE_INPUT: ${{ github.event.inputs.date || github.event.client_payload.date || '' }}
+          DELAY_DAYS_INPUT: ${{ github.event.inputs.delay_days || github.event.client_payload.delay_days || '3' }}
+          FALLBACK_DAYS_INPUT: ${{ github.event.inputs.fallback_days || github.event.client_payload.fallback_days || '4' }}
         run: |
+          set -euo pipefail
           export LLM_PROVIDER="${LLM_PROVIDER:-mock}"
-          MODE="${{ github.event.inputs.mode || 'real' }}"
-          if [ "$MODE" = "mock" ]; then
-            ai-brief mock-run
-          else
-            ai-brief run-daily --delay-days 3
+          MODE="${MODE_INPUT:-real}"
+          DATE="${DATE_INPUT:-}"
+          DELAY_DAYS="${DELAY_DAYS_INPUT:-3}"
+          FALLBACK_DAYS="${FALLBACK_DAYS_INPUT:-4}"
+
+          echo "provider=${LLM_PROVIDER}"
+          echo "production_mode=${MODE}"
+          if [ "$MODE" != "real" ] && [ "$MODE" != "mock" ]; then
+            echo "Unsupported mode: $MODE"
+            exit 1
           fi
+          if [ "$MODE" = "mock" ]; then
+            if [ -n "$DATE" ]; then
+              ai-brief mock-run --date "$DATE" --fallback-days "$FALLBACK_DAYS" | tee daily-brief-result.json
+            else
+              ai-brief mock-run --fallback-days "$FALLBACK_DAYS" | tee daily-brief-result.json
+            fi
+          else
+            if [ -n "$DATE" ]; then
+              ai-brief run-daily --date "$DATE" --fallback-days "$FALLBACK_DAYS" | tee daily-brief-result.json
+            else
+              ai-brief run-daily --delay-days "$DELAY_DAYS" --fallback-days "$FALLBACK_DAYS" | tee daily-brief-result.json
+            fi
+          fi
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("data/reports/runs/last-run.json").read_text())
+          print("run_report_summary=" + json.dumps({
+              "status": report.get("status"),
+              "trigger": report.get("trigger"),
+              "target_date": report.get("target_date"),
+              "actual_date": report.get("actual_date"),
+              "fallback_used": report.get("fallback_used"),
+              "categories": report.get("categories"),
+              "category_counts": report.get("category_counts"),
+              "errors": report.get("errors"),
+              "warnings": report.get("warnings"),
+              "total_candidates": report.get("total_candidates"),
+              "deduped_papers": report.get("deduped_papers"),
+              "featured": report.get("featured"),
+              "mentions": report.get("mentions"),
+              "slugs": report.get("slugs"),
+              "generated_files": report.get("generated_files"),
+              "qa_passed": report.get("qa_passed"),
+              "qa_warnings": report.get("qa_warnings"),
+          }, ensure_ascii=False))
+          PY
 
       - name: Run tests
         run: pytest -q
@@ -71,16 +155,60 @@ jobs:
           npm run build
 
       - name: Commit generated content
+        id: commit
         run: |
+          set -euo pipefail
           git config user.name "ai-brief-bot"
           git config user.email "ai-brief-bot@example.com"
           git add data apps/web/public
+
+          echo "Generated file status:"
+          git status --short data apps/web/public || true
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report_path = Path("data/reports/runs/last-run.json")
+          if report_path.exists():
+              report = json.loads(report_path.read_text())
+              print("target_date=" + str(report.get("target_date")))
+              print("actual_date=" + str(report.get("actual_date")))
+              print("fallback_used=" + str(report.get("fallback_used")))
+              print("generated_files=" + json.dumps(report.get("generated_files", []), ensure_ascii=False))
+              print("latest_brief_slug_zh=" + str(report.get("slugs", {}).get("zh")))
+              print("latest_brief_slug_en=" + str(report.get("slugs", {}).get("en")))
+          else:
+              print("No last-run report found")
+          PY
+
           if git diff --cached --quiet; then
-            echo "No generated changes"
+            echo "git_diff=false"
+            echo "No generated changes to commit. The run succeeded but produced identical committed artifacts."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
+            echo "git_diff=true"
+            git diff --cached --stat
             git commit -m "Update daily AI research brief"
             git pull --rebase origin main
-            git push
+            git push origin HEAD:main
+            echo "commit_sha=$(git rev-parse HEAD)"
+            echo "push_status=success"
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Trigger Cloudflare Pages deploy hook
+        if: steps.commit.outputs.has_changes == 'true'
+        env:
+          CLOUDFLARE_PAGES_DEPLOY_HOOK: ${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
+        run: |
+          if [ -n "$CLOUDFLARE_PAGES_DEPLOY_HOOK" ]; then
+            if curl -fsS -X POST "$CLOUDFLARE_PAGES_DEPLOY_HOOK"; then
+              echo "cloudflare_deploy_hook=success"
+            else
+              echo "::warning::Cloudflare Pages deploy hook failed"
+            fi
+          else
+            echo "CLOUDFLARE_PAGES_DEPLOY_HOOK not set, skipped"
           fi
 
       - name: Send notification

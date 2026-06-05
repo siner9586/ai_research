@@ -44,6 +44,7 @@ Confirm:
 - Latest production deployment finished successfully.
 - Custom domain `aici.ccwu.cc` is listed under Custom domains.
 - DNS and certificate status are active, or certificate is pending validation.
+- If GitHub pushed new generated content but Pages did not deploy, create a Pages deploy hook and save it as GitHub secret `CLOUDFLARE_PAGES_DEPLOY_HOOK`.
 
 ## DNS Record
 
@@ -79,6 +80,7 @@ Expected: HTTP 200 or a normal Cloudflare redirect/200 chain.
 - Search index empty: run `ai-brief build-content --date YYYY-MM-DD`.
 - Domain certificate pending: wait for Cloudflare validation and verify DNS points to Pages.
 - Old content visible: check the latest GitHub commit, latest Pages deployment, and browser cache.
+- GitHub schedule delayed or missed: configure the optional Cloudflare Workers Cron trigger in [cloudflare-cron-dispatch.md](cloudflare-cron-dispatch.md).
 
 ## Workers KV
 

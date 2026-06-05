@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+import logging
+import os
 from datetime import date, timedelta
 from pathlib import Path
 
 from ..config import REPO_ROOT, ensure_dirs, site_config
-from ..fetchers.arxiv import fetch_arxiv_categories, mock_papers
+from ..fetchers.arxiv import fetch_arxiv_categories_with_stats, mock_papers
 from ..models import Paper, PaperSignal, ScoredPaper
 from ..render.markdown import render_daily_markdown
 from ..render.rss import build_rss
@@ -17,24 +19,47 @@ from .qa import run_qa
 from .score import score_papers
 from .select import select_papers
 
+logger = logging.getLogger(__name__)
+DEFAULT_ARXIV_CATEGORIES = ["cs.AI", "cs.CL", "cs.LG", "cs.CV", "cs.MA", "cs.IR"]
+
 
 def fetch_stage(day: date, mock: bool = False) -> list[Paper]:
+    papers, _stats = _fetch_stage_with_stats(day, mock=mock)
+    return papers
+
+
+def _fetch_stage_with_stats(day: date, mock: bool = False, fail_on_empty: bool = True) -> tuple[list[Paper], dict]:
     ensure_dirs()
     pipeline = site_config().get("pipeline", {})
+    categories = pipeline.get("arxiv_categories", DEFAULT_ARXIV_CATEGORIES)
     if mock:
-        papers = mock_papers()
+        raw_papers = mock_papers()
+        stats = {
+            "target": str(day),
+            "categories": categories,
+            "category_counts": _count_by_category(raw_papers, categories),
+            "errors": {},
+            "failed_categories": [],
+            "successful_categories": categories,
+            "total_papers": len(raw_papers),
+            "all_categories_failed": False,
+        }
     else:
-        papers = fetch_arxiv_categories(
-            pipeline.get("arxiv_categories", ["cs.AI", "cs.CL", "cs.LG", "cs.CV", "cs.MA", "cs.IR"]),
+        raw_papers, stats = fetch_arxiv_categories_with_stats(
+            categories,
             int(pipeline.get("max_results_per_category", 80)),
             day=day,
+            request_delay_seconds=float(pipeline.get("arxiv_request_delay_seconds", 3.5)),
         )
-    papers = dedupe_papers(normalize_papers(papers))
-    if not papers:
+    papers = dedupe_papers(normalize_papers(raw_papers))
+    stats["total_candidates"] = len(raw_papers)
+    stats["deduped_papers"] = len(papers)
+    if fail_on_empty and not papers:
         raise RuntimeError(f"No papers found for {day}; refusing to generate an empty production brief")
-    _write(REPO_ROOT / "data" / "raw" / str(day) / "papers.json", papers)
-    _write(_processed_dir(day) / "papers.json", papers)
-    return papers
+    if papers:
+        _write(REPO_ROOT / "data" / "raw" / str(day) / "papers.json", papers)
+        _write(_processed_dir(day) / "papers.json", papers)
+    return papers, stats
 
 
 def enrich_stage(day: date, mock: bool = False) -> dict[str, PaperSignal]:
@@ -68,7 +93,12 @@ def score_stage(day: date) -> tuple[list[ScoredPaper], list[ScoredPaper], list[S
     return scored, featured, mentions
 
 
-def generate_stage(day: date, lang: str | None = None) -> tuple[list[str], dict[str, str]]:
+def generate_stage(
+    day: date,
+    lang: str | None = None,
+    target_date: date | None = None,
+    fallback_from: date | None = None,
+) -> tuple[list[str], dict[str, str]]:
     scored = _read_scored(day)
     selected = _read_selected(day)
     featured = selected["featured"]
@@ -77,7 +107,15 @@ def generate_stage(day: date, lang: str | None = None) -> tuple[list[str], dict[
     slugs: dict[str, str] = {}
     langs = [lang] if lang in {"zh", "en"} else ["zh", "en"]
     for item_lang in langs:
-        rendered, slug = render_daily_markdown(day, item_lang, featured, mentions, scored)
+        rendered, slug = render_daily_markdown(
+            day,
+            item_lang,
+            featured,
+            mentions,
+            scored,
+            target_date=target_date or day,
+            fallback_from=fallback_from,
+        )
         files.extend(rendered)
         slugs[item_lang] = slug
     return files, slugs
@@ -92,35 +130,93 @@ def build_static_stage() -> list[str]:
     ]
 
 
-def qa_stage(day: date, allow_warnings: bool = False):
-    report = run_qa(day, REPO_ROOT / "data" / "content", REPO_ROOT / "data" / "reports" / "qa")
+def qa_stage(day: date, allow_warnings: bool = False, target_date: date | None = None):
+    report = run_qa(day, REPO_ROOT / "data" / "content", REPO_ROOT / "data" / "reports" / "qa", target_date=target_date)
     if report.errors:
         raise RuntimeError(f"QA failed for {day}: {len(report.errors)} errors, {len(report.warnings)} warnings")
     return report
 
 
-def run_daily(day: date, mock: bool = False, allow_qa_warnings: bool = False):
-    papers = fetch_stage(day, mock=mock)
-    enrich_stage(day, mock=mock)
-    scored, featured, mentions = score_stage(day)
-    generated, slugs = generate_stage(day)
-    static_files = build_static_stage()
-    report = qa_stage(day, allow_warnings=allow_qa_warnings)
-    return {
-        "date": str(day),
-        "mock": mock,
-        "papers": len(papers),
-        "featured": len(featured),
-        "mentions": len(mentions),
-        "slugs": slugs,
-        "qa_passed": report.passed,
-        "qa_warnings": report.warnings,
-        "generated": generated + static_files,
-    }
+def run_daily(
+    day: date,
+    mock: bool = False,
+    allow_qa_warnings: bool = False,
+    fallback_days: int | None = None,
+    trigger: str | None = None,
+):
+    pipeline = site_config().get("pipeline", {})
+    fallback_days = int(pipeline.get("fallback_days", 0) if fallback_days is None else fallback_days)
+    run_report = _base_run_report(day, mock=mock, fallback_days=fallback_days, trigger=trigger)
+    try:
+        actual_day, papers, fetch_stats, attempts = _resolve_fetch_day(day, mock=mock, fallback_days=fallback_days)
+        fallback_from = day if actual_day != day else None
+        run_report.update({
+            "actual_date": str(actual_day),
+            "fallback_used": actual_day != day,
+            "fallback_from": str(fallback_from) if fallback_from else None,
+            "attempts": attempts,
+            "categories": fetch_stats.get("categories", []),
+            "category_counts": fetch_stats.get("category_counts", {}),
+            "errors": fetch_stats.get("errors", {}),
+            "total_candidates": fetch_stats.get("total_candidates", fetch_stats.get("total_papers", 0)),
+            "deduped_papers": fetch_stats.get("deduped_papers", len(papers)),
+            "warnings": _fetch_warnings(fetch_stats, day, actual_day),
+        })
+        _log_run_summary("fetch", run_report)
+
+        enrich_stage(actual_day, mock=mock)
+        scored, featured, mentions = score_stage(actual_day)
+        generated, slugs = generate_stage(actual_day, target_date=day, fallback_from=fallback_from)
+        static_files = build_static_stage()
+        qa_report = qa_stage(actual_day, allow_warnings=allow_qa_warnings, target_date=day)
+
+        run_report.update({
+            "status": "success",
+            "featured": len(featured),
+            "mentions": len(mentions),
+            "slugs": slugs,
+            "qa_passed": qa_report.passed,
+            "qa_warnings": qa_report.warnings,
+            "generated_files": generated + static_files,
+        })
+        _write_run_report(run_report)
+        _log_run_summary("complete", run_report)
+        return {
+            "date": str(actual_day),
+            "target_date": str(day),
+            "actual_date": str(actual_day),
+            "fallback_used": actual_day != day,
+            "fallback_from": str(fallback_from) if fallback_from else None,
+            "mock": mock,
+            "papers": len(papers),
+            "total_candidates": run_report["total_candidates"],
+            "deduped_papers": run_report["deduped_papers"],
+            "category_counts": run_report["category_counts"],
+            "category_errors": run_report["errors"],
+            "featured": len(featured),
+            "mentions": len(mentions),
+            "slugs": slugs,
+            "qa_passed": qa_report.passed,
+            "qa_warnings": qa_report.warnings,
+            "generated": generated + static_files,
+            "run_report": run_report["report_path"],
+        }
+    except Exception as exc:
+        run_report["status"] = "failed"
+        run_report["errors"] = _append_error(run_report.get("errors", {}), "pipeline", str(exc))
+        _write_run_report(run_report)
+        _log_run_summary("failed", run_report)
+        raise
 
 
 def _processed_dir(day: date) -> Path:
     path = REPO_ROOT / "data" / "processed" / str(day)
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def _reports_dir() -> Path:
+    path = REPO_ROOT / "data" / "reports" / "runs"
     path.mkdir(parents=True, exist_ok=True)
     return path
 
@@ -132,6 +228,122 @@ def _write(path: Path, data):
     elif hasattr(data, "model_dump"):
         data = data.model_dump(mode="json")
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _resolve_fetch_day(day: date, mock: bool, fallback_days: int) -> tuple[date, list[Paper], dict, list[dict]]:
+    if mock:
+        papers, stats = _fetch_stage_with_stats(day, mock=True)
+        return day, papers, stats, [_attempt_summary(day, stats)]
+
+    attempts: list[dict] = []
+    all_errors: dict[str, str] = {}
+    for offset in range(max(fallback_days, 0) + 1):
+        candidate_day = day - timedelta(days=offset)
+        try:
+            papers, stats = _fetch_stage_with_stats(candidate_day, mock=False, fail_on_empty=False)
+        except Exception as exc:
+            stats = {
+                "target": str(candidate_day),
+                "categories": site_config().get("pipeline", {}).get("arxiv_categories", DEFAULT_ARXIV_CATEGORIES),
+                "category_counts": {},
+                "errors": {"fetch": str(exc)},
+                "total_candidates": 0,
+                "deduped_papers": 0,
+            }
+            attempts.append(_attempt_summary(candidate_day, stats, error=str(exc)))
+            all_errors[str(candidate_day)] = str(exc)
+            logger.warning("No usable arXiv papers for %s: %s", candidate_day, exc)
+            continue
+        attempts.append(_attempt_summary(candidate_day, stats))
+        if papers:
+            return candidate_day, papers, stats, attempts
+
+    searched = ", ".join(str(day - timedelta(days=offset)) for offset in range(max(fallback_days, 0) + 1))
+    detail = "; ".join(f"{attempt['date']}: {attempt.get('error') or '0 papers'}" for attempt in attempts)
+    if all_errors:
+        detail = detail or "; ".join(f"{key}: {value}" for key, value in all_errors.items())
+    raise RuntimeError(
+        "No real arXiv papers found for target date or fallback window; "
+        f"searched {searched}. Details: {detail}"
+    )
+
+
+def _base_run_report(day: date, mock: bool, fallback_days: int, trigger: str | None) -> dict:
+    pipeline = site_config().get("pipeline", {})
+    categories = pipeline.get("arxiv_categories", DEFAULT_ARXIV_CATEGORIES)
+    return {
+        "trigger": trigger or os.environ.get("GITHUB_EVENT_NAME") or "local",
+        "target_date": str(day),
+        "actual_date": None,
+        "fallback_days": fallback_days,
+        "fallback_used": False,
+        "fallback_from": None,
+        "mock": mock,
+        "categories": categories,
+        "category_counts": {},
+        "total_candidates": 0,
+        "deduped_papers": 0,
+        "featured": 0,
+        "mentions": 0,
+        "slugs": {},
+        "errors": {},
+        "warnings": [],
+        "generated_files": [],
+        "qa_passed": False,
+        "qa_warnings": [],
+        "status": "running",
+        "attempts": [],
+        "report_path": str((_reports_dir() / f"{day}.json").relative_to(REPO_ROOT)),
+    }
+
+
+def _write_run_report(report: dict) -> None:
+    path = REPO_ROOT / report["report_path"]
+    _write(path, report)
+    _write(_reports_dir() / "last-run.json", report)
+
+
+def _attempt_summary(day: date, stats: dict, error: str | None = None) -> dict:
+    return {
+        "date": str(day),
+        "category_counts": stats.get("category_counts", {}),
+        "errors": stats.get("errors", {}),
+        "total_candidates": stats.get("total_candidates", stats.get("total_papers", 0)),
+        "deduped_papers": stats.get("deduped_papers", 0),
+        "error": error,
+    }
+
+
+def _fetch_warnings(stats: dict, target_day: date, actual_day: date) -> list[str]:
+    warnings: list[str] = []
+    if actual_day != target_day:
+        warnings.append(f"Fallback used: target_date={target_day}, actual_date={actual_day}")
+    if stats.get("errors"):
+        warnings.append("Partial arXiv category failures: " + "; ".join(f"{key}: {value}" for key, value in stats["errors"].items()))
+    return warnings
+
+
+def _append_error(errors, key: str, message: str) -> dict:
+    if isinstance(errors, dict):
+        updated = dict(errors)
+    else:
+        updated = {"previous": errors}
+    updated[key] = message
+    return updated
+
+
+def _count_by_category(papers: list[Paper], categories: list[str]) -> dict[str, int]:
+    counts = {category: 0 for category in categories}
+    for paper in papers:
+        for category in paper.categories:
+            if category in counts:
+                counts[category] += 1
+                break
+    return counts
+
+
+def _log_run_summary(stage: str, report: dict) -> None:
+    logger.info("Daily brief %s summary:\n%s", stage, json.dumps(report, ensure_ascii=False, indent=2, default=str))
 
 
 def _read_json(path: Path):

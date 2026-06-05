@@ -4,6 +4,7 @@ import argparse
 import json
 
 from .logging_config import configure_logging
+from .config import site_config
 from .pipeline.run_daily import (
     build_static_stage,
     enrich_stage,
@@ -24,20 +25,27 @@ def main(argv=None):
     for name in ["fetch", "enrich", "score", "generate", "build-content", "run-daily", "qa"]:
         cmd = sub.add_parser(name)
         cmd.add_argument("--date")
-        cmd.add_argument("--delay-days", type=int, default=3)
+        cmd.add_argument("--delay-days", type=int)
+        cmd.add_argument("--fallback-days", type=int)
         cmd.add_argument("--lang", choices=["zh", "en"])
         cmd.add_argument("--mock", action="store_true")
         cmd.add_argument("--allow-qa-warnings", action="store_true")
 
     mock = sub.add_parser("mock-run")
     mock.add_argument("--date", default="2026-06-03")
+    mock.add_argument("--fallback-days", type=int)
     mock.add_argument("--allow-qa-warnings", action="store_true")
 
     args = parser.parse_args(argv)
+    pipeline = site_config().get("pipeline", {})
     if args.cmd == "mock-run":
-        result = run_daily(resolve_date(args.date), mock=True, allow_qa_warnings=args.allow_qa_warnings)
+        fallback_days = args.fallback_days if args.fallback_days is not None else int(pipeline.get("fallback_days", 4))
+        result = run_daily(resolve_date(args.date), mock=True, allow_qa_warnings=args.allow_qa_warnings, fallback_days=fallback_days)
     else:
-        day = resolve_date(getattr(args, "date", None), getattr(args, "delay_days", 3))
+        delay_days = getattr(args, "delay_days", None)
+        if delay_days is None:
+            delay_days = int(pipeline.get("delay_days", 3))
+        day = resolve_date(getattr(args, "date", None), delay_days)
         result = _dispatch(args, day)
     print(json.dumps(result, ensure_ascii=False, indent=2, default=str))
 
@@ -63,7 +71,10 @@ def _dispatch(args, day):
         report = qa_stage(day, allow_warnings=args.allow_qa_warnings)
         return report.model_dump(mode="json")
     if args.cmd == "run-daily":
-        return run_daily(day, mock=args.mock, allow_qa_warnings=args.allow_qa_warnings)
+        fallback_days = args.fallback_days
+        if fallback_days is None:
+            fallback_days = int(site_config().get("pipeline", {}).get("fallback_days", 4))
+        return run_daily(day, mock=args.mock, allow_qa_warnings=args.allow_qa_warnings, fallback_days=fallback_days)
     raise SystemExit(f"Unknown command: {args.cmd}")
 
 

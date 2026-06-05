@@ -18,6 +18,8 @@ def render_daily_markdown(
     featured: list[ScoredPaper],
     mentions: list[ScoredPaper],
     candidates: list[ScoredPaper],
+    target_date: date | None = None,
+    fallback_from: date | None = None,
 ) -> tuple[list[str], str]:
     content_dir = REPO_ROOT / "data" / "content" / lang / "daily"
     content_dir.mkdir(parents=True, exist_ok=True)
@@ -26,10 +28,11 @@ def render_daily_markdown(
     slug = f"{day}-{slugify(base_title, max_words=7)}"
     brief_path = content_dir / f"{slug}.md"
     sources_path = content_dir / f"{slug}-sources.md"
+    target_date = target_date or day
     brief = build_daily_brief(day, lang, slug, str(sources_path.relative_to(REPO_ROOT)), featured, mentions, candidates)
 
-    brief_path.write_text(_brief_markdown(brief, candidates) + "\n", encoding="utf-8")
-    sources_path.write_text(_sources_markdown(day, lang, slug, featured, mentions, candidates) + "\n", encoding="utf-8")
+    brief_path.write_text(_brief_markdown(brief, candidates, target_date=target_date, fallback_from=fallback_from) + "\n", encoding="utf-8")
+    sources_path.write_text(_sources_markdown(day, lang, slug, featured, mentions, candidates, target_date=target_date, fallback_from=fallback_from) + "\n", encoding="utf-8")
     return [str(brief_path), str(sources_path)], slug
 
 
@@ -69,7 +72,7 @@ def build_daily_brief(
     )
 
 
-def _brief_markdown(brief: DailyBrief, candidates: list[ScoredPaper]) -> str:
+def _brief_markdown(brief: DailyBrief, candidates: list[ScoredPaper], target_date: date, fallback_from: date | None) -> str:
     lang = brief.lang
     labels = _labels(lang)
     tags = sorted({paper.topic_slug for paper in brief.featured_papers + brief.honorable_mentions if paper.topic_slug != "other"})
@@ -78,6 +81,9 @@ def _brief_markdown(brief: DailyBrief, candidates: list[ScoredPaper]) -> str:
         *_frontmatter({
             "title": brief.title,
             "date": str(brief.date),
+            "target_date": str(target_date),
+            "actual_date": str(brief.date),
+            "fallback_from": str(fallback_from) if fallback_from else "",
             "lang": lang,
             "slug": brief.slug,
             "summary": summary,
@@ -94,6 +100,7 @@ def _brief_markdown(brief: DailyBrief, candidates: list[ScoredPaper]) -> str:
         f"# {brief.title}",
         "",
         f"**{labels['date']}**: {brief.date}",
+        _fallback_note(labels, target_date, brief.date, fallback_from),
         "",
         f"## {labels['overview_heading']}",
         "",
@@ -137,6 +144,8 @@ def _sources_markdown(
     featured: list[ScoredPaper],
     mentions: list[ScoredPaper],
     candidates: list[ScoredPaper],
+    target_date: date,
+    fallback_from: date | None,
 ) -> str:
     labels = _labels(lang)
     generated_at = utc_now().isoformat()
@@ -145,6 +154,9 @@ def _sources_markdown(
         *_frontmatter({
             "title": labels["sources_title"],
             "date": str(day),
+            "target_date": str(target_date),
+            "actual_date": str(day),
+            "fallback_from": str(fallback_from) if fallback_from else "",
             "lang": lang,
             "slug": f"{slug}-sources",
             "summary": labels["sources_summary"].format(count=len(candidates)),
@@ -167,6 +179,7 @@ def _sources_markdown(
             generated_at=generated_at,
             fetched_at=fetched_at,
         ),
+        _fallback_note(labels, target_date, day, fallback_from),
         "",
         f"## {labels['scoring_rules_heading']}",
         "",
@@ -198,6 +211,12 @@ def _frontmatter(values: dict) -> list[str]:
             lines.append(f"{key}: {value}")
     lines.append("---")
     return lines
+
+
+def _fallback_note(labels: dict[str, str], target_date: date, actual_date: date, fallback_from: date | None) -> str:
+    if not fallback_from or target_date == actual_date:
+        return ""
+    return labels["fallback_note"].format(target_date=target_date, actual_date=actual_date)
 
 
 def _brief_paper(row: ScoredPaper, lang: str) -> BriefPaper:
@@ -381,6 +400,7 @@ def _topic_label(row: ScoredPaper, lang: str) -> str:
 def _labels(lang: str) -> dict[str, str]:
     zh = {
         "date": "日期",
+        "fallback_note": "**数据日期说明**: 原始目标日期为 {target_date}，该日期未找到可用 arXiv 论文，本期使用最近可用数据日期 {actual_date}。",
         "overview_heading": "今日概览",
         "trend_heading": "今日趋势观察",
         "featured_heading": "重点论文",
@@ -418,6 +438,7 @@ def _labels(lang: str) -> dict[str, str]:
     }
     en = {
         "date": "Date",
+        "fallback_note": "**Data date note**: The original target date was {target_date}. No usable arXiv papers were found for that date, so this issue uses the nearest available data date, {actual_date}.",
         "overview_heading": "Overview",
         "trend_heading": "Trend Observation",
         "featured_heading": "Featured Papers",

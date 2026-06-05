@@ -1,10 +1,11 @@
 from datetime import date, datetime, time, timezone
 import logging
 import re
+import time as time_module
 from urllib.parse import quote
 import feedparser
 import httpx
-from tenacity import retry, stop_after_attempt, wait_fixed
+from tenacity import RetryError, retry, stop_after_attempt, wait_exponential
 from ..models import Paper
 from ..utils.http import DEFAULT_USER_AGENT
 
@@ -20,7 +21,7 @@ def fetch_arxiv_category(category: str, max_results: int = 50, day: date | None 
         return fetch_arxiv_rss_category(category, max_results)
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
+@retry(stop=stop_after_attempt(4), wait=wait_exponential(multiplier=4, min=4, max=30))
 def _fetch_arxiv_api(category: str, max_results: int = 50, day: date | None = None) -> list[Paper]:
     query_text = f"cat:{category}"
     if day:
@@ -41,7 +42,7 @@ def _fetch_arxiv_api(category: str, max_results: int = 50, day: date | None = No
     return papers
 
 
-@retry(stop=stop_after_attempt(2), wait=wait_fixed(1))
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=2, max=10))
 def fetch_arxiv_rss_category(category: str, max_results: int = 50) -> list[Paper]:
     url = f"https://rss.arxiv.org/rss/{category}"
     r = httpx.get(url, timeout=20, follow_redirects=True, headers={"User-Agent": DEFAULT_USER_AGENT})
@@ -73,25 +74,54 @@ def fetch_arxiv_rss_category(category: str, max_results: int = 50) -> list[Paper
     return papers
 
 
-def fetch_arxiv_categories(categories: list[str], max_results_per_category: int = 80, day: date | None = None) -> list[Paper]:
+def fetch_arxiv_categories_with_stats(
+    categories: list[str],
+    max_results_per_category: int = 80,
+    day: date | None = None,
+    request_delay_seconds: float = 3.5,
+) -> tuple[list[Paper], dict]:
     papers: list[Paper] = []
-    errors: list[str] = []
+    errors: dict[str, str] = {}
+    category_counts: dict[str, int] = {}
     target = str(day) if day else "latest"
-    for category in categories:
+    for index, category in enumerate(categories):
+        failed = False
         try:
             rows = fetch_arxiv_category(category, max_results_per_category, day=day)
         except Exception as exc:
-            message = f"{category}: {exc}"
-            errors.append(message)
-            logger.warning("arXiv fetch failed for %s on %s: %s", category, target, exc)
-            continue
-        if not rows:
+            message = _format_fetch_error(exc)
+            errors[category] = message
+            category_counts[category] = 0
+            logger.warning("arXiv fetch failed for %s on %s: %s", category, target, message)
+            rows = []
+            failed = True
+        if not rows and not failed:
             logger.info("arXiv returned no papers for %s on %s", category, target)
+        category_counts[category] = len(rows)
         papers.extend(rows)
-    if errors and not papers:
-        raise RuntimeError("All arXiv category fetches failed: " + "; ".join(errors))
+        if index < len(categories) - 1 and request_delay_seconds > 0:
+            time_module.sleep(request_delay_seconds)
+    error_messages = [f"{category}: {message}" for category, message in errors.items()]
     if errors:
-        logger.warning("Partial arXiv category failures: %s", "; ".join(errors))
+        logger.warning("Partial arXiv category failures: %s", "; ".join(error_messages))
+    stats = {
+        "target": target,
+        "categories": categories,
+        "category_counts": category_counts,
+        "errors": errors,
+        "failed_categories": sorted(errors),
+        "successful_categories": [category for category in categories if category not in errors],
+        "total_papers": len(papers),
+        "all_categories_failed": bool(categories) and len(errors) == len(categories),
+    }
+    return papers, stats
+
+
+def fetch_arxiv_categories(categories: list[str], max_results_per_category: int = 80, day: date | None = None) -> list[Paper]:
+    papers, stats = fetch_arxiv_categories_with_stats(categories, max_results_per_category, day=day)
+    if stats["all_categories_failed"]:
+        messages = [f"{category}: {message}" for category, message in stats["errors"].items()]
+        raise RuntimeError("All arXiv category fetches failed: " + "; ".join(messages))
     return papers
 
 
@@ -136,6 +166,18 @@ def _rss_authors(entry) -> list[str]:
 def normalize_arxiv_id(value: str) -> str:
     value = value.strip().split("/")[-1]
     return re.sub(r"v\d+$", "", value)
+
+
+def _format_fetch_error(exc: Exception) -> str:
+    if isinstance(exc, RetryError):
+        inner = exc.last_attempt.exception()
+        if inner is not None:
+            exc = inner
+    if isinstance(exc, httpx.HTTPStatusError):
+        request = exc.request
+        response = exc.response
+        return f"HTTP {response.status_code} {response.reason_phrase} for {request.url}"
+    return f"{type(exc).__name__}: {exc}"
 
 
 def date_window(day: date) -> tuple[datetime, datetime]:

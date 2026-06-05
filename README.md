@@ -18,7 +18,7 @@ The project learns from the information architecture of daily AI paper brief pro
 - arXiv Atom API collection for `cs.AI`, `cs.CL`, `cs.LG`, `cs.CV`, `cs.MA`, `cs.IR`.
 - Optional Hugging Face, Semantic Scholar, and GitHub signal enrichment.
 - Configurable 12-part scoring system with per-paper score breakdowns.
-- Topic classification, diversity-aware selection, and T+3 publishing cadence.
+- Topic classification, diversity-aware selection, T+3 publishing cadence, and safe fallback to the nearest recent arXiv data date.
 - Mock provider and mock data so the full pipeline runs without API keys.
 - OpenAI-compatible provider support for OpenAI, DeepSeek, and OpenRouter.
 - Chinese and English Markdown briefs plus source transparency pages.
@@ -30,7 +30,7 @@ The project learns from the information architecture of daily AI paper brief pro
 
 ```mermaid
 flowchart TD
-  A[GitHub Actions 00:30 UTC] --> B[Python pipeline]
+  A[GitHub Actions 02:30 UTC] --> B[Python pipeline]
   B --> C[Fetch arXiv]
   C --> D[Normalize and dedupe]
   D --> E[Optional HF / Semantic Scholar / GitHub signals]
@@ -81,6 +81,8 @@ It generates:
 
 ```bash
 ai-brief run-daily --delay-days 3
+ai-brief run-daily --delay-days 3 --fallback-days 4
+ai-brief run-daily --date 2026-06-03 --fallback-days 4
 ai-brief fetch --date 2026-06-03
 ai-brief enrich --date 2026-06-03
 ai-brief score --date 2026-06-03
@@ -88,7 +90,9 @@ ai-brief build-content --date 2026-06-03
 ai-brief qa --date 2026-06-03
 ```
 
-Production runs query arXiv for the target date. If arXiv fails or returns no candidates, the command fails instead of silently publishing mock content. Use `ai-brief mock-run` only for local demo and CI manual mock mode.
+Production runs query arXiv for the target date. The default target is T+3: today minus `pipeline.delay_days` from `configs/site.yaml`, currently 3 days. If that target date has no real arXiv papers in the configured categories, `run-daily` searches backward up to `pipeline.fallback_days`, currently 4 days, and uses the nearest date with real arXiv data.
+
+Brief and source pages record both `target_date` and `actual_date`; fallback pages also record `fallback_from`. If every fallback date has no real papers, or every arXiv category fails, the command fails clearly and does not publish mock content. Use `ai-brief mock-run` only for local demo, CI validation, and manual mock workflow runs.
 
 ## LLM Configuration
 
@@ -161,15 +165,19 @@ RESEND_API_KEY
 MAIL_FROM
 MAIL_TO
 SITE_URL
+CLOUDFLARE_PAGES_DEPLOY_HOOK
 ```
 
-No secret is required for `mock-run`. Without notification secrets, the notification scripts print `missing config, skipped` and exit successfully.
+No secret is required for `mock-run`. Without API keys, the default `LLM_PROVIDER=mock` can still generate deterministic text from real arXiv metadata; optional enrichers are skipped unless configured. The built-in `GITHUB_TOKEN` is provided by GitHub Actions and does not need to be added as a repository secret. Without notification secrets, the notification scripts print `missing config, skipped` and exit successfully.
+
+`CLOUDFLARE_PAGES_DEPLOY_HOOK` is optional. When set, the workflow POSTs it after a successful push as a Pages deployment fallback. If it is missing or the hook call fails, the GitHub push remains the source of truth.
 
 ## Generate Daily Briefs
 
 ```bash
 ai-brief run-daily --date 2026-06-03
 ai-brief run-daily --delay-days 3
+ai-brief run-daily --delay-days 3 --fallback-days 4
 ai-brief generate --date 2026-06-03 --lang zh
 ai-brief generate --date 2026-06-03 --lang en
 ai-brief build-content --date 2026-06-03
@@ -188,18 +196,42 @@ The static output is `apps/web/dist`.
 
 ## GitHub Actions Automation
 
-`.github/workflows/daily-brief.yml` runs every day at UTC 00:30, which is 08:30 in Beijing/Taipei time. It:
+`.github/workflows/daily-brief.yml` runs every day at UTC 02:30, which is 10:30 in Beijing/Taipei time. GitHub scheduled workflows can be delayed during platform load, so the repository also supports manual `workflow_dispatch` and external `repository_dispatch` triggers. It:
 
 1. Installs Python 3.11 and Node 22.
 2. Installs `requirements.txt` and the editable package.
-3. Runs `ai-brief run-daily --delay-days 3` or `ai-brief mock-run` for manual mock dispatch.
+3. Runs `ai-brief run-daily --delay-days 3 --fallback-days 4` or `ai-brief mock-run` for manual mock dispatch.
 4. Runs `pytest -q`.
 5. Builds Astro.
-6. Commits generated `data/` and `apps/web/public/` artifacts.
+6. Commits generated `data/`, including `data/reports/runs/`, and `apps/web/public/` artifacts.
 7. Pushes to `main`.
-8. Optionally sends Telegram and Resend email notifications.
+8. Optionally triggers a Cloudflare Pages deploy hook.
+9. Optionally sends Telegram and Resend email notifications.
 
 Cloudflare Pages should watch the `main` branch and deploy after the push.
+
+Manual run:
+
+```text
+GitHub repository
+-> Actions
+-> Daily AI Research Brief
+-> Run workflow
+-> mode = real
+-> optional date, delay_days, fallback_days
+-> Run workflow
+```
+
+Useful GitHub CLI commands:
+
+```bash
+gh workflow run daily-brief.yml -f mode=real -f delay_days=3 -f fallback_days=4
+gh workflow run daily-brief.yml -f mode=mock
+gh run list --workflow=daily-brief.yml --limit 10
+gh run view --log
+```
+
+When a run succeeds but the website does not change, inspect the `Commit generated content` step. It prints target date, actual data date, fallback state, generated files, latest slugs, whether Git saw a diff, commit SHA, and push status. If the generation step fails, inspect the `Generate daily brief` step and `data/reports/runs/last-run.json` in the log output; successful runs commit the report.
 
 ## Cloudflare Pages Deployment
 
@@ -221,6 +253,22 @@ Build output directory: apps/web/dist
 ```
 
 This repository is optimized for the recommended `apps/web` root directory.
+
+Optional Pages deploy hook:
+
+```text
+Cloudflare Dashboard
+-> Workers & Pages
+-> ai-research
+-> Settings
+-> Builds & deployments
+-> Deploy hooks
+-> Create hook
+```
+
+Save the hook URL as GitHub secret `CLOUDFLARE_PAGES_DEPLOY_HOOK`. This is a fallback trigger only; Cloudflare Pages should still listen to pushes on `main`.
+
+For an external scheduler fallback, see [docs/cloudflare-cron-dispatch.md](docs/cloudflare-cron-dispatch.md). Cloudflare Workers Cron should only trigger GitHub Actions; content generation remains inside GitHub Actions.
 
 ## Domain Check: aici.ccwu.cc
 
@@ -280,7 +328,7 @@ Future user subscriptions, send-state storage, online APIs, reading state, or ad
 - `data/raw/`: raw fetched paper records.
 - `data/processed/`: normalized papers, signals, scores, and selected papers.
 - `data/content/`: generated bilingual Markdown briefs and source pages.
-- `data/reports/`: QA reports.
+- `data/reports/`: QA reports and run reports.
 - `data/mock/`: reserved for mock fixtures.
 
 ## Scoring Rules
@@ -320,11 +368,11 @@ QA errors fail the CLI and GitHub Actions. Warnings are reported but do not fail
 
 ## FAQ
 
-**Why T+3?** It gives community and repository signals time to appear while still keeping the brief recent.
+**Why T+3?** It gives community and repository signals time to appear while still keeping the brief recent. If the T+3 date has no arXiv publications in the configured categories, the production job searches backward up to 4 days and labels the actual data date in the brief and source page.
 
-**Can it run without keys?** Yes. `mock-run` is keyless; production runs can use arXiv-only data when optional enrichers are disabled.
+**Can it run without keys?** Yes. `mock-run` is keyless; production runs can use arXiv-only data when optional enrichers are disabled. If no LLM key is configured, `LLM_PROVIDER=mock` keeps generation deterministic and source-grounded.
 
-**What happens when arXiv is unavailable?** Production generation fails clearly and does not publish mock content.
+**What happens when arXiv is unavailable?** Production generation tries the fallback date window. If no real arXiv data is found, it fails clearly, writes a run report, and does not publish mock content.
 
 **Where are prompts?** Prompt templates are in `packages/prompts/`.
 

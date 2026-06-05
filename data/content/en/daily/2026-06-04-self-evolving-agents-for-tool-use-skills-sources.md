@@ -10,7 +10,7 @@ summary: "Source and scoring log for 18 candidate papers"
 tags: ["sources", "scoring"]
 topics: ["sources"]
 brief_page: "/en/daily/2026-06-04-self-evolving-agents-for-tool-use-skills/"
-generated_at: "2026-06-05T08:01:25.938868+00:00"
+generated_at: "2026-06-05T08:04:42.152165+00:00"
 page_type: "sources"
 candidate_count: 18
 featured_count: 5
@@ -19,7 +19,7 @@ mentions_count: 13
 
 # Sources and Scoring
 
-This page exposes sources and scores for 18 candidate papers. Fetched at 2026-06-05T08:01:24.688172+00:00. Generated at 2026-06-05T08:01:25.938868+00:00. Featured: 5; honorable mentions: 13.
+This page exposes sources and scores for 18 candidate papers. Fetched at 2026-06-05T08:04:41.118210+00:00. Generated at 2026-06-05T08:04:42.152165+00:00. Featured: 5; honorable mentions: 13.
 **Data date note**: The original target date was 2026-06-05. No usable arXiv papers were found for that date, so this issue uses the nearest available data date, 2026-06-04.
 
 ## Scoring Rule Summary

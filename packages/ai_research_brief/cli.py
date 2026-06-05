@@ -17,6 +17,10 @@ from .pipeline.run_daily import (
 from .utils.dates import resolve_date
 
 
+DEFAULT_DELAY_DAYS = 2
+DEFAULT_FALLBACK_DAYS = 4
+
+
 def main(argv=None):
     configure_logging()
     parser = argparse.ArgumentParser(prog="ai-brief")
@@ -39,12 +43,12 @@ def main(argv=None):
     args = parser.parse_args(argv)
     pipeline = site_config().get("pipeline", {})
     if args.cmd == "mock-run":
-        fallback_days = args.fallback_days if args.fallback_days is not None else int(pipeline.get("fallback_days", 4))
+        fallback_days = args.fallback_days if args.fallback_days is not None else int(pipeline.get("fallback_days", DEFAULT_FALLBACK_DAYS))
         result = run_daily(resolve_date(args.date), mock=True, allow_qa_warnings=args.allow_qa_warnings, fallback_days=fallback_days)
     else:
         delay_days = getattr(args, "delay_days", None)
         if delay_days is None:
-            delay_days = int(pipeline.get("delay_days", 3))
+            delay_days = int(pipeline.get("delay_days", DEFAULT_DELAY_DAYS))
         day = resolve_date(getattr(args, "date", None), delay_days)
         result = _dispatch(args, day)
     print(json.dumps(result, ensure_ascii=False, indent=2, default=str))
@@ -73,7 +77,7 @@ def _dispatch(args, day):
     if args.cmd == "run-daily":
         fallback_days = args.fallback_days
         if fallback_days is None:
-            fallback_days = int(site_config().get("pipeline", {}).get("fallback_days", 4))
+            fallback_days = int(site_config().get("pipeline", {}).get("fallback_days", DEFAULT_FALLBACK_DAYS))
         return run_daily(day, mock=args.mock, allow_qa_warnings=args.allow_qa_warnings, fallback_days=fallback_days)
     raise SystemExit(f"Unknown command: {args.cmd}")
 

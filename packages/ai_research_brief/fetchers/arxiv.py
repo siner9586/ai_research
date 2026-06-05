@@ -1,4 +1,5 @@
 from datetime import date, datetime, time, timezone
+import logging
 import re
 from urllib.parse import quote
 import feedparser
@@ -6,6 +7,8 @@ import httpx
 from tenacity import retry, stop_after_attempt, wait_fixed
 from ..models import Paper
 from ..utils.http import DEFAULT_USER_AGENT
+
+logger = logging.getLogger(__name__)
 
 
 def fetch_arxiv_category(category: str, max_results: int = 50, day: date | None = None) -> list[Paper]:
@@ -72,8 +75,23 @@ def fetch_arxiv_rss_category(category: str, max_results: int = 50) -> list[Paper
 
 def fetch_arxiv_categories(categories: list[str], max_results_per_category: int = 80, day: date | None = None) -> list[Paper]:
     papers: list[Paper] = []
+    errors: list[str] = []
+    target = str(day) if day else "latest"
     for category in categories:
-        papers.extend(fetch_arxiv_category(category, max_results_per_category, day=day))
+        try:
+            rows = fetch_arxiv_category(category, max_results_per_category, day=day)
+        except Exception as exc:
+            message = f"{category}: {exc}"
+            errors.append(message)
+            logger.warning("arXiv fetch failed for %s on %s: %s", category, target, exc)
+            continue
+        if not rows:
+            logger.info("arXiv returned no papers for %s on %s", category, target)
+        papers.extend(rows)
+    if errors and not papers:
+        raise RuntimeError("All arXiv category fetches failed: " + "; ".join(errors))
+    if errors:
+        logger.warning("Partial arXiv category failures: %s", "; ".join(errors))
     return papers
 
 

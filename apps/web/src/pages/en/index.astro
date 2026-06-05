@@ -8,55 +8,91 @@ const briefs = loadBriefs(lang);
 const latest = briefs[0];
 const recent = briefs.slice(0, 7);
 const totalCandidates = briefs.reduce((sum, doc) => sum + Number(doc.meta.candidate_count || 0), 0);
+const avgCandidates = briefs.length ? Math.round(totalCandidates / briefs.length) : 0;
+const latestTopics = latest?.meta.tags?.slice(0, 6) || [];
+const topicNames: Record<string, string> = {
+  agents: 'Agents',
+  reasoning: 'Reasoning',
+  training: 'Training',
+  rag: 'RAG',
+  multimodal: 'Multimodal',
+  code: 'Code AI',
+  'vision-generation': 'Image generation',
+  'video-generation': 'Video generation',
+  safety: 'Safety',
+  'speech-audio': 'Speech/audio',
+  robotics: 'Robotics',
+  interpretability: 'Interpretability',
+  evaluation: 'Evaluation',
+  'data-engineering': 'Data',
+  systems: 'Systems',
+};
 ---
 <BaseLayout lang={lang} title={site.name} description={site.tagline}>
-  <section class="hero">
-    <div>
-      <h1>{site.name}</h1>
-      <p>{site.tagline}</p>
+  <section class="home-hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Daily 07:12 Beijing/Taipei · T+2 arXiv picks</p>
+      <h1>Find the AI papers worth tracking before the pile becomes unreadable.</h1>
+      <p class="hero-subtitle">A daily source-first filter for agents, reasoning, training optimization, RAG, multimodal systems, code intelligence, image and video generation, safety, speech, robotics, evaluation, and data engineering. Start with the full candidate pool, then follow the high-signal papers.</p>
       <div class="action-row">
-        <a class="button" href="/en/methodology/">Methodology</a>
-        <a class="button secondary" href="/en/search/">Search</a>
-        <a class="button secondary" href="/en/archive/">Archive</a>
+        <a class="button" href={latest?.url || '/en/archive/'}>Read latest brief</a>
+        <a class="button secondary" href="/en/search/">Search papers</a>
+        <a class="button secondary" href="/en/methodology/">View method</a>
       </div>
     </div>
-    <div class="metrics">
-      <div class="metric"><strong>{briefs.length}</strong><span>briefs</span></div>
-      <div class="metric"><strong>{totalCandidates}</strong><span>candidates</span></div>
-      <div class="metric"><strong>15</strong><span>topics</span></div>
+    <div class="dashboard-card">
+      <span class="section-kicker">Pipeline status</span>
+      <div class="metric-stack">
+        <div><strong>{briefs.length}</strong><span>published briefs</span></div>
+        <div><strong>{totalCandidates}</strong><span>total candidates</span></div>
+        <div><strong>{avgCandidates}</strong><span>avg candidates/issue</span></div>
+      </div>
+      <p>The pipeline normally collects arXiv papers from two days earlier, scores them with transparent signals, and keeps a source page for every issue.</p>
     </div>
   </section>
+
   {latest && (
-    <section class="latest-issue">
-      <p class="section-kicker">Latest issue</p>
-      <h2><a href={latest.url}>{latest.meta.title}</a></h2>
-      <div class="article-meta">
-        <span>{latest.meta.date}</span>
-        <span>{latest.meta.candidate_count} candidates</span>
-        <span>{latest.meta.featured_count} featured</span>
-        <a href={latest.meta.sources_page}>sources and scoring</a>
+    <section class="latest-panel">
+      <div class="latest-main">
+        <p class="section-kicker">Latest issue · {latest.meta.date}</p>
+        <h2><a href={latest.url}>{latest.meta.title}</a></h2>
+        <p>{latest.meta.summary}</p>
+        <div class="article-meta chip-row">
+          <span>{latest.meta.candidate_count} candidates</span>
+          <span>{latest.meta.featured_count} featured</span>
+          <span>{latest.meta.mentions_count} additional picks</span>
+          <a href={latest.meta.sources_page}>View full candidate pool and scoring</a>
+        </div>
       </div>
-      <p>{latest.meta.summary}</p>
+      <aside class="topic-chips" aria-label="Issue topics">
+        {latestTopics.map((topic: string) => <span>{topicNames[topic] || topic}</span>)}
+      </aside>
     </section>
   )}
-  <section class="subscribe-strip">
-    <span>Browse</span>
+
+  <section class="quick-nav">
     <a href="/en/archive/">Full archive</a>
-    <a href="/en/topics/">Topics</a>
+    <a href="/en/topics/">Topic index</a>
+    <a href="/en/feed.xml">RSS feed</a>
     <a href="/en/privacy/">Privacy</a>
   </section>
-  <section class="article-list">
+
+  <section class="article-list refined-list">
+    <div class="section-head clean">
+      <h2>Recent updates</h2>
+      <a href="/en/archive/">View all</a>
+    </div>
     {briefs.length === 0 && <p>No generated content yet. Run <code>ai-brief mock-run</code> to create a daily brief.</p>}
     {recent.map((doc) => (
-      <article class="article-card">
+      <article class="article-card elevated-card">
+        <p class="section-kicker">{doc.meta.date} · {doc.meta.candidate_count} candidates</p>
         <h2><a href={doc.url}>{doc.meta.title}</a></h2>
+        <p>{doc.meta.summary}</p>
         <div class="article-meta">
-          <span>{doc.meta.date}</span>
-          <span>{doc.meta.candidate_count} candidates</span>
           <span>{doc.meta.featured_count} featured</span>
+          <span>{doc.meta.mentions_count} additional picks</span>
           <a href={doc.meta.sources_page}>sources and scoring</a>
         </div>
-        <p>{doc.meta.summary}</p>
       </article>
     ))}
   </section>

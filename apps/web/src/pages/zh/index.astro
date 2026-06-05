@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { loadBriefs, loadSite } from '../../utils/content';
+import { beijingToday, displayBriefTitle, loadBriefs, loadSite } from '../../utils/content';
 
 const lang = 'zh';
 const site = loadSite()[lang];
@@ -8,6 +8,7 @@ const briefs = loadBriefs(lang);
 const latest = briefs[0];
 const recent = briefs.slice(0, 7);
 const latestTopics = latest?.meta.tags?.slice(0, 6) || [];
+const today = beijingToday();
 const topicNames: Record<string, string> = {
   agents: 'Agent',
   reasoning: '推理',
@@ -29,7 +30,6 @@ const topicNames: Record<string, string> = {
 <BaseLayout lang={lang} title={site.name} description={site.tagline}>
   <section class="home-hero">
     <div class="hero-copy">
-      <p class="eyebrow">每日 07:12 更新 · T+2 arXiv 精选</p>
       <h1>每天从海量 AI 论文里，筛出真正值得跟进的研究线索。</h1>
       <p class="hero-subtitle">覆盖 Agent、推理、训练优化、RAG、多模态、代码智能、图像与视频生成、安全对齐、语音、机器人、评测和数据工程。候选池扩大后，先看全量来源，再看高分重点。</p>
       <div class="action-row">
@@ -43,8 +43,8 @@ const topicNames: Record<string, string> = {
   {latest && (
     <section class="latest-panel">
       <div class="latest-main">
-        <p class="section-kicker">最新一期 · {latest.meta.date}</p>
-        <h2><a href={latest.url}>{latest.meta.title}</a></h2>
+        <p class="section-kicker">最新一期 · {today}</p>
+        <h2><a href={latest.url}>{displayBriefTitle(latest.meta.title)}</a></h2>
         <div class="article-meta chip-row">
           <a href={latest.meta.sources_page}>查看完整候选池与评分</a>
         </div>
@@ -71,7 +71,7 @@ const topicNames: Record<string, string> = {
     {recent.map((doc) => (
       <article class="article-card elevated-card">
         <p class="section-kicker">{doc.meta.date}</p>
-        <h2><a href={doc.url}>{doc.meta.title}</a></h2>
+        <h2><a href={doc.url}>{displayBriefTitle(doc.meta.title)}</a></h2>
         <div class="article-meta">
           <a href={doc.meta.sources_page}>来源与评分</a>
         </div>

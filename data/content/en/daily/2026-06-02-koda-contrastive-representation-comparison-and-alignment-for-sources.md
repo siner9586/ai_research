@@ -10,7 +10,7 @@ summary: "Source and scoring log for 264 candidate papers"
 tags: ["sources", "scoring"]
 topics: ["sources"]
 brief_page: "/en/daily/2026-06-02-koda-contrastive-representation-comparison-and-alignment-for/"
-generated_at: "2026-06-05T07:58:33.853948+00:00"
+generated_at: "2026-06-05T08:01:16.695699+00:00"
 page_type: "sources"
 candidate_count: 264
 featured_count: 5
@@ -19,7 +19,7 @@ mentions_count: 15
 
 # Sources and Scoring
 
-This page exposes sources and scores for 264 candidate papers. Fetched at 2026-06-05T07:58:10.696190+00:00. Generated at 2026-06-05T07:58:33.853948+00:00. Featured: 5; honorable mentions: 15.
+This page exposes sources and scores for 264 candidate papers. Fetched at 2026-06-05T08:00:53.878058+00:00. Generated at 2026-06-05T08:01:16.695699+00:00. Featured: 5; honorable mentions: 15.
 
 
 ## Scoring Rule Summary

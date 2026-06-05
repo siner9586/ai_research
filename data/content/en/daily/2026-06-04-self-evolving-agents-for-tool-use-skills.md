@@ -10,7 +10,7 @@ summary: "This issue selects 5 featured papers and 13 honorable mentions from 18
 tags: ["agents", "code", "data-engineering", "evaluation", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 topics: ["agents", "code", "data-engineering", "evaluation", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 sources_page: "/en/daily/2026-06-04-self-evolving-agents-for-tool-use-skills-sources/"
-generated_at: "2026-06-05T07:58:41.556173+00:00"
+generated_at: "2026-06-05T08:01:25.937120+00:00"
 page_type: "brief"
 candidate_count: 18
 featured_count: 5

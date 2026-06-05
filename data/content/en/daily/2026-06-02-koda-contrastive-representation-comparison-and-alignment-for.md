@@ -10,7 +10,7 @@ summary: "This issue selects 5 featured papers and 15 honorable mentions from 26
 tags: ["agents", "data-engineering", "evaluation", "multimodal", "rag", "reasoning", "safety", "systems", "training"]
 topics: ["agents", "data-engineering", "evaluation", "multimodal", "rag", "reasoning", "safety", "systems", "training"]
 sources_page: "/en/daily/2026-06-02-koda-contrastive-representation-comparison-and-alignment-for-sources/"
-generated_at: "2026-06-05T07:58:33.852456+00:00"
+generated_at: "2026-06-05T08:01:16.693968+00:00"
 page_type: "brief"
 candidate_count: 264
 featured_count: 5

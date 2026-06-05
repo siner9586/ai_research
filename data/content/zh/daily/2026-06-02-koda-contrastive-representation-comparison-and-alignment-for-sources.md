@@ -10,7 +10,7 @@ summary: "候选池 264 篇论文的来源与评分记录"
 tags: ["sources", "scoring"]
 topics: ["sources"]
 brief_page: "/zh/daily/2026-06-02-koda-contrastive-representation-comparison-and-alignment-for/"
-generated_at: "2026-06-05T07:58:31.874892+00:00"
+generated_at: "2026-06-05T08:01:14.304682+00:00"
 page_type: "sources"
 candidate_count: 264
 featured_count: 5
@@ -19,7 +19,7 @@ mentions_count: 15
 
 # 论文来源与评分
 
-本页公开 264 篇候选论文的来源与评分。抓取时间：2026-06-05T07:58:10.696190+00:00。生成时间：2026-06-05T07:58:31.874892+00:00。其中重点论文 5 篇，也值得关注 15 篇。
+本页公开 264 篇候选论文的来源与评分。抓取时间：2026-06-05T08:00:53.878058+00:00。生成时间：2026-06-05T08:01:14.304682+00:00。其中重点论文 5 篇，也值得关注 15 篇。
 
 
 ## 评分规则摘要

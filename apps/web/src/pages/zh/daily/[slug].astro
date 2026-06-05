@@ -1,14 +1,15 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { loadDocs, markdownToHtml } from '../../../utils/content';
+import { displayBriefTitle, loadDocs, markdownToHtml } from '../../../utils/content';
 
 export function getStaticPaths() {
   return loadDocs('zh').map((doc) => ({ params: { slug: doc.slug }, props: { doc } }));
 }
 
 const { doc } = Astro.props;
+const pageTitle = displayBriefTitle(doc.meta.title);
 ---
-<BaseLayout lang="zh" title={doc.meta.title} description={doc.meta.summary}>
+<BaseLayout lang="zh" title={pageTitle} description={doc.meta.summary}>
   <article class="prose">
     <div class="article-meta">
       <span>{doc.meta.date}</span>

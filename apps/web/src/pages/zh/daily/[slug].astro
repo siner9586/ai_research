@@ -8,6 +8,9 @@ export function getStaticPaths() {
 
 const { doc } = Astro.props;
 const pageTitle = displayBriefTitle(doc.meta.title);
+const body = doc.meta.page_type === 'brief'
+  ? doc.body.replace(/\n\*\*日期\*\*:\s*\d{4}-\d{2}-\d{2}\n\n/, '\n')
+  : doc.body;
 ---
 <BaseLayout lang="zh" title={pageTitle} description={doc.meta.summary}>
   <article class="prose">
@@ -17,6 +20,6 @@ const pageTitle = displayBriefTitle(doc.meta.title);
       {doc.meta.brief_page && <a href={doc.meta.brief_page}>返回简报</a>}
       {doc.meta.sources_page && <a href={doc.meta.sources_page}>来源与评分</a>}
     </div>
-    <Fragment set:html={markdownToHtml(doc.body)} />
+    <Fragment set:html={markdownToHtml(body)} />
   </article>
 </BaseLayout>

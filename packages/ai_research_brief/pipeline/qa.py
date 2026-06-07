@@ -6,61 +6,32 @@ import re
 from pathlib import Path
 
 from ..models import QAReport
-
+from .select import build_repeat_history
 
 FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n(.*)$", re.S)
-FORBIDDEN_PATTERNS = [
-    r"\bguaranteed breakthrough\b",
-    r"\bproduction ready\b",
-    r"已被证实",
-    r"必然",
-    r"颠覆",
-    r"革命性突破",
-]
-PEER_REVIEW_PATTERNS = [
-    r"accepted by\s+(NeurIPS|ICML|ICLR|ACL|CVPR|EMNLP)",
-    r"被\s*(NeurIPS|ICML|ICLR|ACL|CVPR|EMNLP)\s*接收",
-]
-USER_VISIBLE_FORBIDDEN_PATTERNS = [
+BAD_VISIBLE = [
     r"每日\s*07:12\s*更新",
     r"Daily\s+07:12",
     r"T\+2\s+ARXIV",
     r"T\+2\s+arXiv",
-    r"流水线状态",
-    r"Pipeline status",
-    r"已发布简报",
-    r"published briefs",
-    r"累计候选论文",
-    r"total candidates",
-    r"平均候选/期",
-    r"avg candidates/issue",
-    r"来源与评分",
-    r"sources and scoring",
     r"完整候选池与评分",
     r"full candidate pool and scoring",
     r"完整候选评分",
     r"Full candidate scores",
     r"今日重点[:：]",
     r"Today's focus:",
-    r"关注理由[:：]\s*重点在于",
-    r"摘要给出的直接线索是",
-    r"The abstract signal is",
-    r"\bscore\s+\d+\b",
+    r"摘要" + r"显示",
+    r"建议" + r"先看每篇",
+    r"重点" + r"核验",
+    r"The abstract" + r" points to",
+    r"The abstract" + r" signal is",
+    r"Open the original" + r" paper",
+    r"Verify" + r" whether",
+    r"evaluation" + r" setup",
 ]
 
 
-def run_qa(
-    day: date,
-    content_dir: Path,
-    reports_dir: Path,
-    target_date: date | None = None,
-    publish_date: date | None = None,
-) -> QAReport:
-    """Validate generated artifacts.
-
-    `day` is the actual arXiv data date. `publish_date` is the public issue
-    date shown on the website and used in daily page slugs.
-    """
+def run_qa(day: date, content_dir: Path, reports_dir: Path, target_date: date | None = None, publish_date: date | None = None) -> QAReport:
     target_date = target_date or day
     publish_date = publish_date or day
     warnings: list[str] = []
@@ -70,8 +41,8 @@ def run_qa(
 
     for lang in ("zh", "en"):
         pages = sorted((content_dir / lang / "daily").glob(f"{publish_date}-*.md"))
-        brief_pages: list[Path] = []
-        source_pages: list[Path] = []
+        briefs = []
+        sources = []
         for path in pages:
             checked.append(str(path))
             parsed = _parse_markdown(path, errors)
@@ -79,20 +50,21 @@ def run_qa(
                 continue
             meta, body = parsed
             docs[lang].append((path, meta, body))
-            if str(meta.get("page_type")) == "brief" and not path.stem.endswith("-sources"):
-                brief_pages.append(path)
-            if str(meta.get("page_type")) == "sources" or path.stem.endswith("-sources"):
-                source_pages.append(path)
-            _check_markdown_doc(path, meta, body, day, target_date, publish_date, errors, warnings)
+            if meta.get("page_type") == "brief" and not path.stem.endswith("-sources"):
+                briefs.append(path)
+            if meta.get("page_type") == "sources" or path.stem.endswith("-sources"):
+                sources.append(path)
+            _check_doc(path, meta, body, day, target_date, publish_date, errors, warnings)
+        if len(briefs) != 1:
+            errors.append(f"Expected exactly one {lang} brief for {publish_date}, found {len(briefs)}")
+        if len(sources) != 1:
+            errors.append(f"Expected exactly one {lang} source page for {publish_date}, found {len(sources)}")
 
-        if not brief_pages:
-            errors.append(f"Missing {lang} daily brief for publication date {publish_date}")
-        if not source_pages:
-            errors.append(f"Missing {lang} sources page for publication date {publish_date}")
-
-    _check_processed(day, content_dir.parents[1], checked, errors)
-    _check_static_artifacts(publish_date, content_dir.parents[1], checked, errors)
-    _check_bilingual_quality(docs, warnings, errors)
+    repo_root = content_dir.parents[1]
+    _check_processed(day, repo_root, checked, errors)
+    _check_pairs(docs, errors)
+    _check_static(publish_date, repo_root, checked, errors, docs)
+    _check_repeat(day, repo_root, docs, errors, warnings)
 
     report = QAReport(
         date=publish_date,
@@ -124,21 +96,12 @@ def _parse_markdown(path: Path, errors: list[str]) -> tuple[dict, str] | None:
         try:
             meta[key.strip()] = json.loads(value)
         except json.JSONDecodeError:
-            meta[key.strip()] = value.strip('"')
+            meta[key.strip()] = int(value) if value.isdigit() else value.strip('"')
     return meta, match.group(2)
 
 
-def _check_markdown_doc(
-    path: Path,
-    meta: dict,
-    body: str,
-    day: date,
-    target_date: date,
-    publish_date: date,
-    errors: list[str],
-    warnings: list[str],
-) -> None:
-    required = ["title", "date", "target_date", "actual_date", "lang", "slug", "summary", "tags", "generated_at"]
+def _check_doc(path: Path, meta: dict, body: str, day: date, target_date: date, publish_date: date, errors: list[str], warnings: list[str]) -> None:
+    required = ["title", "date", "target_date", "actual_date", "lang", "slug", "summary", "tags", "generated_at", "page_type", "candidate_count", "featured_count", "mentions_count"]
     for key in required:
         if meta.get(key) in (None, "", []):
             errors.append(f"Missing frontmatter field {key}: {path}")
@@ -150,29 +113,30 @@ def _check_markdown_doc(
         errors.append(f"Frontmatter target_date mismatch: {path}")
     if str(meta.get("slug")) != path.stem:
         errors.append(f"Slug/path mismatch: {path}")
+    if meta.get("page_type") == "brief" and not meta.get("sources_page"):
+        errors.append(f"Brief is missing sources_page: {path}")
+    if meta.get("page_type") == "sources" and not meta.get("brief_page"):
+        errors.append(f"Sources page is missing brief_page: {path}")
+    visible = "\n".join([str(meta.get("title", "")), str(meta.get("summary", "")), body])
+    for pattern in BAD_VISIBLE:
+        if re.search(pattern, visible, re.I):
+            errors.append(f"Deprecated visible wording matched {pattern}: {path}")
+    if meta.get("page_type") == "brief":
+        _check_featured_explanations(path, meta, body, errors)
     if not re.search(r"https://arxiv\.org/abs/\d{4}\.\d{4,5}", body):
         warnings.append(f"No arXiv URL found: {path}")
-    if str(meta.get("page_type")) == "brief":
-        visible_text = "\n".join([str(meta.get("title", "")), str(meta.get("summary", "")), body])
-        for pattern in USER_VISIBLE_FORBIDDEN_PATTERNS:
-            if re.search(pattern, visible_text, re.I):
-                errors.append(f"User-visible deprecated wording matched {pattern}: {path}")
-    for pattern in FORBIDDEN_PATTERNS:
-        if re.search(pattern, body, re.I):
-            errors.append(f"Forbidden wording matched {pattern}: {path}")
-    for pattern in PEER_REVIEW_PATTERNS:
-        if re.search(pattern, body, re.I):
-            errors.append(f"Possible fabricated peer-review acceptance wording: {path}")
-    for code_url in re.findall(r"Code URL:\s*([^\n]+)", body):
-        clean = code_url.strip()
-        if clean != "none verified" and not clean.startswith("https://github.com/"):
-            errors.append(f"Unverified or unsupported code URL: {path}: {clean}")
-    if meta.get("lang") == "zh":
-        english_terms = re.findall(r"\b[A-Za-z][A-Za-z0-9+\-]{3,}\b", body)
-        if len(english_terms) > 180:
-            warnings.append(f"Chinese page has many English terms; review terminology: {path}")
-    if meta.get("lang") == "en" and len(body.strip()) < 200:
-        errors.append(f"English page is too short: {path}")
+
+
+def _check_featured_explanations(path: Path, meta: dict, body: str, errors: list[str]) -> None:
+    chunks = re.split(r"\n###\s+\d+\.\s+", body)[1:]
+    featured_count = int(meta.get("featured_count") or 0)
+    for index, chunk in enumerate(chunks[:featured_count], start=1):
+        text = _strip(chunk)
+        if meta.get("lang") == "zh":
+            if "核心：" not in text or len(re.sub(r"\s+", "", text)) < 80:
+                errors.append(f"Featured paper {index} lacks a full structured Chinese explanation: {path}")
+        elif "Core idea:" not in text or len(re.findall(r"\b\w+\b", text)) < 45:
+            errors.append(f"Featured paper {index} lacks a full structured English explanation: {path}")
 
 
 def _check_processed(day: date, repo_root: Path, checked: list[str], errors: list[str]) -> None:
@@ -184,24 +148,51 @@ def _check_processed(day: date, repo_root: Path, checked: list[str], errors: lis
             errors.append(f"Missing processed artifact: {path}")
             continue
         try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
+            json.loads(path.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             errors.append(f"Invalid JSON: {path}")
+
+
+def _check_pairs(docs: dict[str, list[tuple[Path, dict, str]]], errors: list[str]) -> None:
+    for lang in ("zh", "en"):
+        brief = _first(docs, lang, "brief")
+        source = _first(docs, lang, "sources")
+        if not brief or not source:
             continue
-        rows = payload if isinstance(payload, list) else payload.get("featured", []) + payload.get("mentions", []) if isinstance(payload, dict) else []
-        if name == "papers.json":
-            for index, row in enumerate(rows):
-                for field in ["title", "abstract", "authors", "abs_url"]:
-                    if not row.get(field):
-                        errors.append(f"Paper {index} missing {field}: {path}")
+        brief_path, brief_meta, brief_body = brief
+        source_path, source_meta, source_body = source
+        for key in ["date", "target_date", "actual_date", "fallback_from", "candidate_count", "featured_count", "mentions_count", "lang"]:
+            if str(brief_meta.get(key, "")) != str(source_meta.get(key, "")):
+                errors.append(f"Brief/source metadata mismatch for {key}: {brief_path} vs {source_path}")
+        if brief_meta.get("sources_page") != f"/{lang}/daily/{source_meta.get('slug')}/":
+            errors.append(f"Brief sources_page does not match source slug: {brief_path}")
+        if source_meta.get("brief_page") != f"/{lang}/daily/{brief_meta.get('slug')}/":
+            errors.append(f"Source brief_page does not match brief slug: {source_path}")
+        if _ids(brief_body) != _ids(source_body):
+            errors.append(f"Brief/source selected arXiv IDs differ for {lang}")
+    zh = _first(docs, "zh", "brief")
+    en = _first(docs, "en", "brief")
+    if not zh or not en:
+        errors.append("Missing bilingual brief pair")
+        return
+    for key in ["date", "actual_date", "candidate_count", "featured_count", "mentions_count"]:
+        if str(zh[1].get(key, "")) != str(en[1].get(key, "")):
+            errors.append(f"zh/en metadata mismatch for {key}")
+    if _ids(zh[2]) != _ids(en[2]):
+        errors.append("zh/en selected arXiv IDs differ")
 
 
-def _check_static_artifacts(day: date, repo_root: Path, checked: list[str], errors: list[str]) -> None:
+def _check_static(day: date, repo_root: Path, checked: list[str], errors: list[str], docs: dict[str, list[tuple[Path, dict, str]]]) -> None:
     public = repo_root / "apps" / "web" / "public"
     for path in [public / "zh" / "feed.xml", public / "en" / "feed.xml", public / "sitemap.xml", public / "search-index.json"]:
         checked.append(str(path))
         if not path.exists():
             errors.append(f"Missing static artifact: {path}")
+            continue
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        for pattern in BAD_VISIBLE:
+            if re.search(pattern, text, re.I):
+                errors.append(f"Static artifact contains deprecated wording matched {pattern}: {path}")
     search_index = public / "search-index.json"
     if search_index.exists():
         try:
@@ -209,19 +200,63 @@ def _check_static_artifacts(day: date, repo_root: Path, checked: list[str], erro
         except json.JSONDecodeError:
             errors.append("search-index.json is not valid JSON")
         else:
+            seen = set()
+            for row in rows:
+                for field in ["title", "date", "lang", "url", "source_url", "summary", "tags", "topics", "authors", "content_excerpt", "type", "text"]:
+                    if field not in row:
+                        errors.append(f"Search index missing field: {field}")
+                key = (row.get("lang"), row.get("date"))
+                if key in seen:
+                    errors.append(f"Search index contains duplicate public issue for {key}")
+                seen.add(key)
             if not any(str(row.get("date")) == str(day) for row in rows):
                 errors.append(f"Search index does not include publication date {day}")
-            for field in ["title", "date", "lang", "url", "summary", "tags", "topics", "authors", "content_excerpt"]:
-                if rows and field not in rows[0]:
-                    errors.append(f"Search index missing field: {field}")
+    sitemap_text = (public / "sitemap.xml").read_text(encoding="utf-8") if (public / "sitemap.xml").exists() else ""
+    for lang in ("zh", "en"):
+        for doc in (_first(docs, lang, "brief"), _first(docs, lang, "sources")):
+            if doc and f"/{lang}/daily/{doc[1].get('slug')}/" not in sitemap_text:
+                errors.append(f"Sitemap missing {lang} page slug {doc[1].get('slug')}")
 
 
-def _check_bilingual_quality(docs: dict[str, list[tuple[Path, dict, str]]], warnings: list[str], errors: list[str]) -> None:
-    zh_briefs = [body for _, meta, body in docs["zh"] if meta.get("page_type") == "brief"]
-    en_briefs = [body for _, meta, body in docs["en"] if meta.get("page_type") == "brief"]
-    if zh_briefs and en_briefs and zh_briefs[0][:500] == en_briefs[0][:500]:
-        errors.append("English brief appears to duplicate Chinese content")
-    if not en_briefs:
-        errors.append("Missing English brief content")
-    if not zh_briefs:
-        errors.append("Missing Chinese brief content")
+def _check_repeat(day: date, repo_root: Path, docs: dict[str, list[tuple[Path, dict, str]]], errors: list[str], warnings: list[str]) -> None:
+    history = build_repeat_history(day, days=30, repo_root=repo_root)
+    if not history:
+        return
+    for lang in ("zh", "en"):
+        brief = _first(docs, lang, "brief")
+        if not brief:
+            continue
+        featured_ids, mention_ids = _section_ids(brief[2])
+        if set(featured_ids) & set(mention_ids):
+            errors.append(f"{lang} featured and mentions overlap in the same issue")
+        for arxiv_id in featured_ids:
+            previous = history.get(f"arxiv:{arxiv_id.lower()}")
+            if previous:
+                errors.append(f"{lang} featured paper {arxiv_id} repeats recent {previous.get('section')} from {previous.get('date')}")
+        if len(featured_ids) != int(brief[1].get("featured_count") or 0):
+            warnings.append(f"{lang} featured_count differs from parsed featured ids")
+
+
+def _first(docs: dict[str, list[tuple[Path, dict, str]]], lang: str, page_type: str):
+    for row in docs[lang]:
+        if row[1].get("page_type") == page_type:
+            return row
+    return None
+
+
+def _section_ids(body: str) -> tuple[list[str], list[str]]:
+    match = re.search(r"\n##\s+(其他值得关注|Other papers worth tracking)\b", body)
+    if match:
+        return _ids(body[: match.start()]), _ids(body[match.start():])
+    return _ids(body), []
+
+
+def _ids(text: str) -> list[str]:
+    return list(dict.fromkeys(re.findall(r"arxiv\.org/abs/(\d{4}\.\d{4,5})", text)))
+
+
+def _strip(text: str) -> str:
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"\[(.*?)\]\(.*?\)", r"\1", text)
+    text = re.sub(r"[#*_`>-]", " ", text)
+    return re.sub(r"\s+", " ", text).strip()

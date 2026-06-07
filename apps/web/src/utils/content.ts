@@ -147,7 +147,8 @@ export function markdownToHtml(markdown: string) {
     if (heading) {
       closeList();
       const level = heading[1].length;
-      out.push(`<h${level}>${inline(heading[2])}</h${level}>`);
+      const className = level === 1 ? ' class="daily-brief-title"' : '';
+      out.push(`<h${level}${className}>${inline(heading[2])}</h${level}>`);
       continue;
     }
     const item = line.match(/^-\s+(.*)$/);

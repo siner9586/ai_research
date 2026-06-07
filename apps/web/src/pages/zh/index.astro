@@ -17,8 +17,8 @@ const topicNames: Record<string, string> = {
   code: '代码智能',
   'vision-generation': '图像生成',
   'video-generation': '视频生成',
-  safety: '安全对齐',
-  'speech-audio': '语音音频',
+  safety: '安全',
+  'speech-audio': '语音/音频',
   robotics: '机器人',
   interpretability: '可解释性',
   evaluation: '评测',
@@ -33,22 +33,30 @@ const topicNames: Record<string, string> = {
       <p class="hero-subtitle">覆盖 Agent、推理、训练优化、RAG、多模态、代码智能、生成、安全、语音、机器人、评测、数据工程和系统部署。</p>
       <div class="action-row">
         <a class="button" href={latest?.url || '/zh/archive/'}>阅读最新简报</a>
+        <a class="button secondary" href="/en/">English</a>
         <a class="button secondary" href="/zh/search/">搜索论文</a>
-        <a class="button secondary" href="/zh/methodology/">查看方法</a>
       </div>
     </div>
   </section>
 
-  {latest && (
-    <section class="latest-panel with-topics">
+  {latest ? (
+    <section class="latest-panel with-topics latest-stack">
       <div class="latest-main">
         <p class="section-kicker">最新一期 · {latest.meta.date}</p>
         <h2><a href={latest.url}>{displayBriefTitle(latest.meta.title)}</a></h2>
+        <div class="issue-meta-row">
+          <span>{latest.meta.candidate_count || 0} 篇候选</span>
+          <span>{latest.meta.featured_count || 0} 篇重点</span>
+          <span>{latest.meta.mentions_count || 0} 篇补充</span>
+          {latest.meta.sources_page && <a class="issue-source-link" href={latest.meta.sources_page}>来源页</a>}
+        </div>
       </div>
-      <aside class="topic-chips" aria-label="本期主题">
+      <aside class="topic-chips issue-keyword-row" aria-label="本期关键词">
         {latestTopics.map((topic: string) => <span>{topicNames[topic] || topic}</span>)}
       </aside>
     </section>
+  ) : (
+    <p class="muted">还没有生成简报。运行 <code>ai-brief mock-run</code> 后会显示最近一期。</p>
   )}
 
   <section class="quick-nav">
@@ -58,17 +66,33 @@ const topicNames: Record<string, string> = {
     <a href="/zh/privacy/">隐私说明</a>
   </section>
 
-  <section class="article-list refined-list">
-    <div class="section-head clean">
-      <h2>最近更新</h2>
+  <section class="archive-links">
+    <div class="section-head">
+      <h2>往期简报</h2>
       <a href="/zh/archive/">查看全部</a>
     </div>
-    {briefs.length === 0 && <p>还没有生成内容。运行 <code>ai-brief mock-run</code> 后会出现每日简报。</p>}
-    {recent.map((doc) => (
-      <article class="article-card elevated-card">
-        <p class="section-kicker">{doc.meta.date}</p>
-        <h2><a href={doc.url}>{displayBriefTitle(doc.meta.title)}</a></h2>
-      </article>
-    ))}
+    {recent.length === 0 ? (
+      <p class="muted">暂无更早简报。</p>
+    ) : (
+      <ul>
+        {recent.map((doc) => (
+          <li>
+            <a href={doc.url}>{displayBriefTitle(doc.meta.title)}</a>
+            <span>{doc.meta.date}</span>
+          </li>
+        ))}
+      </ul>
+    )}
   </section>
 </BaseLayout>
+
+<style>
+  .home-hero h1 { font-size: clamp(30px, 4.6vw, 52px); line-height: 1.08; letter-spacing: -0.045em; }
+  .latest-stack { grid-template-columns: minmax(0, 1fr); align-items: flex-start; gap: 14px; }
+  .latest-main { min-width: 0; }
+  .latest-panel h2 { margin-bottom: 12px; font-size: clamp(22px, 3.4vw, 32px); overflow-wrap: anywhere; }
+  .issue-meta-row, .issue-keyword-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-start; }
+  .issue-meta-row { color: var(--muted); font-size: 14px; }
+  .issue-source-link { font-weight: 700; text-decoration: none; }
+  @media (max-width: 820px) { .home-hero h1 { font-size: clamp(28px, 8.2vw, 38px); line-height: 1.12; } }
+</style>

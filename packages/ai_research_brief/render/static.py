@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import re
-from pathlib import Path
 from xml.sax.saxutils import escape
 
 from ..config import REPO_ROOT, site_config, topics_config
@@ -10,6 +9,15 @@ from ..config import REPO_ROOT, site_config, topics_config
 
 FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n(.*)$", re.S)
 BRIEF_TITLE_PREFIX_RE = re.compile(r"^(今日重点[:：]\s*|Today's focus:\s*)", re.I)
+DEPRECATED_TEXT_PATTERNS = [
+    (r"建议" + r"先看每篇[^。]*。?", "下面按核心问题、方法线索、主要论点和关键词整理。"),
+    (r"摘要" + r"显示[:：]", "核心线索："),
+    (r"\s*重点" + r"核验[:：][^。]*。?", " 代码/数据可用性需查看原文确认。"),
+    (r"Open the original" + r" paper[^.]*\.", "The notes below focus on the core problem, method signal, main claim, and keywords."),
+    (r"The abstract" + r" points to[:：]", "Core signal:"),
+    (r"Verify" + r" whether[^.]*\.", "Code/data availability and transfer limits should be checked in the source paper."),
+    (r"evaluation" + r" setup", "evaluation details"),
+]
 
 
 def read_content_documents(lang: str | None = None) -> list[dict]:
@@ -36,57 +44,45 @@ def read_content_documents(lang: str | None = None) -> list[dict]:
     return docs
 
 
-def build_search_index() -> Path:
+def build_search_index() -> str:
     rows = []
     for doc in _public_briefs(read_content_documents()):
         meta = doc["meta"]
-        text = _strip_markdown(doc["body"])
+        text = _clean_generated_text(_strip_markdown(doc["body"]))
         rows.append({
             "title": _clean_title(meta.get("title", "")),
             "date": meta.get("date", ""),
             "lang": doc["lang"],
             "url": doc["url"],
             "source_url": meta.get("sources_page", ""),
-            "summary": meta.get("summary", ""),
+            "summary": _clean_generated_text(meta.get("summary", "")),
             "tags": meta.get("tags", []),
             "topics": meta.get("topics", meta.get("tags", [])),
             "authors": _extract_authors(doc["body"]),
-            "content_excerpt": _clean_title(text[:800]),
+            "content_excerpt": _clean_generated_text(_clean_title(text[:800])),
             "type": meta.get("page_type", "page"),
-            "text": _clean_title(text[:5000]),
+            "text": _clean_generated_text(_clean_title(text[:5000])),
         })
     out = REPO_ROOT / "apps" / "web" / "public" / "search-index.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
-    return out
+    return str(out)
 
 
-def build_sitemap() -> Path:
+def build_sitemap() -> str:
     base_url = site_config().get("site", {}).get("base_url", "").rstrip("/")
     static_paths = [
-        "/",
-        "/zh/",
-        "/en/",
-        "/zh/archive/",
-        "/en/archive/",
-        "/zh/search/",
-        "/en/search/",
-        "/zh/topics/",
-        "/en/topics/",
-        "/zh/methodology/",
-        "/en/methodology/",
-        "/zh/privacy/",
-        "/en/privacy/",
-        "/zh/whatsnew/",
-        "/en/whatsnew/",
+        "/", "/zh/", "/en/", "/zh/archive/", "/en/archive/",
+        "/zh/search/", "/en/search/", "/zh/topics/", "/en/topics/",
+        "/zh/methodology/", "/en/methodology/", "/zh/privacy/", "/en/privacy/",
+        "/zh/whatsnew/", "/en/whatsnew/",
     ]
     topic_paths = []
     for lang in ("zh", "en"):
         for topic in topics_config().get("topics", []):
             topic_paths.append(f"/{lang}/topics/{topic['slug']}/")
-    brief_docs = _public_briefs(read_content_documents())
     urls = static_paths + topic_paths
-    for doc in brief_docs:
+    for doc in _public_briefs(read_content_documents()):
         urls.append(doc["url"])
         source_url = str(doc["meta"].get("sources_page") or "")
         if source_url:
@@ -98,7 +94,7 @@ def build_sitemap() -> Path:
     out = REPO_ROOT / "apps" / "web" / "public" / "sitemap.xml"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(xml, encoding="utf-8")
-    return out
+    return str(out)
 
 
 def _parse_frontmatter(text: str) -> dict:
@@ -111,10 +107,7 @@ def _parse_frontmatter(text: str) -> dict:
         try:
             meta[key.strip()] = json.loads(value)
         except json.JSONDecodeError:
-            if value.isdigit():
-                meta[key.strip()] = int(value)
-            else:
-                meta[key.strip()] = value.strip('"')
+            meta[key.strip()] = int(value) if value.isdigit() else value.strip('"')
     return meta
 
 
@@ -128,12 +121,21 @@ def _clean_title(text: str) -> str:
     return BRIEF_TITLE_PREFIX_RE.sub("", str(text or "")).strip()
 
 
+def _clean_generated_text(text: str) -> str:
+    value = str(text or "")
+    for pattern, replacement in DEPRECATED_TEXT_PATTERNS:
+        value = re.sub(pattern, replacement, value, flags=re.I)
+    return re.sub(r"\s+", " ", value).strip()
+
+
 def _extract_authors(markdown: str) -> list[str]:
     authors: list[str] = []
     for match in re.finditer(r"(?:Authors / institutions|作者/机构|Authors):\s*([^\n]+)", markdown):
         value = re.sub(r"\[(.*?)\]\(.*?\)", r"\1", match.group(1)).strip()
         if value and value.lower() not in {"unknown", "未知"}:
             authors.extend([part.strip() for part in value.split(",") if part.strip()])
+    for match in re.finditer(r"<span>([^<(]+)\(([^<]+)\)</span>", markdown):
+        authors.extend([part.strip() for part in match.group(2).split(",") if part.strip()])
     return list(dict.fromkeys(authors))[:20]
 
 

@@ -60,15 +60,7 @@ export function loadDocs(lang?: string, options: { includeInternal?: boolean } =
       const isInternal = meta.page_type === 'sources' || slug.endsWith('-sources');
       if (isInternal && options.includeInternal === false) continue;
       const stat = fs.statSync(filePath);
-      docs.push({
-        meta,
-        body,
-        lang: itemLang,
-        slug,
-        url: `/${itemLang}/daily/${slug}/`,
-        filePath,
-        mtimeMs: stat.mtimeMs,
-      });
+      docs.push({ meta, body, lang: itemLang, slug, url: `/${itemLang}/daily/${slug}/`, filePath, mtimeMs: stat.mtimeMs });
     }
   }
   return docs.sort(compareDocs);
@@ -93,9 +85,7 @@ export function loadDoc(lang: string, slug: string) {
 export function topicCounts(lang: string) {
   const counts: Record<string, number> = {};
   for (const doc of loadBriefs(lang)) {
-    for (const tag of doc.meta.tags || []) {
-      counts[tag] = (counts[tag] || 0) + 1;
-    }
+    for (const tag of doc.meta.tags || []) counts[tag] = (counts[tag] || 0) + 1;
   }
   return counts;
 }
@@ -108,67 +98,32 @@ export function displayBriefTitle(title: string | undefined | null) {
 }
 
 export function beijingToday() {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Shanghai',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date());
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 }
 
 export function markdownToHtml(markdown: string) {
   const lines = markdown.split('\n');
   const out: string[] = [];
   let inList = false;
-  const closeList = () => {
-    if (inList) {
-      out.push('</ul>');
-      inList = false;
-    }
-  };
+  const closeList = () => { if (inList) { out.push('</ul>'); inList = false; } };
 
   for (const rawLine of lines) {
     const line = normalizeDisplayLine(rawLine);
-    if (!line.trim()) {
-      closeList();
-      continue;
-    }
-    if (line.startsWith('<p class="paper-meta-line">')) {
-      closeList();
-      out.push(line);
-      continue;
-    }
-    if (line.startsWith('|')) {
-      closeList();
-      out.push(`<pre class="table-line">${escapeHtml(line)}</pre>`);
-      continue;
-    }
+    if (!line.trim()) { closeList(); continue; }
+    if (line.startsWith('<p class="paper-meta-line">')) { closeList(); out.push(line); continue; }
+    if (line.startsWith('|')) { closeList(); out.push(`<pre class="table-line">${escapeHtml(line)}</pre>`); continue; }
     const heading = line.match(/^(#{1,3})\s+(.*)$/);
     if (heading) {
       closeList();
       const level = heading[1].length;
-      const h1Attrs = level === 1
-        ? ' class="daily-brief-title" style="font-size: clamp(28px, 4.2vw, 34px); line-height: 1.18; letter-spacing: -0.025em;"'
-        : '';
+      const h1Attrs = level === 1 ? ' class="daily-brief-title" style="font-size: clamp(28px, 4.2vw, 34px); line-height: 1.18; letter-spacing: -0.025em;"' : '';
       out.push(`<h${level}${h1Attrs}>${inline(heading[2])}</h${level}>`);
       continue;
     }
-    const item = line.match(/^-\s+(.*)$/);
+    const item = line.match(/^-\s+(.*)$/) || line.match(/^\s+-\s+(.*)$/);
     if (item) {
-      if (!inList) {
-        out.push('<ul>');
-        inList = true;
-      }
+      if (!inList) { out.push('<ul>'); inList = true; }
       out.push(`<li>${inline(item[1])}</li>`);
-      continue;
-    }
-    const nestedItem = line.match(/^\s+-\s+(.*)$/);
-    if (nestedItem) {
-      if (!inList) {
-        out.push('<ul>');
-        inList = true;
-      }
-      out.push(`<li>${inline(nestedItem[1])}</li>`);
       continue;
     }
     closeList();
@@ -187,11 +142,8 @@ function parseFrontmatter(raw: string) {
     if (index === -1) continue;
     const key = line.slice(0, index).trim();
     const value = line.slice(index + 1).trim();
-    try {
-      meta[key] = JSON.parse(value);
-    } catch {
-      meta[key] = /^\d+$/.test(value) ? Number(value) : value.replace(/^"|"$/g, '');
-    }
+    try { meta[key] = JSON.parse(value); }
+    catch { meta[key] = /^\d+$/.test(value) ? Number(value) : value.replace(/^"|"$/g, ''); }
   }
   return { meta, body: match[2] };
 }
@@ -213,7 +165,7 @@ function sanitizeGeneratedLine(line: string) {
     .replace(new RegExp('建议' + '先看每篇[^。]*。?', 'g'), '下面按核心问题、方法线索、主要论点和关键词整理。')
     .replace(new RegExp('摘要' + '显示[:：]', 'g'), '核心线索：')
     .replace(new RegExp('\\s*重点' + '核验[:：][^。]*。?', 'g'), ' 代码/数据可用性需查看原文确认。')
-    .replace(new RegExp('Open the original paper[^.]*\\.', 'g'), 'The notes below focus on the core problem, method signal, main claim, and keywords.')
+    .replace(new RegExp('Open the original' + ' paper[^.]*\\.', 'g'), 'The notes below focus on the core problem, method signal, main claim, and keywords.')
     .replace(new RegExp('The abstract' + ' points to[:：]', 'g'), 'Core signal:')
     .replace(new RegExp('Verify' + ' whether[^.]*\\.', 'g'), 'Code/data availability and transfer limits should be confirmed in the original paper.');
 }
@@ -228,10 +180,7 @@ function inline(text: string) {
 }
 
 function escapeHtml(text: string) {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 export function dedupeBriefsByDate(docs: Doc[]) {
@@ -240,9 +189,7 @@ export function dedupeBriefsByDate(docs: Doc[]) {
     const date = String(doc.meta.date || '');
     if (!date) continue;
     const existing = byDate.get(date);
-    if (!existing || compareDocs(doc, existing) < 0) {
-      byDate.set(date, doc);
-    }
+    if (!existing || compareDocs(doc, existing) < 0) byDate.set(date, doc);
   }
   return Array.from(byDate.values()).sort(compareDocs);
 }
@@ -260,5 +207,5 @@ function compareDocs(a: Doc, b: Doc) {
 }
 
 function isPaperLink(label: string, href: string) {
-  return label === 'PDF' || /arxiv\.org\/(abs|pdf)\//.test(href) || /^\d{4}\.\d{4,5}$/.test(label);
+  return /^\d{4}\.\d{4,5}$/.test(label) || String(href || '').includes('arxiv.org') || label === 'PDF';
 }

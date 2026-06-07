@@ -17,7 +17,7 @@ const topicNames: Record<string, string> = {
   code: 'Code AI',
   'vision-generation': 'Image generation',
   'video-generation': 'Video generation',
-  safety: 'Safety',
+  safety: 'Model governance',
   'speech-audio': 'Speech/audio',
   robotics: 'Robotics',
   interpretability: 'Interpretability',
@@ -30,7 +30,7 @@ const topicNames: Record<string, string> = {
   <section class="home-hero compact-home">
     <div class="hero-copy">
       <h1>Find the AI papers worth tracking before the pile becomes unreadable.</h1>
-      <p class="hero-subtitle">A compact daily brief for agents, reasoning, training optimization, RAG, multimodal systems, code intelligence, generation, safety, speech, robotics, evaluation, data engineering, and systems deployment.</p>
+      <p class="hero-subtitle">A compact daily brief for agents, reasoning, training optimization, RAG, multimodal systems, code intelligence, generation, model governance, speech, robotics, evaluation, data engineering, and systems deployment.</p>
       <div class="action-row">
         <a class="button" href={latest?.url || '/en/archive/'}>Read latest brief</a>
         <a class="button secondary" href="/en/search/">Search papers</a>
@@ -40,12 +40,18 @@ const topicNames: Record<string, string> = {
   </section>
 
   {latest && (
-    <section class="latest-panel with-topics">
+    <section class="latest-panel with-topics latest-stack">
       <div class="latest-main">
         <p class="section-kicker">Latest issue · {latest.meta.date}</p>
         <h2><a href={latest.url}>{displayBriefTitle(latest.meta.title)}</a></h2>
+        <div class="issue-meta-row">
+          <span>{latest.meta.candidate_count || 0} candidates</span>
+          <span>{latest.meta.featured_count || 0} featured</span>
+          <span>{latest.meta.mentions_count || 0} additional</span>
+          {latest.meta.sources_page && <a class="issue-source-link" href={latest.meta.sources_page}>Source page</a>}
+        </div>
       </div>
-      <aside class="topic-chips" aria-label="Issue topics">
+      <aside class="topic-chips issue-keyword-row" aria-label="Issue topics">
         {latestTopics.map((topic: string) => <span>{topicNames[topic] || topic}</span>)}
       </aside>
     </section>
@@ -63,7 +69,7 @@ const topicNames: Record<string, string> = {
       <h2>Recent updates</h2>
       <a href="/en/archive/">View all</a>
     </div>
-    {briefs.length === 0 && <p>No generated content yet. Run <code>ai-brief mock-run</code> to create a daily brief.</p>}
+    {briefs.length === 0 && <p>No generated content yet.</p>}
     {recent.map((doc) => (
       <article class="article-card elevated-card">
         <p class="section-kicker">{doc.meta.date}</p>
@@ -72,3 +78,14 @@ const topicNames: Record<string, string> = {
     ))}
   </section>
 </BaseLayout>
+
+<style>
+  .home-hero h1 { font-size: clamp(30px, 4.6vw, 52px); line-height: 1.08; letter-spacing: -0.045em; }
+  .latest-stack { grid-template-columns: minmax(0, 1fr); align-items: flex-start; gap: 14px; }
+  .latest-main { min-width: 0; }
+  .latest-panel h2 { margin-bottom: 12px; font-size: clamp(22px, 3.4vw, 32px); overflow-wrap: anywhere; }
+  .issue-meta-row, .issue-keyword-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-start; }
+  .issue-meta-row { color: var(--muted); font-size: 14px; }
+  .issue-source-link { font-weight: 700; text-decoration: none; }
+  @media (max-width: 820px) { .home-hero h1 { font-size: clamp(28px, 8.2vw, 38px); line-height: 1.12; } }
+</style>

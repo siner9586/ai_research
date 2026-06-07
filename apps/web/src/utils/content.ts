@@ -46,7 +46,7 @@ export function loadTopics() {
   return rows;
 }
 
-export function loadDocs(lang?: string, options: { includeInternal?: boolean } = {}): Doc[] {
+export function loadDocs(lang?: string, options: { includeInternal?: boolean } = { includeInternal: true }): Doc[] {
   const langs = lang ? [lang] : safeReadDir(contentRoot);
   const docs: Doc[] = [];
   for (const itemLang of langs) {
@@ -58,7 +58,7 @@ export function loadDocs(lang?: string, options: { includeInternal?: boolean } =
       const { meta, body } = parseFrontmatter(raw);
       const slug = meta.slug || file.replace(/\.md$/, '');
       const isInternal = meta.page_type === 'sources' || slug.endsWith('-sources');
-      if (isInternal && !options.includeInternal) continue;
+      if (isInternal && options.includeInternal === false) continue;
       const stat = fs.statSync(filePath);
       docs.push({
         meta,
@@ -76,7 +76,7 @@ export function loadDocs(lang?: string, options: { includeInternal?: boolean } =
 
 export function loadBriefs(lang: string) {
   return dedupeBriefsByDate(
-    loadDocs(lang)
+    loadDocs(lang, { includeInternal: false })
       .filter((doc) => doc.meta.page_type === 'brief')
       .filter((doc) => String(doc.meta.date || '') <= beijingToday())
   );

@@ -201,11 +201,21 @@ function safeReadDir(dir: string) {
 }
 
 function normalizeDisplayLine(line: string) {
-  return line
+  return sanitizeGeneratedLine(line)
     .replace(/^(#{1,6}\s*)今日重点[:：]\s*/, '$1')
     .replace(/^(#{1,6}\s*)Today's focus:\s*/i, '$1')
     .replace(/^今日重点[:：]\s*/, '')
     .replace(/^Today's focus:\s*/i, '');
+}
+
+function sanitizeGeneratedLine(line: string) {
+  return line
+    .replace(new RegExp('建议' + '先看每篇[^。]*。?', 'g'), '下面按核心问题、方法线索、主要论点和关键词整理。')
+    .replace(new RegExp('摘要' + '显示[:：]', 'g'), '核心线索：')
+    .replace(new RegExp('\\s*重点' + '核验[:：][^。]*。?', 'g'), ' 代码/数据可用性需查看原文确认。')
+    .replace(new RegExp('Open the original paper[^.]*\\.', 'g'), 'The notes below focus on the core problem, method signal, main claim, and keywords.')
+    .replace(new RegExp('The abstract' + ' points to[:：]', 'g'), 'Core signal:')
+    .replace(new RegExp('Verify' + ' whether[^.]*\\.', 'g'), 'Code/data availability and transfer limits should be confirmed in the original paper.');
 }
 
 function inline(text: string) {

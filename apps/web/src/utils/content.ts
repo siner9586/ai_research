@@ -82,8 +82,12 @@ export function loadBriefs(lang: string) {
   );
 }
 
+export function loadSourceDocs(lang: string) {
+  return loadDocs(lang, { includeInternal: true }).filter((doc) => doc.meta.page_type === 'sources');
+}
+
 export function loadDoc(lang: string, slug: string) {
-  return loadDocs(lang).find((doc) => doc.slug === slug);
+  return loadDocs(lang, { includeInternal: true }).find((doc) => doc.slug === slug);
 }
 
 export function topicCounts(lang: string) {

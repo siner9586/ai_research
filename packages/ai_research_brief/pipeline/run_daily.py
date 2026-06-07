@@ -18,7 +18,7 @@ from .enrich import build_signals
 from .normalize import normalize_papers
 from .qa import run_qa
 from .score import score_papers
-from .select import select_papers
+from .select import build_repeat_history, repeat_guard_summary, select_papers
 
 logger = logging.getLogger(__name__)
 DEFAULT_ARXIV_CATEGORIES = ["cs.AI", "cs.CL", "cs.LG", "cs.CV", "cs.MA", "cs.IR"]
@@ -91,18 +91,28 @@ def score_stage(day: date) -> tuple[list[ScoredPaper], list[ScoredPaper], list[S
         _write(_processed_dir(day) / "signals.json", signal_rows)
     signals = {signal.arxiv_id: signal for signal in signal_rows}
     scored = score_papers(papers, signals, recent_topics=_recent_topics(day))
+    repeat_guard_days = int(pipeline.get("repeat_guard_days", 30))
+    repeat_history = build_repeat_history(
+        day,
+        days=repeat_guard_days,
+        scope=str(pipeline.get("repeat_guard_scope", "featured_and_mentions")),
+    )
     featured, mentions = select_papers(
         scored,
         featured_min=int(pipeline.get("featured_min", 3)),
         featured_max=int(pipeline.get("featured_max", 5)),
         mentions_min=int(pipeline.get("mentions_min", 8)),
         mentions_max=int(pipeline.get("mentions_max", 15)),
+        repeat_history=repeat_history,
+        repeat_guard_featured_strict=bool(pipeline.get("repeat_guard_featured_strict", True)),
     )
+    guard_summary = repeat_guard_summary(scored, featured, mentions, repeat_history, repeat_guard_days)
     _write(_processed_dir(day) / "scored_papers.json", scored)
     _write(
         _processed_dir(day) / "selected_papers.json",
         {"featured": [x.model_dump(mode="json") for x in featured], "mentions": [x.model_dump(mode="json") for x in mentions]},
     )
+    _write(_processed_dir(day) / "repeat_guard_summary.json", guard_summary)
     return scored, featured, mentions
 
 
@@ -194,6 +204,7 @@ def run_daily(
 
         enrich_stage(actual_day, mock=mock)
         scored, featured, mentions = score_stage(actual_day)
+        guard_summary = _read_optional_json(_processed_dir(actual_day) / "repeat_guard_summary.json", {})
         generated, slugs = generate_stage(actual_day, target_date=day, fallback_from=fallback_from, publish_date=publish_date)
         static_files = build_static_stage()
         qa_report = qa_stage(actual_day, allow_warnings=allow_qa_warnings, target_date=day, publish_date=publish_date)
@@ -206,6 +217,7 @@ def run_daily(
             "qa_passed": qa_report.passed,
             "qa_warnings": qa_report.warnings,
             "generated_files": generated + static_files,
+            **guard_summary,
         })
         _write_run_report(run_report)
         _log_run_summary("complete", run_report)
@@ -234,6 +246,7 @@ def run_daily(
             "qa_warnings": qa_report.warnings,
             "generated": generated + static_files,
             "run_report": run_report["report_path"],
+            "repeat_guard": guard_summary,
         }
     except Exception as exc:
         attempts = getattr(exc, "attempts", None)
@@ -339,6 +352,7 @@ def _resolve_fetch_day(day: date, mock: bool, fallback_days: int) -> tuple[date,
 def _base_run_report(day: date, publish_date: date, mock: bool, fallback_days: int, trigger: str | None) -> dict:
     pipeline = site_config().get("pipeline", {})
     categories = pipeline.get("arxiv_categories", DEFAULT_ARXIV_CATEGORIES)
+    repeat_guard_days = int(pipeline.get("repeat_guard_days", 30))
     return {
         "trigger": trigger or os.environ.get("GITHUB_EVENT_NAME") or "local",
         "date": str(publish_date),
@@ -366,6 +380,11 @@ def _base_run_report(day: date, publish_date: date, mock: bool, fallback_days: i
         "generated_files": [],
         "qa_passed": False,
         "qa_warnings": [],
+        "repeat_guard_days": repeat_guard_days,
+        "excluded_recent_duplicates_count": 0,
+        "excluded_recent_duplicates": [],
+        "fallback_allowed": False,
+        "fallback_reason": None,
         "status": "running",
         "attempts": [],
         "report_path": str((_reports_dir() / f"{publish_date}.json").relative_to(REPO_ROOT)),
@@ -436,6 +455,15 @@ def _read_json(path: Path):
     if not path.exists():
         raise FileNotFoundError(f"Missing required pipeline artifact: {path}")
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _read_optional_json(path: Path, default):
+    if not path.exists():
+        return default
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return default
 
 
 def _read_papers(day: date) -> list[Paper]:

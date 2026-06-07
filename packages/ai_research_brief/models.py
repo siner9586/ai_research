@@ -63,6 +63,10 @@ class ScoredPaper(BaseModel):
     confidence_level: str
     selection_tier: str = "candidate"
     rank: int = 0
+    repeat_guard_status: str = "new"
+    previous_seen_date: str | None = None
+    previous_seen_section: str | None = None
+    repeat_guard_reason: str | None = None
 
 class BriefPaper(BaseModel):
     arxiv_id: str

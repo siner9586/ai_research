@@ -83,12 +83,13 @@ def select_papers(
 def build_repeat_history(current_day: date, days: int = 30, scope: str = "featured_and_mentions", repo_root: Path = REPO_ROOT) -> dict[str, dict[str, Any]]:
     history: dict[str, dict[str, Any]] = {}
     include_mentions = scope != "featured_only"
+    content_cutoff = _content_history_cutoff(repo_root / "data" / "content", current_day)
     for offset in range(1, max(days, 0) + 1):
         item_day = current_day - timedelta(days=offset)
         selected_path = repo_root / "data" / "processed" / str(item_day) / "selected_papers.json"
         if selected_path.exists():
             _read_selected_history(selected_path, item_day, include_mentions, history)
-    _read_content_history(repo_root / "data" / "content", current_day, days, include_mentions, history)
+    _read_content_history(repo_root / "data" / "content", content_cutoff, days, include_mentions, history)
     return history
 
 
@@ -175,6 +176,24 @@ def _read_selected_history(path: Path, item_day: date, include_mentions: bool, h
         for row in payload.get(section, []):
             paper = row.get("paper", {}) if isinstance(row, dict) else {}
             _remember(history, paper.get("arxiv_id"), paper.get("title"), str(item_day), section, str(path))
+
+
+def _content_history_cutoff(content_root: Path, current_day: date) -> date:
+    latest: date | None = None
+    if content_root.exists():
+        for path in content_root.glob("*/daily/*.md"):
+            if path.stem.endswith("-sources"):
+                continue
+            try:
+                value = _frontmatter_value(path.read_text(encoding="utf-8"), "date")
+                item_day = date.fromisoformat(value)
+            except (OSError, TypeError, ValueError):
+                continue
+            if item_day <= current_day:
+                continue
+            if latest is None or item_day > latest:
+                latest = item_day
+    return max(current_day, latest + timedelta(days=1) if latest else current_day)
 
 
 def _read_content_history(content_root: Path, current_day: date, days: int, include_mentions: bool, history: dict[str, dict[str, Any]]) -> None:

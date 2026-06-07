@@ -5,12 +5,26 @@ const briefs = loadBriefs('zh');
 ---
 <BaseLayout lang="zh" title="归档">
   <h1>归档</h1>
-  <section class="article-list">
+  <section class="article-list archive-list">
     {briefs.map((doc) => (
-      <article class="article-card">
+      <article class="article-card archive-card">
         <h2><a href={doc.url}>{displayBriefTitle(doc.meta.title)}</a></h2>
-        <div class="article-meta"><span>{doc.meta.date}</span></div>
+        <div class="issue-meta-row archive-meta-row">
+          <span>{doc.meta.date}</span>
+          <span>{doc.meta.candidate_count || 0} 候选</span>
+          <span>{doc.meta.featured_count || 0} 重点</span>
+          <span>{doc.meta.mentions_count || 0} 补充</span>
+          {doc.meta.sources_page ? <a class="issue-source-link" href={doc.meta.sources_page}>来源页</a> : <span class="muted">来源页缺失</span>}
+        </div>
       </article>
     ))}
   </section>
 </BaseLayout>
+
+<style>
+  .archive-list { gap: 14px; }
+  .archive-card h2 { margin-bottom: 12px; overflow-wrap: anywhere; }
+  .archive-meta-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--muted); font-size: 14px; }
+  .archive-meta-row span { border: 1px solid var(--line); border-radius: 8px; background: var(--bg-soft); padding: 4px 10px; }
+  .issue-source-link { font-weight: 700; text-decoration: none; }
+</style>

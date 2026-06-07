@@ -20,16 +20,20 @@ def build_rss(lang: str) -> Path:
     for doc in docs:
         meta = doc["meta"]
         url = f"{base_url}{doc['url']}"
+        source_url = str(meta.get("sources_page") or "")
+        source_abs = f"{base_url}{source_url}" if source_url.startswith("/") else source_url
         pub_date = _rss_date(str(meta.get("date", "")))
+        summary = str(meta.get("summary", ""))
+        if source_abs:
+            summary = f"{summary} Source page: {source_abs}"
         items.append(
             "<item>"
             f"<title>{escape(str(meta.get('title', '')))}</title>"
             f"<link>{escape(url)}</link>"
             f"<guid>{escape(url)}</guid>"
-            f"<description>{escape(str(meta.get('summary', '')))}</description>"
+            f"<description>{escape(summary)}</description>"
             f"<pubDate>{pub_date}</pubDate>"
             f"<language>{escape(lang)}</language>"
-            f"<content>{escape(doc['body'][:8000])}</content>"
             "</item>"
         )
 

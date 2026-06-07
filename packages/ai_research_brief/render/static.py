@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from pathlib import Path
 from xml.sax.saxutils import escape
 
 from ..config import REPO_ROOT, site_config, topics_config

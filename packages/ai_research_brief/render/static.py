@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import re
-from pathlib import Path
 from xml.sax.saxutils import escape
 
 from ..config import REPO_ROOT, site_config, topics_config
@@ -46,6 +45,7 @@ def build_search_index() -> Path:
             "date": meta.get("date", ""),
             "lang": doc["lang"],
             "url": doc["url"],
+            "source_url": meta.get("sources_page", ""),
             "summary": meta.get("summary", ""),
             "tags": meta.get("tags", []),
             "topics": meta.get("topics", meta.get("tags", [])),
@@ -83,7 +83,13 @@ def build_sitemap() -> Path:
     for lang in ("zh", "en"):
         for topic in topics_config().get("topics", []):
             topic_paths.append(f"/{lang}/topics/{topic['slug']}/")
-    urls = static_paths + topic_paths + [doc["url"] for doc in _public_briefs(read_content_documents())]
+    brief_docs = _public_briefs(read_content_documents())
+    urls = static_paths + topic_paths
+    for doc in brief_docs:
+        urls.append(doc["url"])
+        source_url = str(doc["meta"].get("sources_page") or "")
+        if source_url:
+            urls.append(source_url)
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for url in dict.fromkeys(urls):
         xml += f"  <url><loc>{escape(base_url + url)}</loc></url>\n"

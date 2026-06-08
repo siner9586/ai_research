@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, time, timezone
 import json
 
 import pytest
@@ -21,6 +21,11 @@ def _empty_stats(day, categories):
     }
 
 
+def _dated_mock_papers(day: date):
+    anchor = datetime.combine(day, time.min, tzinfo=timezone.utc)
+    return [paper.model_copy(update={"published_at": anchor, "updated_at": anchor}) for paper in mock_papers()]
+
+
 def test_run_daily_falls_back_to_recent_real_arxiv_date(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "mock")
     target = date(2026, 6, 5)
@@ -29,7 +34,7 @@ def test_run_daily_falls_back_to_recent_real_arxiv_date(monkeypatch):
     def fake_fetch(categories, max_results_per_category, day=None, **_kwargs):
         if day == target:
             return [], _empty_stats(day, categories)
-        papers = mock_papers()
+        papers = _dated_mock_papers(day)
         return papers, {
             "target": str(day),
             "categories": categories,

@@ -92,6 +92,16 @@ def _brief_markdown(brief: DailyBrief, candidates: list[ScoredPaper], data_date:
         "",
         f"# {brief.title}",
         "",
+        f"## {labels['candidate_pool_heading']}",
+        "",
+        labels["candidate_pool_summary"].format(
+            candidate_count=len(candidates),
+            featured_count=len(brief.featured_papers),
+            mentions_count=len(brief.honorable_mentions),
+            target_date=target_date,
+            actual_date=data_date,
+        ),
+        "",
         f"## {labels['trend_heading']}",
         "",
         brief.trend_observation,
@@ -123,6 +133,7 @@ def _sources_markdown(
     labels = _labels(lang)
     generated_at = utc_now().isoformat()
     fetched_at = min((row.paper.fetched_at for row in candidates), default=utc_now()).isoformat()
+    sample_count = min(30, len(candidates))
     return "\n".join([
         *_frontmatter({
             "title": labels["sources_title"],
@@ -147,9 +158,25 @@ def _sources_markdown(
         "",
         labels["sources_intro"].format(generated_at=generated_at, fetched_at=fetched_at),
         "",
+        f"## {labels['source_stats_heading']}",
+        "",
+        labels["source_stats_text"].format(
+            candidate_count=len(candidates),
+            featured_count=len(featured),
+            mentions_count=len(mentions),
+            target_date=target_date,
+            actual_date=day,
+        ),
+        "",
         f"## {labels['selected_heading']}",
         "",
         _summary_table(featured + mentions, lang),
+        "",
+        f"## {labels['candidate_sample_heading']}",
+        "",
+        labels["candidate_sample_intro"].format(sample_count=sample_count, candidate_count=len(candidates)),
+        "",
+        _candidate_sample_table(candidates[:sample_count], lang),
     ])
 
 
@@ -310,6 +337,17 @@ def _summary_table(rows: list[ScoredPaper], lang: str) -> str:
     return "\n".join(lines)
 
 
+def _candidate_sample_table(rows: list[ScoredPaper], lang: str) -> str:
+    labels = _labels(lang)
+    if not rows:
+        return labels["empty_table"]
+    lines = [f"| {labels['rank']} | {labels['candidate_title']} | {labels['topic']} | arXiv |", "|---:|---|---|---|"]
+    for row in rows:
+        title = re.sub(r"\s+", " ", row.paper.title).strip()
+        lines.append(f"| {row.rank} | {title} | {_topic_label(row, lang)} | [{row.paper.arxiv_id}]({row.paper.abs_url}) |")
+    return "\n".join(lines)
+
+
 def _brief_title(lang: str, featured: list[ScoredPaper]) -> str:
     if not featured:
         return "今日 AI 论文简报" if lang == "zh" else "Daily AI Research Brief"
@@ -350,6 +388,8 @@ def _topic_label(row: ScoredPaper, lang: str) -> str:
 
 def _labels(lang: str) -> dict[str, str]:
     zh = {
+        "candidate_pool_heading": "候选池概览",
+        "candidate_pool_summary": "本期目标数据日为 {target_date}，实际使用数据日为 {actual_date}；全量抓取并去重后共有 **{candidate_count} 篇候选论文**。页面保持轻量，仅展示重点论文 {featured_count} 篇和其他关注 {mentions_count} 篇；更详细的候选池样例见来源页。",
         "trend_heading": "今天最值得跟进的方向",
         "featured_heading": "重点论文：核心问题、方法线索与关键词",
         "mentions_heading": "其他值得关注",
@@ -358,16 +398,23 @@ def _labels(lang: str) -> dict[str, str]:
         "trend": "今天的高分论文主要指向：{topics}。下面按核心问题、方法线索、主要论点和关键词整理，便于快速判断后续跟进价值。",
         "code": "代码",
         "sources_title": "内部生成记录",
-        "sources_summary": "内部生成元数据",
+        "sources_summary": "内部生成元数据：本期候选论文 {count} 篇。",
         "sources_intro": "内部生成记录。抓取时间 {fetched_at}，生成时间 {generated_at}；机器可读明细保留在 data/processed 与 data/reports。",
+        "source_stats_heading": "候选池统计",
+        "source_stats_text": "目标数据日：{target_date}；实际数据日：{actual_date}。去重后候选论文：**{candidate_count} 篇**；重点论文：{featured_count} 篇；其他关注：{mentions_count} 篇。",
         "selected_heading": "入选论文",
+        "candidate_sample_heading": "候选池样例",
+        "candidate_sample_intro": "以下展示候选池前 {sample_count} 条样例，用于证明本期候选池规模；完整机器可读清单保留在仓库的 data/processed 产物中，本页不恢复沉重的完整评分大表。",
         "rank": "排名",
         "paper": "看点",
+        "candidate_title": "论文原标题",
         "topic": "主题",
         "unknown": "未知",
         "empty_table": "无。",
     }
     en = {
+        "candidate_pool_heading": "Candidate pool overview",
+        "candidate_pool_summary": "Target data date: {target_date}; actual data date: {actual_date}. The pipeline fetched and deduplicated **{candidate_count} candidate papers**. To keep the page lightweight, it shows {featured_count} featured papers and {mentions_count} additional mentions; the source page includes a compact candidate-pool sample.",
         "trend_heading": "What is worth tracking today",
         "featured_heading": "Featured papers: core problem, method signal, and keywords",
         "mentions_heading": "Other papers worth tracking",
@@ -376,11 +423,16 @@ def _labels(lang: str) -> dict[str, str]:
         "trend": "Today’s high-signal papers point to: {topics}. The notes below focus on the core problem, method signal, main claim, and keywords for each featured paper.",
         "code": "Code",
         "sources_title": "Internal Generation Record",
-        "sources_summary": "Internal generation metadata",
+        "sources_summary": "Internal generation metadata: {count} candidate papers.",
         "sources_intro": "Internal generation record. Fetched at {fetched_at}. Generated at {generated_at}. Machine-readable details stay under data/processed and data/reports.",
+        "source_stats_heading": "Candidate pool statistics",
+        "source_stats_text": "Target data date: {target_date}. Actual data date: {actual_date}. Deduplicated candidate papers: **{candidate_count}**. Featured papers: {featured_count}. Additional mentions: {mentions_count}.",
         "selected_heading": "Selected papers",
+        "candidate_sample_heading": "Candidate pool sample",
+        "candidate_sample_intro": "The table below shows the first {sample_count} candidates as a compact proof of the candidate-pool scale. The full machine-readable list remains in the repository data/processed artifacts, so this page does not reintroduce a heavy full scoring board.",
         "rank": "Rank",
         "paper": "Takeaway",
+        "candidate_title": "Original title",
         "topic": "Topic",
         "unknown": "Unknown",
         "empty_table": "None.",

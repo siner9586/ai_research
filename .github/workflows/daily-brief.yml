@@ -8,6 +8,7 @@ on:
       - main
     paths:
       - .github/daily-brief.force
+      - .github/daily-brief-formal-retry.force
   workflow_dispatch:
     inputs:
       mode:
@@ -28,7 +29,7 @@ on:
       fallback_days:
         description: "How many days to search backward if target date has no papers"
         required: false
-        default: "4"
+        default: "7"
   repository_dispatch:
     types: [daily-brief]
 
@@ -62,7 +63,7 @@ jobs:
           MODE_INPUT: ${{ github.event.inputs.mode || github.event.client_payload.mode || 'real' }}
           DATE_INPUT: ${{ github.event.inputs.date || github.event.client_payload.date || '' }}
           DELAY_DAYS_INPUT: ${{ github.event.inputs.delay_days || github.event.client_payload.delay_days || '2' }}
-          FALLBACK_DAYS_INPUT: ${{ github.event.inputs.fallback_days || github.event.client_payload.fallback_days || '4' }}
+          FALLBACK_DAYS_INPUT: ${{ github.event.inputs.fallback_days || github.event.client_payload.fallback_days || '7' }}
         run: |
           echo "trigger=${GITHUB_EVENT_NAME}"
           echo "workflow=${GITHUB_WORKFLOW}"
@@ -96,14 +97,14 @@ jobs:
           MODE_INPUT: ${{ github.event.inputs.mode || github.event.client_payload.mode || 'real' }}
           DATE_INPUT: ${{ github.event.inputs.date || github.event.client_payload.date || '' }}
           DELAY_DAYS_INPUT: ${{ github.event.inputs.delay_days || github.event.client_payload.delay_days || '2' }}
-          FALLBACK_DAYS_INPUT: ${{ github.event.inputs.fallback_days || github.event.client_payload.fallback_days || '4' }}
+          FALLBACK_DAYS_INPUT: ${{ github.event.inputs.fallback_days || github.event.client_payload.fallback_days || '7' }}
         run: |
           set -euo pipefail
           export LLM_PROVIDER="${LLM_PROVIDER:-mock}"
           MODE="${MODE_INPUT:-real}"
           DATE="${DATE_INPUT:-}"
           DELAY_DAYS="${DELAY_DAYS_INPUT:-2}"
-          FALLBACK_DAYS="${FALLBACK_DAYS_INPUT:-4}"
+          FALLBACK_DAYS="${FALLBACK_DAYS_INPUT:-7}"
 
           echo "provider=${LLM_PROVIDER}"
           echo "production_mode=${MODE}"

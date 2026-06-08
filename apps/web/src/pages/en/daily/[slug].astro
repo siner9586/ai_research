@@ -9,6 +9,7 @@ export function getStaticPaths() {
 const { doc } = Astro.props;
 const pageTitle = displayBriefTitle(doc.meta.title);
 const isSources = doc.meta.page_type === 'sources';
+const selectedCount = (doc.meta.featured_count || 0) + (doc.meta.mentions_count || 0);
 const body = doc.meta.page_type === 'brief'
   ? doc.body.replace(/\n\*\*Date\*\*:\s*\d{4}-\d{2}-\d{2}\n\n/, '\n')
   : doc.body;
@@ -24,10 +25,17 @@ const body = doc.meta.page_type === 'brief'
       {isSources && doc.meta.brief_page && <a class="paper-meta-link" href={doc.meta.brief_page}>Back to brief</a>}
       {!isSources && doc.meta.sources_page && <a class="paper-meta-link" href={doc.meta.sources_page}>Source page</a>}
     </div>
+    {!isSources && (
+      <p class="candidate-note">
+        Candidate-pool note: the pipeline fetched and deduplicated <strong>{doc.meta.candidate_count || 0}</strong> candidate papers, then selected <strong>{selectedCount}</strong> papers for the brief ({doc.meta.featured_count || 0} featured, {doc.meta.mentions_count || 0} additional).
+      </p>
+    )}
     <Fragment set:html={markdownToHtml(body)} />
   </article>
 </BaseLayout>
 
 <style>
   .issue-meta-line { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+  .candidate-note { margin: 14px 0 22px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-soft); color: var(--muted); font-size: 0.94rem; }
+  .candidate-note strong { color: var(--text); }
 </style>

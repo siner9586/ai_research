@@ -4,6 +4,8 @@ import path from 'node:path';
 const repoRoot = path.resolve(process.cwd(), '../..');
 const contentRoot = path.join(repoRoot, 'data/content');
 const configsRoot = path.join(repoRoot, 'configs');
+const DAILY_PUBLISH_READY_HOUR = 7;
+const DAILY_PUBLISH_READY_MINUTE = 12;
 
 export type Doc = {
   meta: Record<string, any>;
@@ -67,10 +69,11 @@ export function loadDocs(lang?: string, options: { includeInternal?: boolean } =
 }
 
 export function loadBriefs(lang: string) {
+  const visibleDate = latestVisibleBriefDate();
   return dedupeBriefsByDate(
     loadDocs(lang, { includeInternal: false })
       .filter((doc) => doc.meta.page_type === 'brief')
-      .filter((doc) => String(doc.meta.date || '') <= beijingToday())
+      .filter((doc) => String(doc.meta.date || '') <= visibleDate)
   );
 }
 
@@ -98,7 +101,14 @@ export function displayBriefTitle(title: string | undefined | null) {
 }
 
 export function beijingToday() {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  return beijingNowParts().date;
+}
+
+export function latestVisibleBriefDate() {
+  const now = beijingNowParts();
+  const ready = now.hour > DAILY_PUBLISH_READY_HOUR || (now.hour === DAILY_PUBLISH_READY_HOUR && now.minute >= DAILY_PUBLISH_READY_MINUTE);
+  if (ready) return now.date;
+  return shiftIsoDate(now.date, -1);
 }
 
 export function markdownToHtml(markdown: string) {
@@ -150,6 +160,31 @@ function parseFrontmatter(raw: string) {
 
 function safeReadDir(dir: string) {
   return fs.existsSync(dir) ? fs.readdirSync(dir) : [];
+}
+
+function beijingNowParts() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return {
+    date: `${values.year}-${values.month}-${values.day}`,
+    hour: Number(values.hour === '24' ? '0' : values.hour),
+    minute: Number(values.minute),
+  };
+}
+
+function shiftIsoDate(value: string, days: number) {
+  const [year, month, day] = value.split('-').map(Number);
+  const stamp = new Date(Date.UTC(year, month - 1, day));
+  stamp.setUTCDate(stamp.getUTCDate() + days);
+  return stamp.toISOString().slice(0, 10);
 }
 
 function normalizeDisplayLine(line: string) {

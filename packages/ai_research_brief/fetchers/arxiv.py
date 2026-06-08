@@ -1,4 +1,5 @@
 from datetime import date, datetime, time, timezone
+from email.utils import parsedate_to_datetime
 import logging
 import re
 import time as time_module
@@ -11,6 +12,9 @@ from ..utils.http import DEFAULT_USER_AGENT
 
 logger = logging.getLogger(__name__)
 ARXIV_PAGE_SIZE = 100
+ARXIV_API_TIMEOUT = 45
+ARXIV_API_ATTEMPTS = 5
+ARXIV_RATE_LIMIT_MAX_SLEEP = 240
 
 
 def fetch_arxiv_category(category: str, max_results: int = 50, day: date | None = None) -> list[Paper]:
@@ -18,9 +22,8 @@ def fetch_arxiv_category(category: str, max_results: int = 50, day: date | None 
         papers, _stats = _fetch_arxiv_api_with_stats(category, max_results, day)
         return papers
     except Exception:
-        if day is not None:
-            raise
-        return fetch_arxiv_rss_category(category, max_results)
+        rows = fetch_arxiv_rss_category(category, max_results)
+        return _filter_by_day(rows, day) if day is not None else rows
 
 
 def _fetch_arxiv_api(category: str, max_results: int = 50, day: date | None = None) -> list[Paper]:
@@ -111,39 +114,37 @@ def _fetch_arxiv_query_with_stats(
     }
 
 
-@retry(stop=stop_after_attempt(4), wait=wait_exponential(multiplier=5, min=5, max=45))
 def _fetch_arxiv_query_page(query_text: str, start: int, max_results: int) -> list[Paper]:
     query = quote(query_text)
     url = f"https://export.arxiv.org/api/query?search_query={query}&sortBy=submittedDate&sortOrder=descending&start={start}&max_results={max_results}"
-    r = httpx.get(url, timeout=45, follow_redirects=True, headers={"User-Agent": DEFAULT_USER_AGENT})
-    r.raise_for_status()
-    feed = feedparser.parse(r.text)
-    papers: list[Paper] = []
-    for e in feed.entries:
-        arxiv_id = normalize_arxiv_id(e.id.split("/abs/")[-1])
-        cats = [t["term"] for t in getattr(e, "tags", [])]
-        published = datetime(*e.published_parsed[:6], tzinfo=timezone.utc)
-        updated = datetime(*e.updated_parsed[:6], tzinfo=timezone.utc)
-        papers.append(Paper(
-            id=arxiv_id,
-            arxiv_id=arxiv_id,
-            title=e.title.replace("\n", " ").strip(),
-            abstract=e.summary.replace("\n", " ").strip(),
-            authors=[a.name for a in getattr(e, "authors", [])],
-            primary_category=cats[0] if cats else "cs.AI",
-            categories=cats or ["cs.AI"],
-            published_at=published,
-            updated_at=updated,
-            abs_url=f"https://arxiv.org/abs/{arxiv_id}",
-            pdf_url=f"https://arxiv.org/pdf/{arxiv_id}",
-        ))
-    return papers
+    last_error: Exception | None = None
+    for attempt in range(1, ARXIV_API_ATTEMPTS + 1):
+        try:
+            r = httpx.get(url, timeout=ARXIV_API_TIMEOUT, follow_redirects=True, headers={"User-Agent": DEFAULT_USER_AGENT})
+            if r.status_code == 429:
+                delay = _retry_after_seconds(r, attempt)
+                logger.warning("arXiv API rate limited start=%s max_results=%s attempt=%s/%s; sleeping %.0fs", start, max_results, attempt, ARXIV_API_ATTEMPTS, delay)
+                time_module.sleep(delay)
+                continue
+            r.raise_for_status()
+            feed = feedparser.parse(r.text)
+            return [_entry_to_paper(e) for e in feed.entries]
+        except Exception as exc:
+            last_error = exc
+            if attempt >= ARXIV_API_ATTEMPTS:
+                break
+            delay = min(ARXIV_RATE_LIMIT_MAX_SLEEP, 10 * attempt)
+            logger.warning("arXiv API fetch failed start=%s max_results=%s attempt=%s/%s: %s; sleeping %.0fs", start, max_results, attempt, ARXIV_API_ATTEMPTS, _format_fetch_error(exc), delay)
+            time_module.sleep(delay)
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError("arXiv API returned HTTP 429 Too Many Requests after retries")
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=2, max=10))
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=2, max=20))
 def fetch_arxiv_rss_category(category: str, max_results: int = 50) -> list[Paper]:
     url = f"https://rss.arxiv.org/rss/{category}"
-    r = httpx.get(url, timeout=20, follow_redirects=True, headers={"User-Agent": DEFAULT_USER_AGENT})
+    r = httpx.get(url, timeout=30, follow_redirects=True, headers={"User-Agent": DEFAULT_USER_AGENT})
     r.raise_for_status()
     feed = feedparser.parse(r.text)
     papers: list[Paper] = []
@@ -216,6 +217,14 @@ def fetch_arxiv_categories_with_stats(
         except Exception as exc:
             combined_error = _format_fetch_error(exc)
             logger.warning("Combined arXiv fetch failed for %s on %s: %s", categories, target, combined_error)
+            if _is_rate_limit_error(combined_error):
+                rss_papers, rss_stats = _fetch_categories_from_rss(categories, max_results_per_category, day, request_delay_seconds, max_total_results)
+                if rss_papers:
+                    rss_stats["errors"]["combined_query"] = combined_error
+                    rss_stats["fallback_from"] = "combined_query_rate_limit"
+                    return rss_papers, rss_stats
+                errors.update(rss_stats.get("errors", {}))
+                page_stats.update(rss_stats.get("page_stats", {}))
 
     for index, category in enumerate(categories):
         failed = False
@@ -234,6 +243,8 @@ def fetch_arxiv_categories_with_stats(
             logger.warning("arXiv fetch failed for %s on %s: %s", category, target, message)
             rows = []
             failed = True
+            if _is_rate_limit_error(message) and not papers:
+                break
         if not rows and not failed:
             logger.info("arXiv returned no papers for %s on %s", category, target)
         category_counts[category] = len(rows)
@@ -244,10 +255,10 @@ def fetch_arxiv_categories_with_stats(
             papers = papers[:max_total_results]
             break
 
-    error_messages = [f"{category}: {message}" for category, message in errors.items()]
     if combined_error:
         errors["combined_query"] = combined_error
     if errors:
+        error_messages = [f"{category}: {message}" for category, message in errors.items()]
         logger.warning("Partial arXiv category failures: %s", "; ".join(error_messages))
     stats = {
         "target": target,
@@ -255,10 +266,56 @@ def fetch_arxiv_categories_with_stats(
         "category_counts": category_counts,
         "errors": errors,
         "failed_categories": sorted(category for category in errors if category in categories),
-        "successful_categories": [category for category in categories if category not in errors],
+        "successful_categories": [category for category in categories if category_counts.get(category, 0) > 0],
         "total_papers": len(papers),
-        "all_categories_failed": bool(categories) and all(category in errors for category in categories),
+        "all_categories_failed": bool(categories) and not papers and bool(errors),
         "fetch_mode": "per_category",
+        "max_total_results": max_total_results,
+        "page_stats": page_stats,
+        "page_count": sum(stats.get("pages", 0) for stats in page_stats.values()),
+        "request_count": sum(stats.get("requests", 0) for stats in page_stats.values()),
+        "partial_fetch_errors": _page_errors(page_stats),
+    }
+    return papers, stats
+
+
+def _fetch_categories_from_rss(
+    categories: list[str],
+    max_results_per_category: int,
+    day: date | None,
+    request_delay_seconds: float,
+    max_total_results: int | None,
+) -> tuple[list[Paper], dict]:
+    papers: list[Paper] = []
+    errors: dict[str, str] = {}
+    category_counts: dict[str, int] = {category: 0 for category in categories}
+    page_stats: dict[str, dict] = {}
+    for index, category in enumerate(categories):
+        try:
+            rows = fetch_arxiv_rss_category(category, min(max_results_per_category, 80))
+            if day:
+                rows = _filter_by_day(rows, day)
+            category_counts[category] = len(rows)
+            page_stats[category] = {"pages": 1, "requests": 1, "page_lengths": [len(rows)], "starts": [0], "source": "rss"}
+            papers.extend(rows)
+        except Exception as exc:
+            errors[category] = _format_fetch_error(exc)
+            page_stats[category] = {"pages": 0, "requests": 1, "page_lengths": [], "starts": [], "source": "rss", "page_error": errors[category]}
+        if max_total_results and len(papers) >= max_total_results:
+            papers = papers[:max_total_results]
+            break
+        if index < len(categories) - 1 and request_delay_seconds > 0:
+            time_module.sleep(request_delay_seconds)
+    stats = {
+        "target": str(day) if day else "latest",
+        "categories": categories,
+        "category_counts": category_counts,
+        "errors": errors,
+        "failed_categories": sorted(errors),
+        "successful_categories": [category for category in categories if category_counts.get(category, 0) > 0],
+        "total_papers": len(papers),
+        "all_categories_failed": bool(categories) and not papers and bool(errors),
+        "fetch_mode": "rss_fallback",
         "max_total_results": max_total_results,
         "page_stats": page_stats,
         "page_count": sum(stats.get("pages", 0) for stats in page_stats.values()),
@@ -299,6 +356,52 @@ def mock_papers() -> list[Paper]:
         ('2606.00018', 'Low Rank Adapters as Model Memory Probes', 'A training analysis uses LoRA adapters to estimate memorization capacity and decide when full fine-tuning is needed.', ['Sam Taylor'], 'cs.LG'),
     ]
     return [Paper(id=i, arxiv_id=i, title=t, abstract=a, authors=au, primary_category=c, categories=[c], published_at=now, updated_at=now, abs_url=f'https://arxiv.org/abs/{i}', pdf_url=f'https://arxiv.org/pdf/{i}') for i,t,a,au,c in rows]
+
+
+def _entry_to_paper(e) -> Paper:
+    arxiv_id = normalize_arxiv_id(e.id.split("/abs/")[-1])
+    cats = [t["term"] for t in getattr(e, "tags", [])]
+    published = datetime(*e.published_parsed[:6], tzinfo=timezone.utc)
+    updated = datetime(*e.updated_parsed[:6], tzinfo=timezone.utc)
+    return Paper(
+        id=arxiv_id,
+        arxiv_id=arxiv_id,
+        title=e.title.replace("\n", " ").strip(),
+        abstract=e.summary.replace("\n", " ").strip(),
+        authors=[a.name for a in getattr(e, "authors", [])],
+        primary_category=cats[0] if cats else "cs.AI",
+        categories=cats or ["cs.AI"],
+        published_at=published,
+        updated_at=updated,
+        abs_url=f"https://arxiv.org/abs/{arxiv_id}",
+        pdf_url=f"https://arxiv.org/pdf/{arxiv_id}",
+    )
+
+
+def _filter_by_day(papers: list[Paper], day: date | None) -> list[Paper]:
+    if day is None:
+        return papers
+    return [paper for paper in papers if paper.published_at.date() == day or paper.updated_at.date() == day]
+
+
+def _retry_after_seconds(response: httpx.Response, attempt: int) -> float:
+    value = response.headers.get("Retry-After")
+    if value:
+        try:
+            return min(ARXIV_RATE_LIMIT_MAX_SLEEP, max(30.0, float(value)))
+        except ValueError:
+            try:
+                dt = parsedate_to_datetime(value)
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                return min(ARXIV_RATE_LIMIT_MAX_SLEEP, max(30.0, (dt - datetime.now(timezone.utc)).total_seconds()))
+            except Exception:
+                pass
+    return min(ARXIV_RATE_LIMIT_MAX_SLEEP, 45.0 * attempt)
+
+
+def _is_rate_limit_error(message: str) -> bool:
+    return "429" in message or "Too Many Requests" in message
 
 
 def _count_by_category(papers: list[Paper], categories: list[str]) -> dict[str, int]:

@@ -404,6 +404,15 @@ def _write_run_report(report: dict) -> None:
     _write(_reports_dir() / "last-run.json", report)
 
 
+def _read_optional_json(path: Path, default):
+    if not path.exists():
+        return default
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return default
+
+
 def _log_run_summary(stage: str, report: dict) -> None:
     logger.info(
         "daily_brief_%s status=%s publish_date=%s target_date=%s actual_date=%s "

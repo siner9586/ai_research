@@ -10,6 +10,7 @@ const { doc } = Astro.props;
 const pageTitle = displayBriefTitle(doc.meta.title);
 const isSources = doc.meta.page_type === 'sources';
 const selectedCount = (doc.meta.featured_count || 0) + (doc.meta.mentions_count || 0);
+const sourceDate = doc.meta.actual_date || doc.meta.target_date || doc.meta.date;
 const body = doc.meta.page_type === 'brief'
   ? doc.body.replace(/\n\*\*Date\*\*:\s*\d{4}-\d{2}-\d{2}\n\n/, '\n')
   : doc.body;
@@ -27,7 +28,7 @@ const body = doc.meta.page_type === 'brief'
     </div>
     {!isSources && (
       <p class="candidate-note">
-        Candidate-pool note: the pipeline fetched and deduplicated <strong>{doc.meta.candidate_count || 0}</strong> candidate papers, then selected <strong>{selectedCount}</strong> papers for the brief ({doc.meta.featured_count || 0} featured, {doc.meta.mentions_count || 0} additional).
+        This issue fetched and deduplicated <strong>{doc.meta.candidate_count || 0}</strong> candidate papers from the <strong>{sourceDate}</strong> source date, then selected <strong>{doc.meta.featured_count || 0}</strong> featured papers and <strong>{doc.meta.mentions_count || 0}</strong> additional mentions.
       </p>
     )}
     <Fragment set:html={markdownToHtml(body)} />

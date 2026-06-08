@@ -42,10 +42,9 @@ const topicNames: Record<string, string> = {
   {latest ? (
     <section class="latest-panel with-topics latest-stack">
       <div class="latest-main">
-        <p class="section-kicker">最新一期 · {latest.meta.date}</p>
+        <p class="section-kicker">最新一期 · {latest.meta.date} · {latest.meta.candidate_count || 0} 篇候选</p>
         <h2><a href={latest.url}>{displayBriefTitle(latest.meta.title)}</a></h2>
         <div class="issue-meta-row">
-          <span>{latest.meta.candidate_count || 0} 篇候选</span>
           <span>{latest.meta.featured_count || 0} 篇重点</span>
           <span>{latest.meta.mentions_count || 0} 篇补充</span>
           {latest.meta.sources_page ? <a class="issue-source-link" href={latest.meta.sources_page}>来源页</a> : <span class="muted">来源页缺失</span>}

@@ -392,6 +392,9 @@ def _base_run_report(day: date, publish_date: date, mock: bool, fallback_days: i
 
 
 def _publication_date() -> date:
+    pinned = os.environ.get("AI_RESEARCH_PUBLISH_DATE")
+    if pinned:
+        return date.fromisoformat(pinned)
     return datetime.now(ZoneInfo(PUBLISH_TIMEZONE)).date()
 
 
@@ -421,20 +424,17 @@ def _fetch_warnings(stats: dict, target_day: date, actual_day: date) -> list[str
     warnings: list[str] = []
     if actual_day != target_day:
         warnings.append(f"Fallback used internally: target_date={target_day}, actual_date={actual_day}")
-    if stats.get("errors"):
-        warnings.append("Partial arXiv category failures: " + "; ".join(f"{key}: {value}" for key, value in stats["errors"].items()))
-    if stats.get("partial_fetch_errors"):
-        warnings.append("Partial arXiv page failures: " + "; ".join(f"{key}: {value}" for key, value in stats["partial_fetch_errors"].items()))
+    partial_errors = stats.get("partial_fetch_errors") or {}
+    if partial_errors:
+        warnings.append("Partial fetch fallback used for categories: " + ", ".join(sorted(partial_errors)))
     return warnings
 
 
-def _append_error(errors, key: str, message: str) -> dict:
-    if isinstance(errors, dict):
-        updated = dict(errors)
-    else:
-        updated = {"previous": errors}
-    updated[key] = message
-    return updated
+def _append_error(errors, key: str, message: str):
+    if not isinstance(errors, dict):
+        errors = {"previous": str(errors)}
+    errors[key] = message
+    return errors
 
 
 def _count_by_category(papers: list[Paper], categories: list[str]) -> dict[str, int]:
@@ -443,64 +443,43 @@ def _count_by_category(papers: list[Paper], categories: list[str]) -> dict[str, 
         for category in paper.categories:
             if category in counts:
                 counts[category] += 1
-                break
     return counts
 
 
-def _log_run_summary(stage: str, report: dict) -> None:
-    logger.info("Daily brief %s summary:\n%s", stage, json.dumps(report, ensure_ascii=False, indent=2, default=str))
-
-
-def _read_json(path: Path):
-    if not path.exists():
-        raise FileNotFoundError(f"Missing required pipeline artifact: {path}")
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-def _read_optional_json(path: Path, default):
-    if not path.exists():
-        return default
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return default
-
-
 def _read_papers(day: date) -> list[Paper]:
-    return [Paper.model_validate(row) for row in _read_json(_processed_dir(day) / "papers.json")]
+    data = json.loads((_processed_dir(day) / "papers.json").read_text(encoding="utf-8"))
+    return [Paper(**x) for x in data]
 
 
 def _read_signals(day: date) -> list[PaperSignal]:
     path = _processed_dir(day) / "signals.json"
     if not path.exists():
         return []
-    return [PaperSignal.model_validate(row) for row in _read_json(path)]
+    return [PaperSignal(**x) for x in json.loads(path.read_text(encoding="utf-8"))]
 
 
 def _read_scored(day: date) -> list[ScoredPaper]:
-    return [ScoredPaper.model_validate(row) for row in _read_json(_processed_dir(day) / "scored_papers.json")]
+    return [ScoredPaper(**x) for x in json.loads((_processed_dir(day) / "scored_papers.json").read_text(encoding="utf-8"))]
 
 
 def _read_selected(day: date) -> dict[str, list[ScoredPaper]]:
-    payload = _read_json(_processed_dir(day) / "selected_papers.json")
-    return {
-        "featured": [ScoredPaper.model_validate(row) for row in payload.get("featured", [])],
-        "mentions": [ScoredPaper.model_validate(row) for row in payload.get("mentions", [])],
-    }
+    data = json.loads((_processed_dir(day) / "selected_papers.json").read_text(encoding="utf-8"))
+    return {"featured": [ScoredPaper(**x) for x in data.get("featured", [])], "mentions": [ScoredPaper(**x) for x in data.get("mentions", [])]}
 
 
-def _recent_topics(day: date) -> set[str]:
-    topics: set[str] = set()
-    for offset in range(1, 8):
-        path = REPO_ROOT / "data" / "processed" / str(day - timedelta(days=offset)) / "selected_papers.json"
+def _recent_topics(day: date) -> list[str]:
+    topics: list[str] = []
+    for delta in range(1, 8):
+        path = _processed_dir(day - timedelta(days=delta)) / "selected_papers.json"
         if not path.exists():
             continue
         try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
+            data = json.loads(path.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             continue
-        for row in payload.get("featured", []):
-            topic = row.get("topic_slug")
-            if topic:
-                topics.add(topic)
-    return topics
+        for key in ("featured", "mentions"):
+            for row in data.get(key, []):
+                topic = row.get("topic_slug") or row.get("topic")
+                if topic:
+                    topics.append(str(topic))
+    return topics[-40:]

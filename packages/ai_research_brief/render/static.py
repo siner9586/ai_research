@@ -74,8 +74,7 @@ def build_sitemap() -> str:
     static_paths = [
         "/", "/zh/", "/en/", "/zh/archive/", "/en/archive/",
         "/zh/search/", "/en/search/", "/zh/topics/", "/en/topics/",
-        "/zh/methodology/", "/en/methodology/", "/zh/privacy/", "/en/privacy/",
-        "/zh/whatsnew/", "/en/whatsnew/",
+        "/zh/privacy/", "/en/privacy/", "/zh/whatsnew/", "/en/whatsnew/",
     ]
     topic_paths = []
     for lang in ("zh", "en"):

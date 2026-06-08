@@ -4,28 +4,20 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 <BaseLayout lang="en" title="Method">
   <article class="prose">
     <h1>Method</h1>
-    <p>This project implements a verifiable information pipeline: collect a broad paper pool from primary sources, rank it with a multi-signal rules engine, and generate compact bilingual daily briefs.</p>
+    <p>This site uses a verifiable lightweight information pipeline: collect AI-related papers from arXiv by source date, deduplicate them, rank them with rule-based signals, and render compact bilingual daily briefs.</p>
     <h2>Collection</h2>
-    <p>The default collector covers AI-related arXiv categories including cs.AI, cs.CL, cs.LG, cs.CV, cs.MA, cs.IR, cs.RO, cs.SD, cs.MM, cs.HC, cs.SE, cs.DC, stat.ML, and eess.AS. Categories and limits are configuration-driven.</p>
+    <p>The default collector covers AI-related arXiv categories including cs.AI, cs.CL, cs.LG, cs.CV, cs.MA, cs.IR, cs.RO, cs.SD, cs.MM, cs.HC, cs.SE, cs.DC, stat.ML, and eess.AS. The production source date is normally two days before the publication date so issues do not reuse data across dates.</p>
     <h2>Ranking Signals</h2>
     <ul>
-      <li>Institution background from configured top institutions.</li>
-      <li>Community recommendation through optional HF Daily Papers enrichment.</li>
-      <li>Community heat through HF upvote tiers.</li>
-      <li>Top conference signals such as NeurIPS, ICML, ICLR, ACL, and CVPR.</li>
-      <li>Code availability through paper text or GitHub metadata.</li>
-      <li>Practitioner relevance keywords such as deployment, inference, agents, RAG, safety, and evaluation.</li>
-      <li>Academic impact through optional Semantic Scholar citation counts.</li>
-      <li>Open-source heat through optional GitHub stars and trending signals.</li>
-      <li>arXiv category weight from configured AI categories.</li>
-      <li>Novelty and duplicate penalties for repeated titles.</li>
-      <li>Recent topic repetition penalties to reduce consecutive same-topic concentration.</li>
-      <li>Safety, ethics, and governance keywords for additional visibility.</li>
+      <li>Keywords in titles and abstracts, including institutions, conferences, code, deployment, inference, agents, RAG, safety, and evaluation.</li>
+      <li>arXiv category weights and topic classification to surface core AI directions.</li>
+      <li>Deduplication and recent-topic penalties to reduce repeated papers and overly similar consecutive issues.</li>
+      <li>Safety, ethics, and governance keywords receive additional visibility for model-risk tracking.</li>
     </ul>
     <h2>Cadence</h2>
-    <p>The production pipeline computes the publication date in Beijing/Taipei time and fetches the target date, or the nearest usable date when arXiv has no usable rows. Without external API keys, production runs continue with arXiv metadata; mock-run is reserved for fixed demo data and offline validation.</p>
+    <p>GitHub Actions runs on a Beijing/Taipei schedule. The public issue date is the publication date, while the paper source date is two days earlier. Production runs do not silently fall back to older data; if the strict source date has no usable papers, the run should fail or skip publication explicitly.</p>
     <h2>Transparency</h2>
-    <p>The frontend presents only the compact brief. Machine-readable details, run reports, and QA results remain in the data directory for inspecting collection scale, pagination, dedupe, and fallback behavior.</p>
+    <p>The frontend presents only the compact brief. Machine-readable details, run reports, and QA results remain in the data directory for inspecting collection scale, pagination, dedupe, date binding, and generation status.</p>
     <h2>Limits</h2>
     <p>Briefs are generated from titles, abstracts, and public metadata by default. They do not replace full-paper reading, and arXiv preprints must not be described as verified conclusions or conference acceptances.</p>
   </article>

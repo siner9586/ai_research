@@ -21,7 +21,7 @@ from .utils.dates import resolve_date
 
 
 DEFAULT_DELAY_DAYS = 2
-DEFAULT_FALLBACK_DAYS = 7
+DEFAULT_FALLBACK_DAYS = 0
 PUBLISH_TIMEZONE = "Asia/Shanghai"
 
 

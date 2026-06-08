@@ -23,10 +23,11 @@ BAD_VISIBLE = [
     r"重点" + r"核验",
     r"The abstract" + r" points to",
 ]
+MAX_EMPTY_DAY_LOOKBACK = 7
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Validate strict T+2 publication/data-date invariants.")
+    parser = argparse.ArgumentParser(description="Validate publication/data-date invariants for generated briefs.")
     parser.add_argument("--report", default="data/reports/runs/last-run.json")
     args = parser.parse_args(argv)
 
@@ -48,16 +49,31 @@ def main(argv: list[str] | None = None) -> int:
         return _finish(errors)
 
     expected_target = publish_date - timedelta(days=2)
+    fallback_days = int(report.get("fallback_days") or 0)
+    fallback_used = bool(report.get("fallback_used"))
+    fallback_from = str(report.get("fallback_from") or "")
+
     if target_date != expected_target:
         errors.append(f"target_date must equal publish_date - 2 days: publish_date={publish_date} target_date={target_date} expected={expected_target}")
-    if actual_date != target_date:
-        errors.append(f"actual_date must equal target_date: target_date={target_date} actual_date={actual_date}")
-    if int(report.get("fallback_days") or 0) != 0:
-        errors.append(f"fallback_days must be 0 in production: {report.get('fallback_days')}")
-    if bool(report.get("fallback_used")):
-        errors.append(f"fallback_used must be false in production: {report.get('fallback_used')}")
+    if fallback_days < 0 or fallback_days > MAX_EMPTY_DAY_LOOKBACK:
+        errors.append(f"fallback_days must be between 0 and {MAX_EMPTY_DAY_LOOKBACK}: {fallback_days}")
+    if actual_date > target_date:
+        errors.append(f"actual_date cannot be after target_date: target_date={target_date} actual_date={actual_date}")
+    if actual_date < target_date:
+        if not fallback_used:
+            errors.append(f"fallback_used must be true when actual_date is before target_date: target_date={target_date} actual_date={actual_date}")
+        if fallback_days <= 0:
+            errors.append("fallback_days must be positive when using an older non-empty source date")
+        if fallback_from != str(target_date):
+            errors.append(f"fallback_from must equal target_date when using an older source date: fallback_from={fallback_from} target_date={target_date}")
+    if actual_date == target_date and fallback_used:
+        errors.append(f"fallback_used must be false when actual_date equals target_date: {actual_date}")
     if report.get("mock"):
-        errors.append("last production guard cannot validate a mock run")
+        errors.append("production guard cannot validate a mock run")
+    if int(report.get("total_candidates") or 0) <= 0:
+        errors.append("run report must contain a positive total_candidates count")
+    if int(report.get("deduped_papers") or 0) <= 0:
+        errors.append("run report must contain a positive deduped_papers count")
 
     docs = _check_content(publish_date, target_date, actual_date, errors)
     _check_processed(actual_date, errors)

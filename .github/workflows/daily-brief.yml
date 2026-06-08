@@ -22,6 +22,12 @@ on:
       date:
         description: "Optional YYYY-MM-DD data date"
         required: false
+      publish_date:
+        description: "Optional YYYY-MM-DD publication date"
+        required: false
+      backfill:
+        description: "Optional comma list publish_date:data_date, e.g. 2026-06-08:2026-06-06"
+        required: false
       delay_days:
         description: "Delay days when date is not provided"
         required: false
@@ -58,21 +64,68 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Print trigger summary
+      - name: Resolve trigger inputs
         env:
-          MODE_INPUT: ${{ github.event.inputs.mode || github.event.client_payload.mode || 'real' }}
+          MODE_INPUT: ${{ github.event.inputs.mode || github.event.client_payload.mode || '' }}
           DATE_INPUT: ${{ github.event.inputs.date || github.event.client_payload.date || '' }}
-          DELAY_DAYS_INPUT: ${{ github.event.inputs.delay_days || github.event.client_payload.delay_days || '2' }}
-          FALLBACK_DAYS_INPUT: ${{ github.event.inputs.fallback_days || github.event.client_payload.fallback_days || '7' }}
+          PUBLISH_DATE_INPUT: ${{ github.event.inputs.publish_date || github.event.client_payload.publish_date || '' }}
+          BACKFILL_INPUT: ${{ github.event.inputs.backfill || github.event.client_payload.backfill || '' }}
+          DELAY_DAYS_INPUT: ${{ github.event.inputs.delay_days || github.event.client_payload.delay_days || '' }}
+          FALLBACK_DAYS_INPUT: ${{ github.event.inputs.fallback_days || github.event.client_payload.fallback_days || '' }}
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          def clean(value: str | None) -> str:
+              if value is None:
+                  return ""
+              value = str(value).strip()
+              if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+                  value = value[1:-1]
+              return value.strip()
+
+          force = {}
+          force_path = Path(".github/daily-brief.force")
+          if force_path.exists():
+              for raw in force_path.read_text(encoding="utf-8").splitlines():
+                  line = raw.strip()
+                  if not line or line.startswith("#") or ":" not in line:
+                      continue
+                  key, value = line.split(":", 1)
+                  force[key.strip()] = clean(value)
+
+          def pick(env_name: str, force_key: str, default: str = "") -> str:
+              return clean(os.environ.get(env_name)) or force.get(force_key, "") or default
+
+          values = {
+              "EFFECTIVE_MODE": pick("MODE_INPUT", "mode", "real"),
+              "EFFECTIVE_DATE": pick("DATE_INPUT", "date", ""),
+              "EFFECTIVE_PUBLISH_DATE": pick("PUBLISH_DATE_INPUT", "publish_date", ""),
+              "EFFECTIVE_BACKFILL": pick("BACKFILL_INPUT", "backfill", ""),
+              "EFFECTIVE_DELAY_DAYS": pick("DELAY_DAYS_INPUT", "delay_days", "2"),
+              "EFFECTIVE_FALLBACK_DAYS": pick("FALLBACK_DAYS_INPUT", "fallback_days", "7"),
+              "EFFECTIVE_CLEANUP_MOCK_ARTIFACTS": force.get("cleanup_mock_artifacts", "false").lower(),
+          }
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as fh:
+              for key, value in values.items():
+                  fh.write(f"{key}={value}\n")
+          print("resolved_inputs=" + str(values))
+          PY
+
+      - name: Print trigger summary
         run: |
           echo "trigger=${GITHUB_EVENT_NAME}"
           echo "workflow=${GITHUB_WORKFLOW}"
           echo "ref=${GITHUB_REF}"
           echo "sha=${GITHUB_SHA}"
-          echo "mode=${MODE_INPUT}"
-          echo "date=${DATE_INPUT:-<not set>}"
-          echo "delay_days=${DELAY_DAYS_INPUT}"
-          echo "fallback_days=${FALLBACK_DAYS_INPUT}"
+          echo "mode=${EFFECTIVE_MODE}"
+          echo "date=${EFFECTIVE_DATE:-<not set>}"
+          echo "publish_date=${EFFECTIVE_PUBLISH_DATE:-<not set>}"
+          echo "backfill=${EFFECTIVE_BACKFILL:-<not set>}"
+          echo "delay_days=${EFFECTIVE_DELAY_DAYS}"
+          echo "fallback_days=${EFFECTIVE_FALLBACK_DAYS}"
+          echo "cleanup_mock_artifacts=${EFFECTIVE_CLEANUP_MOCK_ARTIFACTS}"
           echo "utc_now=$(date -u '+%Y-%m-%d %H:%M:%S %Z')"
           TZ=Asia/Shanghai date '+beijing_taipei_now=%Y-%m-%d %H:%M:%S %Z'
 
@@ -89,7 +142,16 @@ jobs:
       - name: Clean test-generated artifacts
         run: |
           git checkout -- data apps/web/public || true
-          git clean -fd data/raw/2026-06-03 data/processed/2026-06-03 data/reports || true
+          git clean -fd data/raw/2026-06-03 data/processed/2026-06-03 data/reports data/content/zh/daily/2026-06-03-* data/content/en/daily/2026-06-03-* || true
+
+      - name: Clean known mock-contaminated artifacts
+        run: |
+          if [ "${EFFECTIVE_CLEANUP_MOCK_ARTIFACTS:-false}" = "true" ]; then
+            rm -rf data/raw/2026-06-04 data/processed/2026-06-04
+            rm -f data/content/zh/daily/2026-06-08-ai-research-brief*.md
+            rm -f data/content/en/daily/2026-06-08-ai-research-brief*.md
+            rm -f data/reports/qa/2026-06-08.json data/reports/runs/2026-06-08.json
+          fi
 
       - name: Generate daily brief
         env:
@@ -104,17 +166,15 @@ jobs:
           AI_RESEARCH_EXTERNAL_SIGNALS: ${{ secrets.AI_RESEARCH_EXTERNAL_SIGNALS }}
           GITHUB_TOKEN: ${{ github.token }}
           GITHUB_API_TOKEN: ${{ github.token }}
-          MODE_INPUT: ${{ github.event.inputs.mode || github.event.client_payload.mode || 'real' }}
-          DATE_INPUT: ${{ github.event.inputs.date || github.event.client_payload.date || '' }}
-          DELAY_DAYS_INPUT: ${{ github.event.inputs.delay_days || github.event.client_payload.delay_days || '2' }}
-          FALLBACK_DAYS_INPUT: ${{ github.event.inputs.fallback_days || github.event.client_payload.fallback_days || '7' }}
         run: |
           set -euo pipefail
           export LLM_PROVIDER="${LLM_PROVIDER:-mock}"
-          MODE="${MODE_INPUT:-real}"
-          DATE="${DATE_INPUT:-}"
-          DELAY_DAYS="${DELAY_DAYS_INPUT:-2}"
-          FALLBACK_DAYS="${FALLBACK_DAYS_INPUT:-7}"
+          MODE="${EFFECTIVE_MODE:-real}"
+          DATE="${EFFECTIVE_DATE:-}"
+          PUBLISH_DATE="${EFFECTIVE_PUBLISH_DATE:-}"
+          BACKFILL="${EFFECTIVE_BACKFILL:-}"
+          DELAY_DAYS="${EFFECTIVE_DELAY_DAYS:-2}"
+          FALLBACK_DAYS="${EFFECTIVE_FALLBACK_DAYS:-7}"
 
           echo "provider=${LLM_PROVIDER}"
           echo "production_mode=${MODE}"
@@ -122,15 +182,48 @@ jobs:
             echo "Unsupported mode: $MODE"
             exit 1
           fi
-          if [ "$MODE" = "mock" ]; then
-            if [ -n "$DATE" ]; then
-              ai-brief mock-run --date "$DATE" --fallback-days "$FALLBACK_DAYS" | tee daily-brief-result.json
+
+          run_one() {
+            local data_date="$1"
+            local publish_date="$2"
+            if [ -n "$publish_date" ]; then
+              export AI_RESEARCH_PUBLISH_DATE="$publish_date"
+              echo "AI_RESEARCH_PUBLISH_DATE=$AI_RESEARCH_PUBLISH_DATE"
             else
-              ai-brief mock-run --fallback-days "$FALLBACK_DAYS" | tee daily-brief-result.json
+              unset AI_RESEARCH_PUBLISH_DATE || true
             fi
+            if [ "$MODE" = "mock" ]; then
+              ai-brief mock-run --date "$data_date" --fallback-days "$FALLBACK_DAYS" | tee "daily-brief-result-${publish_date:-single}.json"
+            else
+              ai-brief run-daily --date "$data_date" --fallback-days "$FALLBACK_DAYS" | tee "daily-brief-result-${publish_date:-single}.json"
+            fi
+          }
+
+          if [ -n "$BACKFILL" ]; then
+            if [ "$MODE" = "mock" ]; then
+              echo "Backfill must run in real mode, not mock mode."
+              exit 1
+            fi
+            IFS=',' read -ra ENTRIES <<< "$BACKFILL"
+            for entry in "${ENTRIES[@]}"; do
+              item="$(echo "$entry" | xargs)"
+              publish_date="${item%%:*}"
+              data_date="${item#*:}"
+              if [ -z "$publish_date" ] || [ -z "$data_date" ] || [ "$publish_date" = "$data_date" ] && [[ "$item" != *:* ]]; then
+                echo "Invalid backfill entry: $entry"
+                exit 1
+              fi
+              echo "Backfilling publish_date=$publish_date data_date=$data_date"
+              run_one "$data_date" "$publish_date"
+            done
+          elif [ -n "$DATE" ]; then
+            run_one "$DATE" "$PUBLISH_DATE"
           else
-            if [ -n "$DATE" ]; then
-              ai-brief run-daily --date "$DATE" --fallback-days "$FALLBACK_DAYS" | tee daily-brief-result.json
+            if [ -n "$PUBLISH_DATE" ]; then
+              export AI_RESEARCH_PUBLISH_DATE="$PUBLISH_DATE"
+            fi
+            if [ "$MODE" = "mock" ]; then
+              ai-brief mock-run --fallback-days "$FALLBACK_DAYS" | tee daily-brief-result.json
             else
               ai-brief run-daily --delay-days "$DELAY_DAYS" --fallback-days "$FALLBACK_DAYS" | tee daily-brief-result.json
             fi
@@ -169,11 +262,9 @@ jobs:
 
       - name: Commit generated content
         id: commit
-        env:
-          MODE_INPUT: ${{ github.event.inputs.mode || github.event.client_payload.mode || 'real' }}
         run: |
           set -euo pipefail
-          if [ "${MODE_INPUT:-real}" = "mock" ]; then
+          if [ "${EFFECTIVE_MODE:-real}" = "mock" ]; then
             echo "Mock mode is validation-only; generated demo content will not be committed or published."
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
             exit 0

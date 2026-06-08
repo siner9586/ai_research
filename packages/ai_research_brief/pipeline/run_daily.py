@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -41,7 +41,8 @@ def _fetch_stage_with_stats(day: date, mock: bool = False, fail_on_empty: bool =
     pipeline = site_config().get("pipeline", {})
     categories = pipeline.get("arxiv_categories", DEFAULT_ARXIV_CATEGORIES)
     if mock:
-        raw_papers = mock_papers()
+        mock_dt = datetime.combine(day, time.min, tzinfo=timezone.utc)
+        raw_papers = [paper.model_copy(update={"published_at": mock_dt, "updated_at": mock_dt}) for paper in mock_papers()]
         stats = {
             "target": str(day),
             "categories": categories,

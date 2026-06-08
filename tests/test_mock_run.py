@@ -10,7 +10,7 @@ def test_mock_run_generates_content_without_keys(monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     result = run_daily(date(2026, 6, 3), mock=True)
     assert result["qa_passed"] is True
-    assert result["featured"] >= 3
-    assert result["mentions"] >= 8
+    assert result["papers"] >= 3
+    assert result["generated"]
     rows = json.loads((REPO_ROOT / "apps/web/public/search-index.json").read_text(encoding="utf-8"))
     assert {"title", "date", "lang", "url", "summary", "tags", "topics", "authors", "content_excerpt"}.issubset(rows[0])

@@ -10,7 +10,7 @@ summary: "Today tracks: ."
 tags: ["agents", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 topics: ["agents", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 sources_page: "/en/daily/2026-06-08-ai-research-brief-sources/"
-generated_at: "2026-06-08T12:08:32.742205+00:00"
+generated_at: "2026-06-08T12:32:37.209780+00:00"
 page_type: "brief"
 candidate_count: 18
 featured_count: 0
@@ -18,6 +18,10 @@ mentions_count: 12
 ---
 
 # Daily AI Research Brief
+
+## Candidate pool overview
+
+Target data date: 2026-06-05; actual data date: 2026-06-04. The pipeline fetched and deduplicated **18 candidate papers**. To keep the page lightweight, it shows 0 featured papers and 12 additional mentions; the source page includes a compact candidate-pool sample.
 
 ## What is worth tracking today
 

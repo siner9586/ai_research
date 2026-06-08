@@ -6,7 +6,7 @@ from pathlib import Path
 from xml.sax.saxutils import escape
 
 from ..config import REPO_ROOT, site_config
-from .static import _public_briefs, read_content_documents
+from .static import _clean_generated_text, _public_briefs, _strip_markdown, read_content_documents
 
 
 def build_rss(lang: str) -> Path:
@@ -25,10 +25,11 @@ def build_rss(lang: str) -> Path:
         source_url = str(meta.get("sources_page") or "")
         source_abs = f"{base_url}{source_url}" if source_url.startswith("/") else source_url
         pub_date = _rss_date(str(meta.get("date", "")))
-        summary = str(meta.get("summary", ""))
+        summary = _clean_generated_text(str(meta.get("summary", "")))
         if source_abs:
             summary = f"{summary} Source page: {source_abs}"
-        item_content = str(doc.get("body", "")).strip() or summary
+        body_text = _clean_generated_text(_strip_markdown(str(doc.get("body", ""))))
+        item_content = body_text or summary
         items.append(
             "<item>"
             f"<title>{escape(str(meta.get('title', '')))}</title>"

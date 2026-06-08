@@ -17,6 +17,8 @@ def build_rss(lang: str) -> Path:
     docs = _public_briefs(read_content_documents(lang))[:30]
 
     items = []
+    content_open = "<" + "content" + ">"
+    content_close = "</" + "content" + ">"
     for doc in docs:
         meta = doc["meta"]
         url = f"{base_url}{doc['url']}"
@@ -26,12 +28,14 @@ def build_rss(lang: str) -> Path:
         summary = str(meta.get("summary", ""))
         if source_abs:
             summary = f"{summary} Source page: {source_abs}"
+        item_content = str(doc.get("body", "")).strip() or summary
         items.append(
             "<item>"
             f"<title>{escape(str(meta.get('title', '')))}</title>"
             f"<link>{escape(url)}</link>"
             f"<guid>{escape(url)}</guid>"
             f"<description>{escape(summary)}</description>"
+            f"{content_open}{escape(item_content)}{content_close}"
             f"<pubDate>{pub_date}</pubDate>"
             f"<language>{escape(lang)}</language>"
             "</item>"

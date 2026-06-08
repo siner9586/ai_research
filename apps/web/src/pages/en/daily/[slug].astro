@@ -15,12 +15,19 @@ const body = doc.meta.page_type === 'brief'
 ---
 <BaseLayout lang="en" title={pageTitle} description={doc.meta.summary}>
   <article class="prose">
-    <div class="article-meta">
+    <div class="article-meta issue-meta-line">
       <span>{doc.meta.date}</span>
       <span>{isSources ? 'source page' : 'daily brief'}</span>
+      <span>{doc.meta.candidate_count || 0} candidates</span>
+      <span>{doc.meta.featured_count || 0} featured</span>
+      <span>{doc.meta.mentions_count || 0} additional</span>
       {isSources && doc.meta.brief_page && <a class="paper-meta-link" href={doc.meta.brief_page}>Back to brief</a>}
       {!isSources && doc.meta.sources_page && <a class="paper-meta-link" href={doc.meta.sources_page}>Source page</a>}
     </div>
     <Fragment set:html={markdownToHtml(body)} />
   </article>
 </BaseLayout>
+
+<style>
+  .issue-meta-line { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+</style>

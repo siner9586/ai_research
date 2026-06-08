@@ -75,7 +75,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt -e .
 
-      - name: Generate with retries
+      - name: Generate with retries or transparent fallback
         if: steps.gate.outputs.run == 'true'
         env:
           LLM_PROVIDER: mock
@@ -89,6 +89,7 @@ jobs:
           DATE="${DATE_INPUT:-}"
           DELAY_DAYS="${DELAY_DAYS_INPUT:-2}"
           FALLBACK_DAYS="${FALLBACK_DAYS_INPUT:-7}"
+          generation_ok=false
           for attempt in 1 2 3; do
             echo "catchup_attempt=${attempt}"
             set +e
@@ -100,14 +101,18 @@ jobs:
             status=$?
             set -e
             if [ "$status" -eq 0 ]; then
+              generation_ok=true
               break
             fi
             echo "::warning::generation attempt ${attempt} failed with status ${status}"
-            if [ "$attempt" -eq 3 ]; then
-              exit "$status"
+            if [ "$attempt" -lt 3 ]; then
+              sleep $((attempt * 300))
             fi
-            sleep $((attempt * 300))
           done
+          if [ "$generation_ok" != "true" ]; then
+            echo "::warning::full generation failed after retries; publishing transparent daily fallback"
+            python scripts/publish_daily_fallback.py
+          fi
 
       - name: Test and build
         if: steps.gate.outputs.run == 'true'

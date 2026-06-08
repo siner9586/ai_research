@@ -10,13 +10,13 @@ from ..config import REPO_ROOT, site_config, topics_config
 FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n(.*)$", re.S)
 BRIEF_TITLE_PREFIX_RE = re.compile(r"^(今日重点[:：]\s*|Today's focus:\s*)", re.I)
 DEPRECATED_TEXT_PATTERNS = [
-    (r"建议" + r"先看每篇[^。]*。?", "下面按核心问题、方法线索、主要论点和关键词整理。"),
-    (r"摘要" + r"显示[:：]", "核心线索："),
-    (r"\s*重点" + r"核验[:：][^。]*。?", " 代码/数据可用性需查看原文确认。"),
-    (r"Open the original" + r" paper[^.]*\.", "The notes below focus on the core problem, method signal, main claim, and keywords."),
-    (r"The abstract" + r" points to[:：]", "Core signal:"),
-    (r"Verify" + r" whether[^.]*\.", "Code/data availability and transfer limits should be checked in the source paper."),
-    (r"evaluation" + r" setup", "evaluation details"),
+    (r"建议\s*先看每篇[^。]*。?", "下面按核心问题、方法线索、主要论点和关键词整理。"),
+    (r"摘要\s*显示[:：]?", "核心线索："),
+    (r"\s*重点\s*核验[:：]?[^。]*。?", " 代码/数据可用性需查看原文确认。"),
+    (r"Open\s+the\s+original\s+paper[^.]*\.", "The notes below focus on the core problem, method signal, main claim, and keywords."),
+    (r"The\s+abstract\s+points\s+to[:：]?", "Core signal:"),
+    (r"Verify\s+whether[^.]*\.", "Code/data availability and transfer limits should be checked in the source paper."),
+    (r"evaluation\s+setup", "evaluation details"),
 ]
 
 

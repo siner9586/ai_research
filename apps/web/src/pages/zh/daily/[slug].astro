@@ -10,6 +10,7 @@ const { doc } = Astro.props;
 const pageTitle = displayBriefTitle(doc.meta.title);
 const isSources = doc.meta.page_type === 'sources';
 const selectedCount = (doc.meta.featured_count || 0) + (doc.meta.mentions_count || 0);
+const sourceDate = doc.meta.actual_date || doc.meta.target_date || doc.meta.date;
 const body = doc.meta.page_type === 'brief'
   ? doc.body.replace(/\n\*\*日期\*\*:\s*\d{4}-\d{2}-\d{2}\n\n/, '\n')
   : doc.body;
@@ -27,7 +28,7 @@ const body = doc.meta.page_type === 'brief'
     </div>
     {!isSources && (
       <p class="candidate-note">
-        候选池标注：本期抓取并去重 <strong>{doc.meta.candidate_count || 0}</strong> 篇候选论文，从中筛选 <strong>{selectedCount}</strong> 篇进入简报（重点 {doc.meta.featured_count || 0} 篇，补充 {doc.meta.mentions_count || 0} 篇）。
+        本期从 <strong>{sourceDate}</strong> 论文源抓取并去重 <strong>{doc.meta.candidate_count || 0}</strong> 篇候选论文，筛选 <strong>{doc.meta.featured_count || 0}</strong> 篇重点论文与 <strong>{doc.meta.mentions_count || 0}</strong> 篇补充关注。
       </p>
     )}
     <Fragment set:html={markdownToHtml(body)} />

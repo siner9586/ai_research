@@ -10,7 +10,7 @@ summary: "今天主要跟进：。"
 tags: ["agents", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 topics: ["agents", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 sources_page: "/zh/daily/2026-06-08-ai-research-brief-sources/"
-generated_at: "2026-06-08T12:32:36.895290+00:00"
+generated_at: "2026-06-08T13:03:31.348781+00:00"
 page_type: "brief"
 candidate_count: 18
 featured_count: 0
@@ -18,10 +18,6 @@ mentions_count: 12
 ---
 
 # 今日 AI 论文简报
-
-## 候选池概览
-
-本期目标数据日为 2026-06-05，实际使用数据日为 2026-06-04；全量抓取并去重后共有 **18 篇候选论文**。页面保持轻量，仅展示重点论文 0 篇和其他关注 12 篇；更详细的候选池样例见来源页。
 
 ## 今天最值得跟进的方向
 

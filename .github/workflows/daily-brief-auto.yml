@@ -1,0 +1,121 @@
+name: Daily AI Brief Auto Publish
+
+on:
+  schedule:
+    - cron: "12 23 * * *"
+  workflow_dispatch:
+    inputs:
+      delay_days:
+        description: "Calendar T+N source target. Default keeps T+2."
+        required: false
+        default: "2"
+      fallback_days:
+        description: "Look back only when the calendar T+2 arXiv source day is empty."
+        required: false
+        default: "4"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-ai-brief-auto-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -e .
+
+      - name: Run tests before generation
+        env:
+          AI_RESEARCH_PUBLISH_DATE: "2026-06-03"
+        run: pytest -q
+
+      - name: Generate real daily brief
+        env:
+          LLM_PROVIDER: mock
+          DELAY_DAYS: ${{ github.event.inputs.delay_days || '2' }}
+          FALLBACK_DAYS: ${{ github.event.inputs.fallback_days || '4' }}
+        run: |
+          set -euo pipefail
+          echo "production_mode=real"
+          echo "delay_days=${DELAY_DAYS}"
+          echo "fallback_days=${FALLBACK_DAYS}"
+          ai-brief run-daily --delay-days "${DELAY_DAYS}" --fallback-days "${FALLBACK_DAYS}" | tee daily-brief-auto-result.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('data/reports/runs/last-run.json').read_text())
+          print('run_report_summary=' + json.dumps({
+              'status': report.get('status'),
+              'publish_date': report.get('publish_date'),
+              'target_date': report.get('target_date'),
+              'actual_date': report.get('actual_date'),
+              'fallback_days': report.get('fallback_days'),
+              'fallback_used': report.get('fallback_used'),
+              'fallback_from': report.get('fallback_from'),
+              'total_candidates': report.get('total_candidates'),
+              'deduped_papers': report.get('deduped_papers'),
+              'featured': report.get('featured'),
+              'mentions': report.get('mentions'),
+              'qa_passed': report.get('qa_passed'),
+              'errors': report.get('errors'),
+          }, ensure_ascii=False))
+          if report.get('status') != 'success':
+              raise SystemExit('run report is not successful')
+          if int(report.get('total_candidates') or 0) <= 0:
+              raise SystemExit('no candidates fetched')
+          if int(report.get('deduped_papers') or 0) <= 0:
+              raise SystemExit('no deduped papers fetched')
+          if report.get('errors'):
+              raise SystemExit('run report contains errors')
+          PY
+
+      - name: Run publication guard
+        run: python scripts/strict_t2_guard.py
+
+      - name: Build Astro site
+        run: |
+          cd apps/web
+          npm install
+          npm run build
+
+      - name: Commit and push generated content
+        run: |
+          set -euo pipefail
+          git config user.name "ai-brief-bot"
+          git config user.email "ai-brief-bot@example.com"
+          git add data apps/web/public
+          git status --short data apps/web/public || true
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+          else
+            git diff --cached --stat
+            python - <<'PY' > /tmp/brief-commit-message.txt
+          import json
+          from pathlib import Path
+          report = json.loads(Path('data/reports/runs/last-run.json').read_text())
+          print(f"chore: publish daily AI brief {report.get('publish_date')}")
+          PY
+            git commit -F /tmp/brief-commit-message.txt
+            git pull --rebase origin main
+            git push origin HEAD:main
+            echo "commit_sha=$(git rev-parse HEAD)"
+            echo "push_status=success"
+          fi

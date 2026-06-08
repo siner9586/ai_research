@@ -163,7 +163,7 @@ def _check_pairs(docs: dict[str, list[tuple[Path, dict, str]]], errors: list[str
             errors.append(f"Brief sources_page does not match source slug: {brief_path}")
         if source_meta.get("brief_page") != f"/{lang}/daily/{brief_meta.get('slug')}/":
             errors.append(f"Source brief_page does not match brief slug: {source_path}")
-        if _ids(brief_body) != _ids(source_body):
+        if _ids(brief_body) != _source_selected_ids(source_body):
             errors.append(f"Brief/source selected arXiv IDs differ for {lang}")
     zh = _first(docs, "zh", "brief")
     en = _first(docs, "en", "brief")
@@ -245,6 +245,16 @@ def _section_ids(body: str) -> tuple[list[str], list[str]]:
     if match:
         return _ids(body[: match.start()]), _ids(body[match.start():])
     return _ids(body), []
+
+
+def _source_selected_ids(body: str) -> list[str]:
+    start = re.search(r"\n##\s+(入选论文|Selected papers)\b", body)
+    if start:
+        body = body[start.start():]
+    end = re.search(r"\n##\s+(候选池样例|Candidate pool sample)\b", body)
+    if end:
+        body = body[: end.start()]
+    return _ids(body)
 
 
 def _ids(text: str) -> list[str]:

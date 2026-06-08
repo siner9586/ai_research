@@ -81,6 +81,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt -e .
 
+      - name: Run tests before production generation
+        env:
+          AI_RESEARCH_PUBLISH_DATE: "2026-06-03"
+        run: pytest -q
+
+      - name: Clean test-generated artifacts
+        run: |
+          git checkout -- data apps/web/public || true
+          git clean -fd data/raw/2026-06-03 data/processed/2026-06-03 data/reports || true
+
       - name: Generate daily brief
         env:
           LLM_PROVIDER: ${{ secrets.LLM_PROVIDER }}
@@ -150,9 +160,6 @@ jobs:
               "qa_warnings": report.get("qa_warnings"),
           }, ensure_ascii=False))
           PY
-
-      - name: Run tests
-        run: pytest -q
 
       - name: Build Astro site
         run: |

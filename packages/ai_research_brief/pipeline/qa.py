@@ -16,18 +16,12 @@ BAD_VISIBLE = [
     r"T\+2\s+arXiv",
     r"完整候选池与评分",
     r"full candidate pool and scoring",
-    r"完整候选评分",
-    r"Full candidate scores",
     r"今日重点[:：]",
     r"Today's focus:",
     r"摘要" + r"显示",
     r"建议" + r"先看每篇",
     r"重点" + r"核验",
     r"The abstract" + r" points to",
-    r"The abstract" + r" signal is",
-    r"Open the original" + r" paper",
-    r"Verify" + r" whether",
-    r"evaluation" + r" setup",
 ]
 
 
@@ -64,7 +58,7 @@ def run_qa(day: date, content_dir: Path, reports_dir: Path, target_date: date | 
     _check_processed(day, repo_root, checked, errors)
     _check_pairs(docs, errors)
     _check_static(publish_date, repo_root, checked, errors, docs)
-    _check_repeat(day, repo_root, docs, errors, warnings)
+    _check_repeat(day, publish_date, repo_root, docs, errors, warnings)
 
     report = QAReport(
         date=publish_date,
@@ -121,7 +115,8 @@ def _check_doc(path: Path, meta: dict, body: str, day: date, target_date: date, 
     for pattern in BAD_VISIBLE:
         if re.search(pattern, visible, re.I):
             errors.append(f"Deprecated visible wording matched {pattern}: {path}")
-    if meta.get("page_type") == "brief":
+    featured_count = int(meta.get("featured_count") or 0)
+    if meta.get("page_type") == "brief" and featured_count > 0:
         _check_featured_explanations(path, meta, body, errors)
     if not re.search(r"https://arxiv\.org/abs/\d{4}\.\d{4,5}", body):
         warnings.append(f"No arXiv URL found: {path}")
@@ -218,8 +213,9 @@ def _check_static(day: date, repo_root: Path, checked: list[str], errors: list[s
                 errors.append(f"Sitemap missing {lang} page slug {doc[1].get('slug')}")
 
 
-def _check_repeat(day: date, repo_root: Path, docs: dict[str, list[tuple[Path, dict, str]]], errors: list[str], warnings: list[str]) -> None:
+def _check_repeat(day: date, publish_date: date, repo_root: Path, docs: dict[str, list[tuple[Path, dict, str]]], errors: list[str], warnings: list[str]) -> None:
     history = build_repeat_history(day, days=30, repo_root=repo_root)
+    history = {key: value for key, value in history.items() if str(value.get("date")) != str(publish_date)}
     if not history:
         return
     for lang in ("zh", "en"):

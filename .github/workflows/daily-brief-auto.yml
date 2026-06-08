@@ -87,6 +87,28 @@ jobs:
               raise SystemExit('run report contains errors')
           PY
 
+      - name: Prevent reusing previous source date
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import date, timedelta
+          from pathlib import Path
+
+          report = json.loads(Path('data/reports/runs/last-run.json').read_text())
+          publish = date.fromisoformat(report['publish_date'])
+          actual = str(report.get('actual_date') or '')
+          previous_report = Path('data/reports/runs') / f'{publish - timedelta(days=1)}.json'
+          if previous_report.exists():
+              previous = json.loads(previous_report.read_text())
+              previous_actual = str(previous.get('actual_date') or '')
+              if actual and actual == previous_actual:
+                  raise SystemExit(
+                      f"Refusing to publish {publish}: actual_date {actual} was already used by previous issue "
+                      f"{previous.get('publish_date')}. Wait for a new non-empty arXiv source day or run an explicit manual backfill."
+                  )
+          print(f"source_date_reuse_guard=passed actual_date={actual}")
+          PY
+
       - name: Run publication guard
         run: python scripts/strict_t2_guard.py
 

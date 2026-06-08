@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import datetime
+from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from .logging_config import configure_logging
-from .config import site_config
+from .config import REPO_ROOT, site_config
 from .pipeline.run_daily import (
     build_static_stage,
     enrich_stage,
@@ -18,7 +21,8 @@ from .utils.dates import resolve_date
 
 
 DEFAULT_DELAY_DAYS = 2
-DEFAULT_FALLBACK_DAYS = 4
+DEFAULT_FALLBACK_DAYS = 7
+PUBLISH_TIMEZONE = "Asia/Shanghai"
 
 
 def main(argv=None):
@@ -42,15 +46,19 @@ def main(argv=None):
 
     args = parser.parse_args(argv)
     pipeline = site_config().get("pipeline", {})
-    if args.cmd == "mock-run":
-        fallback_days = args.fallback_days if args.fallback_days is not None else int(pipeline.get("fallback_days", DEFAULT_FALLBACK_DAYS))
-        result = run_daily(resolve_date(args.date), mock=True, allow_qa_warnings=args.allow_qa_warnings, fallback_days=fallback_days)
-    else:
-        delay_days = getattr(args, "delay_days", None)
-        if delay_days is None:
-            delay_days = int(pipeline.get("delay_days", DEFAULT_DELAY_DAYS))
-        day = resolve_date(getattr(args, "date", None), delay_days)
-        result = _dispatch(args, day)
+    try:
+        if args.cmd == "mock-run":
+            fallback_days = args.fallback_days if args.fallback_days is not None else int(pipeline.get("fallback_days", DEFAULT_FALLBACK_DAYS))
+            result = run_daily(resolve_date(args.date), mock=True, allow_qa_warnings=args.allow_qa_warnings, fallback_days=fallback_days)
+        else:
+            delay_days = getattr(args, "delay_days", None)
+            if delay_days is None:
+                delay_days = int(pipeline.get("delay_days", DEFAULT_DELAY_DAYS))
+            day = resolve_date(getattr(args, "date", None), delay_days)
+            result = _dispatch(args, day)
+    except Exception:
+        _print_failure_reports()
+        raise
     print(json.dumps(result, ensure_ascii=False, indent=2, default=str))
 
 
@@ -80,6 +88,25 @@ def _dispatch(args, day):
             fallback_days = int(site_config().get("pipeline", {}).get("fallback_days", DEFAULT_FALLBACK_DAYS))
         return run_daily(day, mock=args.mock, allow_qa_warnings=args.allow_qa_warnings, fallback_days=fallback_days)
     raise SystemExit(f"Unknown command: {args.cmd}")
+
+
+def _print_failure_reports() -> None:
+    publish_date = datetime.now(ZoneInfo(PUBLISH_TIMEZONE)).date().isoformat()
+    paths = [
+        REPO_ROOT / "data" / "reports" / "qa" / f"{publish_date}.json",
+        REPO_ROOT / "data" / "reports" / "runs" / f"{publish_date}.json",
+        REPO_ROOT / "data" / "reports" / "runs" / "last-run.json",
+    ]
+    for path in paths:
+        if not path.exists():
+            continue
+        print(f"::group::failure-report {path.relative_to(REPO_ROOT)}")
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            print(json.dumps(payload, ensure_ascii=False, indent=2, default=str))
+        except Exception as exc:
+            print(f"Could not read {path}: {exc}")
+        print("::endgroup::")
 
 
 if __name__ == "__main__":

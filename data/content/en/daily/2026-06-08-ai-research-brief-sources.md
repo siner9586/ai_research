@@ -10,7 +10,7 @@ summary: "Internal generation metadata: 18 candidate papers."
 tags: ["internal"]
 topics: ["internal"]
 brief_page: "/en/daily/2026-06-08-ai-research-brief/"
-generated_at: "2026-06-08T13:03:31.578615+00:00"
+generated_at: "2026-06-08T14:03:24.619309+00:00"
 page_type: "sources"
 candidate_count: 18
 featured_count: 0
@@ -19,7 +19,7 @@ mentions_count: 12
 
 # Internal Generation Record
 
-Internal generation record. Fetched at 2026-06-08T13:03:31.074781+00:00. Generated at 2026-06-08T13:03:31.578615+00:00. Machine-readable details stay under data/processed and data/reports.
+Internal generation record. Fetched at 2026-06-08T14:03:24.099245+00:00. Generated at 2026-06-08T14:03:24.619309+00:00. Machine-readable details stay under data/processed and data/reports.
 
 ## Selected papers
 

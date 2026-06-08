@@ -10,7 +10,7 @@ summary: "内部生成元数据：本期候选论文 18 篇。"
 tags: ["internal"]
 topics: ["internal"]
 brief_page: "/zh/daily/2026-06-08-ai-research-brief/"
-generated_at: "2026-06-08T13:03:31.350223+00:00"
+generated_at: "2026-06-08T14:03:24.383097+00:00"
 page_type: "sources"
 candidate_count: 18
 featured_count: 0
@@ -19,7 +19,7 @@ mentions_count: 12
 
 # 内部生成记录
 
-内部生成记录。抓取时间 2026-06-08T13:03:31.074781+00:00，生成时间 2026-06-08T13:03:31.350223+00:00；机器可读明细保留在 data/processed 与 data/reports。
+内部生成记录。抓取时间 2026-06-08T14:03:24.099245+00:00，生成时间 2026-06-08T14:03:24.383097+00:00；机器可读明细保留在 data/processed 与 data/reports。
 
 ## 入选论文
 

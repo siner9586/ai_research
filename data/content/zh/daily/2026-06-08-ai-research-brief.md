@@ -10,7 +10,7 @@ summary: "今天主要跟进：。"
 tags: ["agents", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 topics: ["agents", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 sources_page: "/zh/daily/2026-06-08-ai-research-brief-sources/"
-generated_at: "2026-06-08T13:03:31.348781+00:00"
+generated_at: "2026-06-08T14:03:24.381645+00:00"
 page_type: "brief"
 candidate_count: 18
 featured_count: 0

@@ -10,7 +10,7 @@ summary: "Today tracks: ."
 tags: ["agents", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 topics: ["agents", "interpretability", "multimodal", "rag", "robotics", "safety", "systems", "training", "video-generation"]
 sources_page: "/en/daily/2026-06-08-ai-research-brief-sources/"
-generated_at: "2026-06-08T13:03:31.577191+00:00"
+generated_at: "2026-06-08T14:03:24.617822+00:00"
 page_type: "brief"
 candidate_count: 18
 featured_count: 0

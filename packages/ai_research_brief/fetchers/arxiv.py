@@ -219,12 +219,10 @@ def fetch_arxiv_categories_with_stats(
             logger.warning("Combined arXiv fetch failed for %s on %s: %s", categories, target, combined_error)
             if _is_rate_limit_error(combined_error):
                 rss_papers, rss_stats = _fetch_categories_from_rss(categories, max_results_per_category, day, request_delay_seconds, max_total_results)
-                if rss_papers:
-                    rss_stats["errors"]["combined_query"] = combined_error
-                    rss_stats["fallback_from"] = "combined_query_rate_limit"
-                    return rss_papers, rss_stats
-                errors.update(rss_stats.get("errors", {}))
-                page_stats.update(rss_stats.get("page_stats", {}))
+                rss_stats["errors"]["combined_query"] = combined_error
+                rss_stats["fallback_from"] = "combined_query_rate_limit"
+                rss_stats["all_categories_failed"] = False
+                return rss_papers, rss_stats
 
     for index, category in enumerate(categories):
         failed = False

@@ -35,7 +35,7 @@ on:
       fallback_days:
         description: "How many days to search backward if target date has no papers"
         required: false
-        default: "7"
+        default: "0"
   repository_dispatch:
     types: [daily-brief]
 
@@ -104,7 +104,7 @@ jobs:
               "EFFECTIVE_PUBLISH_DATE": pick("PUBLISH_DATE_INPUT", "publish_date", ""),
               "EFFECTIVE_BACKFILL": pick("BACKFILL_INPUT", "backfill", ""),
               "EFFECTIVE_DELAY_DAYS": pick("DELAY_DAYS_INPUT", "delay_days", "2"),
-              "EFFECTIVE_FALLBACK_DAYS": pick("FALLBACK_DAYS_INPUT", "fallback_days", "7"),
+              "EFFECTIVE_FALLBACK_DAYS": pick("FALLBACK_DAYS_INPUT", "fallback_days", "0"),
               "EFFECTIVE_CLEANUP_MOCK_ARTIFACTS": force.get("cleanup_mock_artifacts", "false").lower(),
           }
           with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as fh:
@@ -144,13 +144,16 @@ jobs:
           git checkout -- data apps/web/public || true
           git clean -fd data/raw/2026-06-03 data/processed/2026-06-03 data/reports data/content/zh/daily/2026-06-03-* data/content/en/daily/2026-06-03-* || true
 
-      - name: Clean known mock-contaminated artifacts
+      - name: Clean known wrong generated artifacts
         run: |
           if [ "${EFFECTIVE_CLEANUP_MOCK_ARTIFACTS:-false}" = "true" ]; then
             rm -rf data/raw/2026-06-04 data/processed/2026-06-04
             rm -f data/content/zh/daily/2026-06-08-ai-research-brief*.md
             rm -f data/content/en/daily/2026-06-08-ai-research-brief*.md
+            rm -f data/content/zh/daily/2026-06-09-*.md
+            rm -f data/content/en/daily/2026-06-09-*.md
             rm -f data/reports/qa/2026-06-08.json data/reports/runs/2026-06-08.json
+            rm -f data/reports/qa/2026-06-09.json data/reports/runs/2026-06-09.json
           fi
 
       - name: Generate daily brief
@@ -174,7 +177,7 @@ jobs:
           PUBLISH_DATE="${EFFECTIVE_PUBLISH_DATE:-}"
           BACKFILL="${EFFECTIVE_BACKFILL:-}"
           DELAY_DAYS="${EFFECTIVE_DELAY_DAYS:-2}"
-          FALLBACK_DAYS="${EFFECTIVE_FALLBACK_DAYS:-7}"
+          FALLBACK_DAYS="${EFFECTIVE_FALLBACK_DAYS:-0}"
 
           echo "provider=${LLM_PROVIDER}"
           echo "production_mode=${MODE}"
@@ -182,16 +185,40 @@ jobs:
             echo "Unsupported mode: $MODE"
             exit 1
           fi
+          if [ "$FALLBACK_DAYS" != "0" ]; then
+            echo "fallback_days must be 0 for strict production generation; got $FALLBACK_DAYS"
+            exit 1
+          fi
+
+          validate_pair() {
+            local publish_date="$1"
+            local data_date="$2"
+            python - "$publish_date" "$data_date" <<'PY'
+          import sys
+          from datetime import date, timedelta
+          publish_date = date.fromisoformat(sys.argv[1])
+          data_date = date.fromisoformat(sys.argv[2])
+          expected = publish_date - timedelta(days=2)
+          if data_date != expected:
+              raise SystemExit(f"Backfill must be explicit T+2: publish_date={publish_date} data_date={data_date} expected_data_date={expected}")
+          print(f"validated_t2_pair publish_date={publish_date} target_date={data_date} actual_date={data_date} fallback_days=0 fallback_used=false")
+          PY
+          }
 
           run_one() {
             local data_date="$1"
             local publish_date="$2"
             if [ -n "$publish_date" ]; then
+              validate_pair "$publish_date" "$data_date"
               export AI_RESEARCH_PUBLISH_DATE="$publish_date"
               echo "AI_RESEARCH_PUBLISH_DATE=$AI_RESEARCH_PUBLISH_DATE"
             else
               unset AI_RESEARCH_PUBLISH_DATE || true
             fi
+            echo "target_date=$data_date"
+            echo "actual_date=$data_date"
+            echo "fallback_days=$FALLBACK_DAYS"
+            echo "fallback_used=false"
             if [ "$MODE" = "mock" ]; then
               ai-brief mock-run --date "$data_date" --fallback-days "$FALLBACK_DAYS" | tee "daily-brief-result-${publish_date:-single}.json"
             else
@@ -236,8 +263,10 @@ jobs:
           print("run_report_summary=" + json.dumps({
               "status": report.get("status"),
               "trigger": report.get("trigger"),
+              "publish_date": report.get("publish_date"),
               "target_date": report.get("target_date"),
               "actual_date": report.get("actual_date"),
+              "fallback_days": report.get("fallback_days"),
               "fallback_used": report.get("fallback_used"),
               "categories": report.get("categories"),
               "category_counts": report.get("category_counts"),
@@ -253,6 +282,10 @@ jobs:
               "qa_warnings": report.get("qa_warnings"),
           }, ensure_ascii=False))
           PY
+
+      - name: Run strict T+2 artifact guard
+        if: ${{ env.EFFECTIVE_MODE != 'mock' }}
+        run: python scripts/strict_t2_guard.py
 
       - name: Build Astro site
         run: |
@@ -282,9 +315,15 @@ jobs:
           report_path = Path("data/reports/runs/last-run.json")
           if report_path.exists():
               report = json.loads(report_path.read_text())
+              print("publish_date=" + str(report.get("publish_date")))
               print("target_date=" + str(report.get("target_date")))
               print("actual_date=" + str(report.get("actual_date")))
+              print("fallback_days=" + str(report.get("fallback_days")))
               print("fallback_used=" + str(report.get("fallback_used")))
+              print("candidate_count=" + str(report.get("total_candidates")))
+              print("deduped_papers=" + str(report.get("deduped_papers")))
+              print("featured_count=" + str(report.get("featured")))
+              print("mentions_count=" + str(report.get("mentions")))
               print("generated_files=" + json.dumps(report.get("generated_files", []), ensure_ascii=False))
               print("latest_brief_slug_zh=" + str(report.get("slugs", {}).get("zh")))
               print("latest_brief_slug_en=" + str(report.get("slugs", {}).get("en")))
@@ -299,7 +338,13 @@ jobs:
           else
             echo "git_diff=true"
             git diff --cached --stat
-            git commit -m "Update daily AI research brief"
+            python - <<'PY' > /tmp/brief-commit-message.txt
+          import json
+          from pathlib import Path
+          report = json.loads(Path("data/reports/runs/last-run.json").read_text())
+          print(f"Fix strict T+2 brief generation and rebuild {report.get('publish_date')} issue")
+          PY
+            git commit -F /tmp/brief-commit-message.txt
             git pull --rebase origin main
             git push origin HEAD:main
             echo "commit_sha=$(git rev-parse HEAD)"

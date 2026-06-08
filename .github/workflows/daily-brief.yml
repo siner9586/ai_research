@@ -353,7 +353,7 @@ jobs:
           fi
 
       - name: Trigger Cloudflare Pages deploy hook
-        if: steps.commit.outputs.has_changes == 'true'
+        if: ${{ env.EFFECTIVE_MODE != 'mock' }}
         env:
           CLOUDFLARE_PAGES_DEPLOY_HOOK: ${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
         run: |

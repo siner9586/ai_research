@@ -404,6 +404,24 @@ def _write_run_report(report: dict) -> None:
     _write(_reports_dir() / "last-run.json", report)
 
 
+def _log_run_summary(stage: str, report: dict) -> None:
+    logger.info(
+        "daily_brief_%s status=%s publish_date=%s target_date=%s actual_date=%s "
+        "fallback_days=%s fallback_used=%s candidates=%s deduped=%s featured=%s mentions=%s",
+        stage,
+        report.get("status"),
+        report.get("publish_date"),
+        report.get("target_date"),
+        report.get("actual_date"),
+        report.get("fallback_days"),
+        report.get("fallback_used"),
+        report.get("total_candidates"),
+        report.get("deduped_papers"),
+        report.get("featured"),
+        report.get("mentions"),
+    )
+
+
 def _attempt_summary(day: date, stats: dict, error: str | None = None) -> dict:
     return {
         "date": str(day),

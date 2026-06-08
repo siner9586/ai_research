@@ -136,6 +136,7 @@ def _check_featured_explanations(path: Path, meta: dict, body: str, errors: list
 
 def _check_processed(day: date, repo_root: Path, checked: list[str], errors: list[str]) -> None:
     processed = repo_root / "data" / "processed" / str(day)
+    papers_payload = None
     for name in ["papers.json", "scored_papers.json", "selected_papers.json"]:
         path = processed / name
         checked.append(str(path))
@@ -143,9 +144,38 @@ def _check_processed(day: date, repo_root: Path, checked: list[str], errors: lis
             errors.append(f"Missing processed artifact: {path}")
             continue
         try:
-            json.loads(path.read_text(encoding="utf-8"))
+            payload = json.loads(path.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             errors.append(f"Invalid JSON: {path}")
+            continue
+        if name == "papers.json":
+            papers_payload = payload
+    _check_paper_publication_dates(day, processed / "papers.json", papers_payload, errors)
+
+
+def _check_paper_publication_dates(day: date, path: Path, payload, errors: list[str]) -> None:
+    if not isinstance(payload, list):
+        errors.append(f"Processed papers artifact is not a list: {path}")
+        return
+    if not payload:
+        errors.append(f"Processed papers artifact is empty: {path}")
+        return
+    wrong_dates: list[str] = []
+    for row in payload:
+        if not isinstance(row, dict):
+            wrong_dates.append("<non-object>")
+            continue
+        arxiv_id = str(row.get("arxiv_id") or row.get("id") or "<missing-id>")
+        published_at = str(row.get("published_at") or "")
+        if not published_at.startswith(str(day)):
+            wrong_dates.append(f"{arxiv_id}:{published_at or '<missing-published_at>'}")
+        if len(wrong_dates) >= 5:
+            break
+    if wrong_dates:
+        errors.append(
+            f"Processed papers in {path} must be newly fetched for actual_date {day}; "
+            f"found mismatched published_at values: {', '.join(wrong_dates)}"
+        )
 
 
 def _check_pairs(docs: dict[str, list[tuple[Path, dict, str]]], errors: list[str]) -> None:

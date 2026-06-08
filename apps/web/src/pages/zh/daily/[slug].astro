@@ -9,6 +9,7 @@ export function getStaticPaths() {
 const { doc } = Astro.props;
 const pageTitle = displayBriefTitle(doc.meta.title);
 const isSources = doc.meta.page_type === 'sources';
+const selectedCount = (doc.meta.featured_count || 0) + (doc.meta.mentions_count || 0);
 const body = doc.meta.page_type === 'brief'
   ? doc.body.replace(/\n\*\*日期\*\*:\s*\d{4}-\d{2}-\d{2}\n\n/, '\n')
   : doc.body;
@@ -24,10 +25,17 @@ const body = doc.meta.page_type === 'brief'
       {isSources && doc.meta.brief_page && <a class="paper-meta-link" href={doc.meta.brief_page}>返回简报</a>}
       {!isSources && doc.meta.sources_page && <a class="paper-meta-link" href={doc.meta.sources_page}>来源页</a>}
     </div>
+    {!isSources && (
+      <p class="candidate-note">
+        候选池标注：本期抓取并去重 <strong>{doc.meta.candidate_count || 0}</strong> 篇候选论文，从中筛选 <strong>{selectedCount}</strong> 篇进入简报（重点 {doc.meta.featured_count || 0} 篇，补充 {doc.meta.mentions_count || 0} 篇）。
+      </p>
+    )}
     <Fragment set:html={markdownToHtml(body)} />
   </article>
 </BaseLayout>
 
 <style>
   .issue-meta-line { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+  .candidate-note { margin: 14px 0 22px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-soft); color: var(--muted); font-size: 0.94rem; }
+  .candidate-note strong { color: var(--text); }
 </style>

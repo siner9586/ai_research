@@ -1,0 +1,154 @@
+name: Daily AI Research Brief Catch-up
+
+on:
+  schedule:
+    - cron: "42 00 * * *"
+    - cron: "42 03 * * *"
+    - cron: "42 06 * * *"
+    - cron: "42 09 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Optional YYYY-MM-DD data date"
+        required: false
+      delay_days:
+        description: "Delay days when date is not provided"
+        required: false
+        default: "2"
+      fallback_days:
+        description: "Fallback window"
+        required: false
+        default: "7"
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: daily-ai-research-brief-main
+  cancel-in-progress: false
+
+jobs:
+  catchup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Skip if today's issue already exists
+        id: gate
+        run: |
+          set -euo pipefail
+          publish_date=$(TZ=Asia/Shanghai date '+%Y-%m-%d')
+          echo "publish_date=${publish_date}" >> "$GITHUB_OUTPUT"
+          if [ "${GITHUB_EVENT_NAME}" != "workflow_dispatch" ] && ls data/content/zh/daily/${publish_date}-*.md >/dev/null 2>&1 && ls data/content/en/daily/${publish_date}-*.md >/dev/null 2>&1; then
+            echo "Today's issue already exists: ${publish_date}"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Need to generate issue for ${publish_date}"
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.gate.outputs.run == 'true'
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.run == 'true'
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install dependencies
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -e .
+
+      - name: Generate with retries
+        if: steps.gate.outputs.run == 'true'
+        env:
+          LLM_PROVIDER: mock
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_API_TOKEN: ${{ github.token }}
+          DATE_INPUT: ${{ github.event.inputs.date || '' }}
+          DELAY_DAYS_INPUT: ${{ github.event.inputs.delay_days || '2' }}
+          FALLBACK_DAYS_INPUT: ${{ github.event.inputs.fallback_days || '7' }}
+        run: |
+          set -euo pipefail
+          DATE="${DATE_INPUT:-}"
+          DELAY_DAYS="${DELAY_DAYS_INPUT:-2}"
+          FALLBACK_DAYS="${FALLBACK_DAYS_INPUT:-7}"
+          for attempt in 1 2 3; do
+            echo "catchup_attempt=${attempt}"
+            set +e
+            if [ -n "$DATE" ]; then
+              ai-brief run-daily --date "$DATE" --fallback-days "$FALLBACK_DAYS" | tee daily-brief-result.json
+            else
+              ai-brief run-daily --delay-days "$DELAY_DAYS" --fallback-days "$FALLBACK_DAYS" | tee daily-brief-result.json
+            fi
+            status=$?
+            set -e
+            if [ "$status" -eq 0 ]; then
+              break
+            fi
+            echo "::warning::generation attempt ${attempt} failed with status ${status}"
+            if [ "$attempt" -eq 3 ]; then
+              exit "$status"
+            fi
+            sleep $((attempt * 300))
+          done
+
+      - name: Test and build
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          pytest -q
+          cd apps/web
+          npm ci || npm install
+          npm run build
+
+      - name: Commit and push generated content
+        if: steps.gate.outputs.run == 'true'
+        id: commit
+        run: |
+          set -euo pipefail
+          git config user.name "ai-brief-bot"
+          git config user.email "ai-brief-bot@example.com"
+          git add data apps/web/public
+          git status --short data apps/web/public || true
+          if git diff --cached --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "Update daily AI research brief"
+          for attempt in 1 2 3; do
+            git pull --rebase origin main || true
+            if git push origin HEAD:main; then
+              echo "has_changes=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep $((attempt * 20))
+          done
+          exit 1
+
+      - name: Trigger Cloudflare deploy
+        if: steps.commit.outputs.has_changes == 'true'
+        env:
+          DEPLOY_HOOK: ${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
+        run: |
+          if [ -z "${DEPLOY_HOOK:-}" ]; then
+            echo "No Cloudflare deploy hook set"
+            exit 0
+          fi
+          for attempt in 1 2 3; do
+            if curl -fsS -X POST "$DEPLOY_HOOK"; then
+              exit 0
+            fi
+            sleep $((attempt * 30))
+          done
+          echo "::warning::Cloudflare deploy hook failed after retries"

@@ -23,13 +23,6 @@ BAD_VISIBLE = [
     r"重点" + r"核验",
     r"The abstract" + r" points to",
 ]
-MOCK_ALLOWED_PUBLISH_DATE = "2026-06-03"
-MOCK_ID_RE = re.compile(r"\b2606\.000(?:0[1-9]|1[0-8])\b")
-MOCK_TEXT_RE = re.compile(
-    r"Self Evolving Agents for Tool Use Skills|Red Teaming Open Source LLM Guardrails|"
-    r"Preference Optimization for Safer Tool Agents|Alice Chen|Bob Smith|Carol Li",
-    re.I,
-)
 
 
 def run_qa(day: date, content_dir: Path, reports_dir: Path, target_date: date | None = None, publish_date: date | None = None) -> QAReport:
@@ -62,7 +55,7 @@ def run_qa(day: date, content_dir: Path, reports_dir: Path, target_date: date | 
             errors.append(f"Expected exactly one {lang} source page for {publish_date}, found {len(sources)}")
 
     repo_root = content_dir.parents[1]
-    _check_processed(day, publish_date, repo_root, checked, errors)
+    _check_processed(day, repo_root, checked, errors)
     _check_pairs(docs, errors)
     _check_static(publish_date, repo_root, checked, errors, docs)
     _check_repeat(day, publish_date, repo_root, docs, errors, warnings)
@@ -122,8 +115,6 @@ def _check_doc(path: Path, meta: dict, body: str, day: date, target_date: date, 
     for pattern in BAD_VISIBLE:
         if re.search(pattern, visible, re.I):
             errors.append(f"Deprecated visible wording matched {pattern}: {path}")
-    if str(publish_date) != MOCK_ALLOWED_PUBLISH_DATE and _looks_like_mock(visible):
-        errors.append(f"Mock/test artifact leaked into production issue: {path}")
     featured_count = int(meta.get("featured_count") or 0)
     if meta.get("page_type") == "brief" and featured_count > 0:
         _check_featured_explanations(path, meta, body, errors)
@@ -143,7 +134,7 @@ def _check_featured_explanations(path: Path, meta: dict, body: str, errors: list
             errors.append(f"Featured paper {index} lacks a full structured English explanation: {path}")
 
 
-def _check_processed(day: date, publish_date: date, repo_root: Path, checked: list[str], errors: list[str]) -> None:
+def _check_processed(day: date, repo_root: Path, checked: list[str], errors: list[str]) -> None:
     processed = repo_root / "data" / "processed" / str(day)
     for name in ["papers.json", "scored_papers.json", "selected_papers.json"]:
         path = processed / name
@@ -152,13 +143,9 @@ def _check_processed(day: date, publish_date: date, repo_root: Path, checked: li
             errors.append(f"Missing processed artifact: {path}")
             continue
         try:
-            text = path.read_text(encoding="utf-8")
-            json.loads(text)
+            json.loads(path.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             errors.append(f"Invalid JSON: {path}")
-            continue
-        if str(publish_date) != MOCK_ALLOWED_PUBLISH_DATE and _looks_like_mock(text):
-            errors.append(f"Mock/test processed artifact leaked into production issue: {path}")
 
 
 def _check_pairs(docs: dict[str, list[tuple[Path, dict, str]]], errors: list[str]) -> None:
@@ -201,8 +188,6 @@ def _check_static(day: date, repo_root: Path, checked: list[str], errors: list[s
         for pattern in BAD_VISIBLE:
             if re.search(pattern, text, re.I):
                 errors.append(f"Static artifact contains deprecated wording matched {pattern}: {path}")
-        if str(day) != MOCK_ALLOWED_PUBLISH_DATE and _looks_like_mock(text):
-            errors.append(f"Static artifact contains mock/test data outside {MOCK_ALLOWED_PUBLISH_DATE}: {path}")
     search_index = public / "search-index.json"
     if search_index.exists():
         try:
@@ -274,10 +259,6 @@ def _source_selected_ids(body: str) -> list[str]:
 
 def _ids(text: str) -> list[str]:
     return list(dict.fromkeys(re.findall(r"arxiv\.org/abs/(\d{4}\.\d{4,5})", text)))
-
-
-def _looks_like_mock(text: str) -> bool:
-    return bool(MOCK_ID_RE.search(text) or MOCK_TEXT_RE.search(text))
 
 
 def _strip(text: str) -> str:

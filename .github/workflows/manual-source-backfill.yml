@@ -44,14 +44,15 @@ jobs:
 
       - name: Clean generated artifacts
         run: |
-          git checkout -- data apps/web/public || true
-          git clean -fd data/raw/2026-06-03 data/processed/2026-06-03 data/reports data/content/zh/daily/2026-06-03-* data/content/en/daily/2026-06-03-* || true
-          # Preserve committed source_date candidates; manual backfill must reuse the selected source file.
+          set -euo pipefail
+          git checkout -- data/content data/reports apps/web/public || true
+          # Manual source-date backfill must not delete or mutate the committed source candidates.
           rm -f data/content/zh/daily/${{ github.event.inputs.publish_date }}-*.md
           rm -f data/content/en/daily/${{ github.event.inputs.publish_date }}-*.md
-          rm -f data/reports/qa/${{ github.event.inputs.publish_date }}.json data/reports/runs/${{ github.event.inputs.publish_date }}.json
-          rm -f data/content/zh/daily/2026-06-09-*.md data/content/en/daily/2026-06-09-*.md
-          rm -f data/reports/qa/2026-06-09.json data/reports/runs/2026-06-09.json
+          rm -f data/reports/qa/${{ github.event.inputs.publish_date }}.json
+          rm -f data/reports/runs/${{ github.event.inputs.publish_date }}.json
+          rm -f data/reports/runs/last-run.json
+          rm -f manual-source-backfill-result.json
 
       - name: Validate source override
         run: |
@@ -65,6 +66,36 @@ jobs:
           print(f"validated_source_override publish_date={publish} calendar_t2_date={calendar_t2} source_date={source} fallback_days=0 fallback_used=false")
           PY
 
+      - name: Inspect committed source candidates
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          source = '${{ github.event.inputs.source_date }}'
+          required = {
+              'papers': Path(f'data/processed/{source}/papers.json'),
+              'scored': Path(f'data/processed/{source}/scored_papers.json'),
+              'selected': Path(f'data/processed/{source}/selected_papers.json'),
+          }
+          missing = [f'{name}:{path}' for name, path in required.items() if not path.exists()]
+          env_value = '0'
+          if missing:
+              print('source_candidates_state=incomplete fallback_refetch_allowed=true missing=' + ','.join(missing))
+          else:
+              scored = json.loads(required['scored'].read_text(encoding='utf-8'))
+              selected = json.loads(required['selected'].read_text(encoding='utf-8'))
+              featured_count = len(selected.get('featured', []))
+              mentions_count = len(selected.get('mentions', []))
+              print(
+                  'source_candidates_state=complete reuse_existing_source=true '
+                  f'candidate_count={len(scored)} featured_count={featured_count} mentions_count={mentions_count}'
+              )
+              env_value = '1'
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as handle:
+              handle.write(f'AI_RESEARCH_SOURCE_CANDIDATES_PRESENT={env_value}\n')
+          PY
+
       - name: Generate brief from source date
         env:
           AI_RESEARCH_PUBLISH_DATE: ${{ github.event.inputs.publish_date }}
@@ -74,7 +105,10 @@ jobs:
           ai-brief run-daily --date "${{ github.event.inputs.source_date }}" --fallback-days 0 | tee manual-source-backfill-result.json
           python - <<'PY'
           import json
+          import os
           from pathlib import Path
+          publish = '${{ github.event.inputs.publish_date }}'
+          source = '${{ github.event.inputs.source_date }}'
           report = json.loads(Path('data/reports/runs/last-run.json').read_text())
           print('run_report_summary=' + json.dumps({
               'status': report.get('status'),
@@ -85,22 +119,37 @@ jobs:
               'fallback_used': report.get('fallback_used'),
               'total_candidates': report.get('total_candidates'),
               'deduped_papers': report.get('deduped_papers'),
+              'candidate_count': report.get('candidate_count'),
               'featured': report.get('featured'),
               'mentions': report.get('mentions'),
               'slugs': report.get('slugs'),
               'qa_passed': report.get('qa_passed'),
+              'fetch_mode': report.get('fetch_mode'),
+              'reuse_existing_source': report.get('reuse_existing_source'),
+              'candidate_file': report.get('candidate_file'),
+              'selected_file': report.get('selected_file'),
               'errors': report.get('errors'),
           }, ensure_ascii=False))
-          if report.get('publish_date') != '${{ github.event.inputs.publish_date }}':
+          if report.get('publish_date') != publish:
               raise SystemExit('publish_date mismatch')
-          if report.get('target_date') != '${{ github.event.inputs.source_date }}':
+          if report.get('target_date') != source:
               raise SystemExit('target_date/source_date mismatch')
-          if report.get('actual_date') != '${{ github.event.inputs.source_date }}':
+          if report.get('actual_date') != source:
               raise SystemExit('actual_date/source_date mismatch')
           if report.get('fallback_days') != 0 or report.get('fallback_used'):
               raise SystemExit('fallback must remain disabled')
+          if report.get('mock'):
+              raise SystemExit('manual production backfill must not be mock')
           if int(report.get('total_candidates') or 0) <= 0:
               raise SystemExit('source date returned no candidates')
+          expected_candidate = f'data/processed/{source}/scored_papers.json'
+          expected_selected = f'data/processed/{source}/selected_papers.json'
+          if report.get('candidate_file') != expected_candidate:
+              raise SystemExit(f'candidate_file mismatch: {report.get("candidate_file")} != {expected_candidate}')
+          if report.get('selected_file') != expected_selected:
+              raise SystemExit(f'selected_file mismatch: {report.get("selected_file")} != {expected_selected}')
+          if os.environ.get('AI_RESEARCH_SOURCE_CANDIDATES_PRESENT') == '1' and not report.get('reuse_existing_source'):
+              raise SystemExit('committed source candidates existed but were not reused')
           if report.get('errors'):
               raise SystemExit('run report contains errors')
           PY

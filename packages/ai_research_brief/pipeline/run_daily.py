@@ -205,20 +205,49 @@ def run_daily(
 
         enrich_stage(actual_day, mock=mock)
         scored, featured, mentions = score_stage(actual_day)
+        manifest = _write_candidate_manifest(
+            publish_date=publish_date,
+            target_date=day,
+            actual_date=actual_day,
+            fallback_from=fallback_from,
+            mock=mock,
+            fetch_stats=fetch_stats,
+            papers=papers,
+            scored=scored,
+            featured=featured,
+            mentions=mentions,
+        )
         guard_summary = _read_optional_json(_processed_dir(actual_day) / "repeat_guard_summary.json", {})
         generated, slugs = generate_stage(actual_day, target_date=day, fallback_from=fallback_from, publish_date=publish_date)
         static_files = build_static_stage()
+
+        run_report.update({
+            "status": "validating",
+            "candidate_count": len(scored),
+            "featured": len(featured),
+            "featured_count": len(featured),
+            "mentions": len(mentions),
+            "mentions_count": len(mentions),
+            "candidate_ids": manifest["candidate_ids"],
+            "featured_ids": manifest["featured_ids"],
+            "mention_ids": manifest["mention_ids"],
+            "selected_ids": manifest["selected_ids"],
+            "candidate_manifest": manifest["manifest_file"],
+            "candidate_file": manifest["candidate_file"],
+            "raw_candidate_file": manifest["raw_candidate_file"],
+            "processed_papers_file": manifest["processed_papers_file"],
+            "selected_file": manifest["selected_file"],
+            "slugs": slugs,
+            "generated_files": generated + static_files + [str((REPO_ROOT / manifest["manifest_file"]).resolve())],
+            **guard_summary,
+        })
+        _write_run_report(run_report)
         qa_report = qa_stage(actual_day, allow_warnings=allow_qa_warnings, target_date=day, publish_date=publish_date)
 
         run_report.update({
             "status": "success",
-            "featured": len(featured),
-            "mentions": len(mentions),
-            "slugs": slugs,
             "qa_passed": qa_report.passed,
             "qa_warnings": qa_report.warnings,
-            "generated_files": generated + static_files,
-            **guard_summary,
         })
         _write_run_report(run_report)
         _log_run_summary("complete", run_report)
@@ -233,6 +262,12 @@ def run_daily(
             "papers": len(papers),
             "total_candidates": run_report["total_candidates"],
             "deduped_papers": run_report["deduped_papers"],
+            "candidate_count": run_report["candidate_count"],
+            "featured_count": run_report["featured_count"],
+            "mentions_count": run_report["mentions_count"],
+            "candidate_manifest": run_report["candidate_manifest"],
+            "candidate_file": run_report["candidate_file"],
+            "selected_file": run_report["selected_file"],
             "fetch_mode": run_report["fetch_mode"],
             "page_count": run_report["page_count"],
             "request_count": run_report["request_count"],
@@ -242,6 +277,7 @@ def run_daily(
             "category_errors": run_report["errors"],
             "featured": len(featured),
             "mentions": len(mentions),
+            "selected_ids": run_report["selected_ids"],
             "slugs": slugs,
             "qa_passed": qa_report.passed,
             "qa_warnings": qa_report.warnings,
@@ -368,6 +404,18 @@ def _base_run_report(day: date, publish_date: date, mock: bool, fallback_days: i
         "category_counts": {},
         "total_candidates": 0,
         "deduped_papers": 0,
+        "candidate_count": 0,
+        "featured_count": 0,
+        "mentions_count": 0,
+        "candidate_ids": [],
+        "featured_ids": [],
+        "mention_ids": [],
+        "selected_ids": [],
+        "candidate_manifest": None,
+        "candidate_file": None,
+        "raw_candidate_file": None,
+        "processed_papers_file": None,
+        "selected_file": None,
         "fetch_mode": None,
         "page_count": 0,
         "request_count": 0,
@@ -390,6 +438,64 @@ def _base_run_report(day: date, publish_date: date, mock: bool, fallback_days: i
         "attempts": [],
         "report_path": str((_reports_dir() / f"{publish_date}.json").relative_to(REPO_ROOT)),
     }
+
+
+def _write_candidate_manifest(
+    *,
+    publish_date: date,
+    target_date: date,
+    actual_date: date,
+    fallback_from: date | None,
+    mock: bool,
+    fetch_stats: dict,
+    papers: list[Paper],
+    scored: list[ScoredPaper],
+    featured: list[ScoredPaper],
+    mentions: list[ScoredPaper],
+) -> dict:
+    paths = _candidate_source_paths(actual_date)
+    manifest = {
+        "schema_version": 1,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "publish_date": str(publish_date),
+        "target_date": str(target_date),
+        "actual_date": str(actual_date),
+        "fallback_used": actual_date != target_date,
+        "fallback_from": str(fallback_from) if fallback_from else None,
+        "mock": mock,
+        "fetch_mode": fetch_stats.get("fetch_mode"),
+        "candidate_count": len(scored),
+        "raw_candidate_count": len(papers),
+        "featured_count": len(featured),
+        "mentions_count": len(mentions),
+        "candidate_ids": _scored_ids(scored),
+        "paper_ids": _paper_ids(papers),
+        "featured_ids": _scored_ids(featured),
+        "mention_ids": _scored_ids(mentions),
+        "selected_ids": _scored_ids(featured + mentions),
+        **paths,
+    }
+    _write(REPO_ROOT / paths["manifest_file"], manifest)
+    return manifest
+
+
+def _candidate_source_paths(actual_date: date) -> dict[str, str]:
+    prefix = f"data/processed/{actual_date}"
+    return {
+        "raw_candidate_file": f"data/raw/{actual_date}/papers.json",
+        "processed_papers_file": f"{prefix}/papers.json",
+        "candidate_file": f"{prefix}/scored_papers.json",
+        "selected_file": f"{prefix}/selected_papers.json",
+        "manifest_file": f"{prefix}/candidate_manifest.json",
+    }
+
+
+def _paper_ids(papers: list[Paper]) -> list[str]:
+    return [paper.arxiv_id for paper in papers]
+
+
+def _scored_ids(rows: list[ScoredPaper]) -> list[str]:
+    return [row.paper.arxiv_id for row in rows]
 
 
 def _publication_date() -> date:
@@ -425,7 +531,7 @@ def _log_run_summary(stage: str, report: dict) -> None:
         report.get("actual_date"),
         report.get("fallback_days"),
         report.get("fallback_used"),
-        report.get("total_candidates"),
+        report.get("candidate_count") or report.get("total_candidates"),
         report.get("deduped_papers"),
         report.get("featured"),
         report.get("mentions"),

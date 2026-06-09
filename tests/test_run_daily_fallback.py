@@ -22,8 +22,36 @@ def _empty_stats(day, categories):
 
 
 def _dated_mock_papers(day: date):
+    """Build non-mock-looking fixture papers for fallback tests.
+
+    The fallback test exercises real-mode date resolution, so its fixtures must
+    not contain mock IDs, mock authors, or mock titles that production QA is
+    supposed to block.
+    """
     anchor = datetime.combine(day, time.min, tzinfo=timezone.utc)
-    return [paper.model_copy(update={"published_at": anchor, "updated_at": anchor}) for paper in mock_papers()]
+    rows = []
+    for index, paper in enumerate(mock_papers(), start=1):
+        arxiv_id = f"2606.10{index:03d}"
+        rows.append(
+            paper.model_copy(
+                update={
+                    "id": arxiv_id,
+                    "arxiv_id": arxiv_id,
+                    "title": f"Reliable Agent Evaluation Fixture {index}",
+                    "abstract": (
+                        "This paper studies reliable agent evaluation, retrieval grounding, "
+                        "planning workflows, benchmark construction, and deployment checks "
+                        "for AI systems with reproducible experimental signals."
+                    ),
+                    "authors": [f"Researcher {index}", "AI Systems Lab"],
+                    "published_at": anchor,
+                    "updated_at": anchor,
+                    "abs_url": f"https://arxiv.org/abs/{arxiv_id}",
+                    "pdf_url": f"https://arxiv.org/pdf/{arxiv_id}",
+                }
+            )
+        )
+    return rows
 
 
 def test_run_daily_falls_back_to_recent_real_arxiv_date(monkeypatch):

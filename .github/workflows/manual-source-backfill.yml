@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       publish_date:
-        description: "Publication date, e.g. 2026-06-08"
+        description: "Publication date, e.g. 2026-06-09"
         required: true
       source_date:
         description: "Real non-empty arXiv source date, e.g. 2026-06-05"
@@ -46,7 +46,6 @@ jobs:
         run: |
           set -euo pipefail
           git checkout -- data/content data/reports apps/web/public || true
-          # Manual source-date backfill must not delete or mutate the committed source candidates.
           rm -f data/content/zh/daily/${{ github.event.inputs.publish_date }}-*.md
           rm -f data/content/en/daily/${{ github.event.inputs.publish_date }}-*.md
           rm -f data/reports/qa/${{ github.event.inputs.publish_date }}.json
@@ -57,16 +56,20 @@ jobs:
       - name: Validate source override
         run: |
           python - <<'PY'
+          import os
           from datetime import date, timedelta
           publish = date.fromisoformat('${{ github.event.inputs.publish_date }}')
           source = date.fromisoformat('${{ github.event.inputs.source_date }}')
           calendar_t2 = publish - timedelta(days=2)
           delta = (calendar_t2 - source).days
+          one_off_reuse = publish.isoformat() == '2026-06-09' and source.isoformat() == '2026-06-05'
           if source > calendar_t2:
               raise SystemExit(f"source_date cannot be after calendar T+2: source={source} calendar_t2={calendar_t2}")
-          if delta > 4:
-              raise SystemExit(f"source_date is outside maximum fallback window: publish={publish} calendar_t2={calendar_t2} source={source} max_fallback_days=4")
-          print(f"validated_source_override publish_date={publish} calendar_t2_date={calendar_t2} source_date={source} fallback_delta={delta} max_fallback_days=4")
+          if delta > 2:
+              raise SystemExit(f"source_date is outside maximum fallback window: publish={publish} calendar_t2={calendar_t2} source={source} max_fallback_days=2")
+          print(f"validated_source_override publish_date={publish} calendar_t2_date={calendar_t2} source_date={source} fallback_delta={delta} max_fallback_days=2 one_off_reuse={one_off_reuse}")
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as handle:
+              handle.write(f"AI_RESEARCH_MANUAL_REUSE_EXISTING_SOURCE={'1' if one_off_reuse else '0'}\n")
           PY
 
       - name: Inspect committed source candidates
@@ -76,6 +79,7 @@ jobs:
           import os
           from pathlib import Path
           source = '${{ github.event.inputs.source_date }}'
+          allow_reuse = os.environ.get('AI_RESEARCH_MANUAL_REUSE_EXISTING_SOURCE') == '1'
           required = {
               'papers': Path(f'data/processed/{source}/papers.json'),
               'scored': Path(f'data/processed/{source}/scored_papers.json'),
@@ -91,18 +95,19 @@ jobs:
               featured_count = len(selected.get('featured', []))
               mentions_count = len(selected.get('mentions', []))
               print(
-                  'source_candidates_state=complete reuse_existing_source=true '
+                  'source_candidates_state=complete '
+                  f'one_off_reuse_allowed={allow_reuse} '
                   f'candidate_count={len(scored)} featured_count={featured_count} mentions_count={mentions_count}'
               )
-              env_value = '1'
+              env_value = '1' if allow_reuse else '0'
           with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as handle:
-              handle.write(f'AI_RESEARCH_SOURCE_CANDIDATES_PRESENT={env_value}\n')
+              handle.write(f'AI_RESEARCH_SOURCE_CANDIDATES_PRESENT={"1" if not missing else "0"}\n')
+              handle.write(f'AI_RESEARCH_REUSE_EXISTING_SOURCE={env_value}\n')
           PY
 
       - name: Generate brief from source date
         env:
           AI_RESEARCH_PUBLISH_DATE: ${{ github.event.inputs.publish_date }}
-          AI_RESEARCH_REUSE_EXISTING_SOURCE: "1"
           LLM_PROVIDER: mock
         run: |
           ai-brief run-daily --date "${{ github.event.inputs.source_date }}" --fallback-days 0 | tee manual-source-backfill-result.json
@@ -112,6 +117,8 @@ jobs:
           from pathlib import Path
           publish = '${{ github.event.inputs.publish_date }}'
           source = '${{ github.event.inputs.source_date }}'
+          allow_reuse = os.environ.get('AI_RESEARCH_MANUAL_REUSE_EXISTING_SOURCE') == '1'
+          source_candidates_present = os.environ.get('AI_RESEARCH_SOURCE_CANDIDATES_PRESENT') == '1'
           report = json.loads(Path('data/reports/runs/last-run.json').read_text())
           print('run_report_summary=' + json.dumps({
               'status': report.get('status'),
@@ -129,6 +136,7 @@ jobs:
               'qa_passed': report.get('qa_passed'),
               'fetch_mode': report.get('fetch_mode'),
               'reuse_existing_source': report.get('reuse_existing_source'),
+              'request_count': report.get('request_count'),
               'candidate_file': report.get('candidate_file'),
               'selected_file': report.get('selected_file'),
               'errors': report.get('errors'),
@@ -151,14 +159,24 @@ jobs:
               raise SystemExit(f'candidate_file mismatch: {report.get("candidate_file")} != {expected_candidate}')
           if report.get('selected_file') != expected_selected:
               raise SystemExit(f'selected_file mismatch: {report.get("selected_file")} != {expected_selected}')
-          if os.environ.get('AI_RESEARCH_SOURCE_CANDIDATES_PRESENT') == '1' and not report.get('reuse_existing_source'):
-              raise SystemExit('committed source candidates existed but were not reused')
+          if report.get('reuse_existing_source') and not allow_reuse:
+              raise SystemExit('reuse_existing_source is only allowed for the one-off 2026-06-09 / 2026-06-05 backfill')
+          if allow_reuse and source_candidates_present and not report.get('reuse_existing_source'):
+              raise SystemExit('one-off committed source candidates existed but were not reused')
+          if not report.get('reuse_existing_source') and int(report.get('request_count') or 0) <= 0:
+              raise SystemExit('non-exception manual backfill must refetch the source date')
           if report.get('errors'):
               raise SystemExit('run report contains errors')
           PY
 
       - name: Run candidate lineage guard
-        run: python scripts/candidate_lineage_guard.py --mode manual --max-fallback-days 4 --allow-reuse-existing-source
+        run: |
+          set -euo pipefail
+          EXTRA=""
+          if [ "${AI_RESEARCH_MANUAL_REUSE_EXISTING_SOURCE:-0}" = "1" ]; then
+            EXTRA="--allow-reuse-existing-source"
+          fi
+          python scripts/candidate_lineage_guard.py --mode manual --max-fallback-days 2 ${EXTRA}
 
       - name: Build Astro site
         run: |

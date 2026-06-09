@@ -1,40 +1,39 @@
 ---
 title: "内部生成记录"
 date: "2026-06-03"
-target_date: "2026-06-01"
-actual_date: "2026-06-01"
-fallback_from: ""
+target_date: "2026-06-05"
+actual_date: "2026-06-04"
+fallback_from: "2026-06-05"
 lang: "zh"
 slug: "2026-06-03-ai-research-brief-sources"
-summary: "内部生成元数据：本期候选论文 273 篇，轻量回滚。"
+summary: "内部生成元数据：本期候选论文 18 篇。"
 tags: ["internal"]
 topics: ["internal"]
 brief_page: "/zh/daily/2026-06-03-ai-research-brief/"
-generated_at: "2026-06-09T00:00:00+08:00"
+generated_at: "2026-06-09T00:16:14.977869+00:00"
 page_type: "sources"
-candidate_count: 273
-featured_count: 5
-mentions_count: 10
+candidate_count: 18
+featured_count: 0
+mentions_count: 12
 ---
 
 # 内部生成记录
 
-## 生成说明
-
-本页为 2026-06-03 轻量回滚 sources。数据源采用 2026-06-01 的真实 arXiv 候选池，已移除 mock 论文、伪造作者和 2606.000xx 链接。
+内部生成记录。抓取时间 2026-06-09T00:16:14.682228+00:00，生成时间 2026-06-09T00:16:14.977869+00:00；机器可读明细保留在 data/processed 与 data/reports。
 
 ## 入选论文
 
-- [Cosmos 3: Omnimodal World Models for Physical AI](https://arxiv.org/abs/2606.02800)
-- [Thinking Past the Answer: Evaluating Harmful Overthinking in Large Reasoning Models](https://arxiv.org/abs/2606.02835)
-- [AgentRedBench: Dynamic Redteaming and Integration-Aware Defense for LLM Agents over SaaS Integrations](https://arxiv.org/abs/2606.02240)
-- [Toward a Modular Architecture for Embedded AI Agent Systems at the Edge](https://arxiv.org/abs/2606.02862)
-- [Do Transformers Need Three Projections? Systematic Study of QKV Variants](https://arxiv.org/abs/2606.04032)
-
-## 候选池样例
-
-- [KForge](https://arxiv.org/abs/2606.02963)
-- [OpenWebRL](https://arxiv.org/abs/2606.02031)
-- [Acceptance-Test-Driven Evaluation Protocols for Business-Centric LLM Systems](https://arxiv.org/abs/2606.02755)
-- [MASER](https://arxiv.org/abs/2606.02463)
-- [EntangleCodec](https://arxiv.org/abs/2606.02739)
+| 排名 | 看点 | 主题 | arXiv |
+|---:|---|---|---|
+| 6 | 让 Agent 更可靠地调用工具和复用技能 | Agent 与工具调用 | [2606.00012](https://arxiv.org/abs/2606.00012) |
+| 7 | 识别并缓解模型安全、越狱和对齐风险 | 安全与对齐 | [2606.00017](https://arxiv.org/abs/2606.00017) |
+| 8 | 改进训练数据筛选、合成和去重流程 | 数据工程 | [2606.00007](https://arxiv.org/abs/2606.00007) |
+| 10 | 增强多模态模型理解图表和文档的能力 | 多模态模型 | [2606.00014](https://arxiv.org/abs/2606.00014) |
+| 11 | 让 Agent 更可靠地调用工具和复用技能 | Agent 与工具调用 | [2606.00015](https://arxiv.org/abs/2606.00015) |
+| 12 | 解释模型内部表征和行为归因 | 可解释性 | [2606.00008](https://arxiv.org/abs/2606.00008) |
+| 13 | 改进图像生成、视觉理解和可控渲染 | 视频生成 | [2606.00010](https://arxiv.org/abs/2606.00010) |
+| 14 | 用新基准和评测方法暴露模型短板 | Agent 与工具调用 | [2606.00016](https://arxiv.org/abs/2606.00016) |
+| 15 | 跟进训练与后训练中的高分研究线索 | 训练与后训练 | [2606.00018](https://arxiv.org/abs/2606.00018) |
+| 16 | 提升模型推理、规划和验证能力 | 机器人与具身智能 | [2606.00006](https://arxiv.org/abs/2606.00006) |
+| 17 | 让 Agent 更可靠地调用工具和复用技能 | Agent 与工具调用 | [2606.00009](https://arxiv.org/abs/2606.00009) |
+| 18 | 降低推理成本并提升部署效率 | 系统与部署 | [2606.00011](https://arxiv.org/abs/2606.00011) |

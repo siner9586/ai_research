@@ -1,70 +1,45 @@
 ---
-title: "Track physical AI world models, reasoning evaluation, edge agent systems, and inference architecture"
+title: "Daily AI Research Brief"
 date: "2026-06-03"
-target_date: "2026-06-01"
-actual_date: "2026-06-01"
-fallback_from: ""
+target_date: "2026-06-05"
+actual_date: "2026-06-04"
+fallback_from: "2026-06-05"
 lang: "en"
 slug: "2026-06-03-ai-research-brief"
-summary: "Today tracks: physical AI world models, reasoning evaluation, edge agent systems, and inference architecture."
-tags: ["agents", "evaluation", "multimodal", "reasoning", "robotics", "systems", "training"]
-topics: ["agents", "evaluation", "multimodal", "reasoning", "robotics", "systems", "training"]
+summary: "Today tracks: ."
+tags: ["agents", "data-engineering", "interpretability", "multimodal", "robotics", "safety", "systems", "training", "video-generation"]
+topics: ["agents", "data-engineering", "interpretability", "multimodal", "robotics", "safety", "systems", "training", "video-generation"]
 sources_page: "/en/daily/2026-06-03-ai-research-brief-sources/"
-generated_at: "2026-06-09T00:00:00+08:00"
+generated_at: "2026-06-09T00:16:15.198056+00:00"
 page_type: "brief"
-candidate_count: 273
-featured_count: 5
-mentions_count: 10
+candidate_count: 18
+featured_count: 0
+mentions_count: 12
 ---
 
-# Track physical AI world models, reasoning evaluation, edge agent systems, and inference architecture
+# Daily AI Research Brief
 
 ## What is worth tracking today
 
-This is a lightweight restored issue based on the real 2026-06-01 arXiv candidate pool. Mock papers and fabricated author names have been removed. The format follows the latest lightweight issue style: featured papers, additional leads, and reading boundaries.
+Today’s high-signal papers point to: . The notes below focus on the core problem, method signal, main claim, and keywords for each featured paper.
 
 ## Featured papers: core problem, method signal, and keywords
 
-### 1. Physical AI world models
-
-<p class="paper-meta-line"><span>Cosmos 3: Omnimodal World Models for Physical AI</span> <a class="paper-meta-link" href="https://arxiv.org/abs/2606.02800">2606.02800</a> <a class="paper-meta-link" href="https://arxiv.org/pdf/2606.02800">PDF</a></p>
-
-Core signal: a unified world-model direction for language, image, video, audio, and action sequences. Keywords: physical AI, world model, multimodal, robotics.
-
-### 2. Reasoning evaluation and test-time compute
-
-<p class="paper-meta-line"><span>Thinking Past the Answer: Evaluating Overthinking in Large Reasoning Models</span> <a class="paper-meta-link" href="https://arxiv.org/abs/2606.02835">2606.02835</a> <a class="paper-meta-link" href="https://arxiv.org/pdf/2606.02835">PDF</a></p>
-
-Core signal: studies when longer reasoning traces help or hurt answer quality. Keywords: reasoning, test-time compute, evaluation, verification.
-
-### 3. Web agent learning
-
-<p class="paper-meta-line"><span>OpenWebRL: Demystifying Online Multi-turn Reinforcement Learning for Visual Web Agents</span> <a class="paper-meta-link" href="https://arxiv.org/abs/2606.02031">2606.02031</a> <a class="paper-meta-link" href="https://arxiv.org/pdf/2606.02031">PDF</a></p>
-
-Core signal: online multi-turn reinforcement learning for visual web agents. Keywords: web agents, reinforcement learning, multimodal, evaluation.
-
-### 4. Embedded edge agent systems
-
-<p class="paper-meta-line"><span>Toward a Modular Architecture for Embedded AI Agent Systems at the Edge</span> <a class="paper-meta-link" href="https://arxiv.org/abs/2606.02862">2606.02862</a> <a class="paper-meta-link" href="https://arxiv.org/pdf/2606.02862">PDF</a></p>
-
-Core signal: modular architecture for agent systems in edge environments. Keywords: edge AI, agents, systems, deployment.
-
-### 5. QKV variants and inference efficiency
-
-<p class="paper-meta-line"><span>Do Transformers Need Three Projections? Systematic Study of QKV Variants</span> <a class="paper-meta-link" href="https://arxiv.org/abs/2606.04032">2606.04032</a> <a class="paper-meta-link" href="https://arxiv.org/pdf/2606.04032">PDF</a></p>
-
-Core signal: systematic study of QKV projection variants in Transformers. Keywords: transformer, QKV, inference, architecture.
-
 ## Other papers worth tracking
-
-- [KForge](https://arxiv.org/abs/2606.02963): cross-platform kernel generation for AI accelerators.
-- [MASER](https://arxiv.org/abs/2606.02463): modality-adaptive routing for embodied 3D spatial intelligence.
-- [Acceptance-Test-Driven Evaluation Protocols for Business-Centric LLM Systems](https://arxiv.org/abs/2606.02755): acceptance-test evaluation for business LLM systems.
-- [EntangleCodec](https://arxiv.org/abs/2606.02739): semantic-acoustic audio tokenization.
-- [Large AI Models in Dental Healthcare](https://arxiv.org/abs/2606.02914): domain-specific healthcare AI systems.
+- [Preference Optimization for Safer Tool Agents](https://arxiv.org/abs/2606.00012): Covers tool use, execution feedback, and reusable capabilities; useful as an agent reliability lead.
+- [Red Teaming Open Source LLM Guardrails](https://arxiv.org/abs/2606.00017): Covers model safety, guardrail routing, risk classification, or governance evaluation; useful as a safety workflow lead.
+- [Synthetic Data Curation for Post Training](https://arxiv.org/abs/2606.00007): Covers a concrete data engineering signal; useful as a follow-up candidate.
+- [Chart Understanding for Vision Language Models](https://arxiv.org/abs/2606.00014): Covers a concrete multimodal models signal; useful as a follow-up candidate.
+- [Agentic 3D Modeling through Code Execution](https://arxiv.org/abs/2606.00015): Covers tool use, execution feedback, and reusable capabilities; useful as an agent reliability lead.
+- [Mechanistic Attribution for Factual Editing](https://arxiv.org/abs/2606.00008): Covers a concrete interpretability signal; useful as a follow-up candidate.
+- [Video Diffusion Models Need Temporal Tests](https://arxiv.org/abs/2606.00010): Covers a concrete video generation signal; useful as a follow-up candidate.
+- [Training Data Deduplication for Foundation Models](https://arxiv.org/abs/2606.00016): Covers tool use, execution feedback, and reusable capabilities; useful as an agent reliability lead.
+- [Low Rank Adapters as Model Memory Probes](https://arxiv.org/abs/2606.00018): Covers a concrete training and post-training signal; useful as a follow-up candidate.
+- [Robotics Policies with Memory Grounded Planning](https://arxiv.org/abs/2606.00006): Covers a concrete robotics and embodied ai signal; useful as a follow-up candidate.
+- [Open Speech Agent Benchmark](https://arxiv.org/abs/2606.00009): Covers tool use, execution feedback, and reusable capabilities; useful as an agent reliability lead.
+- [Serving Quantized Models with Adaptive Batching](https://arxiv.org/abs/2606.00011): Covers inference cost, latency, throughput, and deployment constraints; useful for systems optimization.
 
 ## Reading boundaries
-
-- This restored issue is intentionally lightweight.
-- Briefs are based on titles, abstracts, and public metadata, not full paper review.
-- Code, data, and reproducibility should be verified from the original papers.
+- Automated ranking favors papers with community, code, and applied-engineering signals.
+- Briefs are based on titles, abstracts, and public metadata by default, not full-paper review.
+- External API failures degrade optional signals and are reflected in internal records.

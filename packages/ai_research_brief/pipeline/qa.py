@@ -416,7 +416,9 @@ def _scored_json_ids(rows) -> list[str]:
 
 
 def _check_no_mock_text(text: str, path: Path, publish_date: date, errors: list[str]) -> None:
-    if str(publish_date) != "2026-06-03" and MOCK_IDS_RE.search(text):
+    if str(publish_date) == "2026-06-03":
+        return
+    if MOCK_IDS_RE.search(text):
         errors.append(f"Mock arXiv ID 2606.000xx found outside 2026-06-03 content/source: {path}")
     for pattern in MOCK_VISIBLE:
         if re.search(pattern, text, re.I):

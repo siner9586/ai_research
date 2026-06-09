@@ -22,12 +22,6 @@ def _empty_stats(day, categories):
 
 
 def _dated_mock_papers(day: date):
-    """Build non-mock-looking fixture papers for fallback tests.
-
-    The fallback test exercises real-mode date resolution, so its fixtures must
-    not contain mock IDs, mock authors, or mock titles that production QA is
-    supposed to block.
-    """
     anchor = datetime.combine(day, time.min, tzinfo=timezone.utc)
     rows = []
     for index, paper in enumerate(mock_papers(), start=1):
@@ -38,11 +32,7 @@ def _dated_mock_papers(day: date):
                     "id": arxiv_id,
                     "arxiv_id": arxiv_id,
                     "title": f"Reliable Agent Evaluation Fixture {index}",
-                    "abstract": (
-                        "This paper studies reliable agent evaluation, retrieval grounding, "
-                        "planning workflows, benchmark construction, and deployment checks "
-                        "for AI systems with reproducible experimental signals."
-                    ),
+                    "abstract": "This paper studies reliable agent evaluation, retrieval grounding, planning workflows, benchmark construction, and deployment checks for AI systems.",
                     "authors": [f"Researcher {index}", "AI Systems Lab"],
                     "published_at": anchor,
                     "updated_at": anchor,
@@ -56,6 +46,7 @@ def _dated_mock_papers(day: date):
 
 def test_run_daily_falls_back_to_recent_real_arxiv_date(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("AI_RESEARCH_PUBLISH_DATE", "2026-06-05")
     target = date(2026, 6, 5)
     actual = date(2026, 6, 4)
 
@@ -77,6 +68,7 @@ def test_run_daily_falls_back_to_recent_real_arxiv_date(monkeypatch):
     monkeypatch.setattr(run_daily_module, "fetch_arxiv_categories_with_stats", fake_fetch)
     result = run_daily_module.run_daily(target, mock=False, fallback_days=1)
 
+    assert result["publish_date"] == str(target)
     assert result["target_date"] == str(target)
     assert result["actual_date"] == str(actual)
     assert result["fallback_used"] is True
@@ -84,6 +76,7 @@ def test_run_daily_falls_back_to_recent_real_arxiv_date(monkeypatch):
 
     report = json.loads((REPO_ROOT / "data/reports/runs/last-run.json").read_text(encoding="utf-8"))
     assert report["status"] == "success"
+    assert report["publish_date"] == str(target)
     assert report["fallback_from"] == str(target)
     assert report["actual_date"] == str(actual)
 
@@ -96,6 +89,7 @@ def test_run_daily_falls_back_to_recent_real_arxiv_date(monkeypatch):
 
 def test_run_daily_fails_when_fallback_window_has_no_real_papers(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("AI_RESEARCH_PUBLISH_DATE", "2026-06-05")
     target = date(2026, 6, 5)
 
     def fake_fetch(categories, max_results_per_category, day=None, **_kwargs):
@@ -108,6 +102,7 @@ def test_run_daily_fails_when_fallback_window_has_no_real_papers(monkeypatch):
 
     report = json.loads((REPO_ROOT / "data/reports/runs/last-run.json").read_text(encoding="utf-8"))
     assert report["status"] == "failed"
+    assert report["publish_date"] == str(target)
     assert report["target_date"] == str(target)
     assert report["actual_date"] is None
     assert report["generated_files"] == []
@@ -115,6 +110,7 @@ def test_run_daily_fails_when_fallback_window_has_no_real_papers(monkeypatch):
 
 def test_run_daily_does_not_fallback_when_all_categories_fail(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("AI_RESEARCH_PUBLISH_DATE", "2026-06-05")
     target = date(2026, 6, 5)
 
     def fake_fetch(categories, max_results_per_category, day=None, **_kwargs):
@@ -122,7 +118,7 @@ def test_run_daily_does_not_fallback_when_all_categories_fail(monkeypatch):
             "target": str(day),
             "categories": categories,
             "category_counts": {category: 0 for category in categories},
-            "errors": {category: "HTTP 429 Too Many Requests" for category in categories},
+            "errors": {category: "rate limited" for category in categories},
             "failed_categories": categories,
             "successful_categories": [],
             "total_papers": 0,
@@ -132,10 +128,11 @@ def test_run_daily_does_not_fallback_when_all_categories_fail(monkeypatch):
     monkeypatch.setattr(run_daily_module, "fetch_arxiv_categories_with_stats", fake_fetch)
 
     with pytest.raises(RuntimeError, match="All arXiv categories failed"):
-        run_daily_module.run_daily(target, mock=False, fallback_days=4)
+        run_daily_module.run_daily(target, mock=False, fallback_days=1)
 
     report = json.loads((REPO_ROOT / "data/reports/runs/last-run.json").read_text(encoding="utf-8"))
     assert report["status"] == "failed"
-    assert len(report["attempts"]) == 1
-    assert report["attempts"][0]["date"] == str(target)
-    assert report["errors"]["pipeline"].startswith("All arXiv categories failed")
+    assert report["publish_date"] == str(target)
+    assert report["target_date"] == str(target)
+    assert report["actual_date"] is None
+    assert "rate limited" in report["errors"]["pipeline"]

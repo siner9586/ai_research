@@ -55,6 +55,8 @@ def run_qa(day: date, content_dir: Path, reports_dir: Path, target_date: date | 
     errors: list[str] = []
     checked: list[str] = []
     docs: dict[str, list[tuple[Path, dict, str]]] = {"zh": [], "en": []}
+    repo_root = content_dir.parents[1]
+    allow_mock_fixture = _is_mock_fixture_run(day, repo_root)
 
     for lang in ("zh", "en"):
         pages = sorted((content_dir / lang / "daily").glob(f"{publish_date}-*.md"))
@@ -71,15 +73,14 @@ def run_qa(day: date, content_dir: Path, reports_dir: Path, target_date: date | 
                 briefs.append(path)
             if meta.get("page_type") == "sources" or path.stem.endswith("-sources"):
                 sources.append(path)
-            _check_doc(path, meta, body, day, target_date, publish_date, errors, warnings)
+            _check_doc(path, meta, body, day, target_date, publish_date, errors, warnings, allow_mock_fixture)
         if len(briefs) != 1:
             errors.append(f"Expected exactly one {lang} brief for {publish_date}, found {len(briefs)}")
         if len(sources) != 1:
             errors.append(f"Expected exactly one {lang} source page for {publish_date}, found {len(sources)}")
 
-    repo_root = content_dir.parents[1]
     _check_processed(day, repo_root, checked, errors)
-    _check_candidate_source(day, publish_date, target_date, repo_root, docs, checked, errors)
+    _check_candidate_source(day, publish_date, target_date, repo_root, docs, checked, errors, allow_mock_fixture)
     _check_pairs(docs, errors)
     _check_static(publish_date, repo_root, checked, errors, docs)
     _check_repeat(day, publish_date, repo_root, docs, errors, warnings)
@@ -118,7 +119,7 @@ def _parse_markdown(path: Path, errors: list[str]) -> tuple[dict, str] | None:
     return meta, match.group(2)
 
 
-def _check_doc(path: Path, meta: dict, body: str, day: date, target_date: date, publish_date: date, errors: list[str], warnings: list[str]) -> None:
+def _check_doc(path: Path, meta: dict, body: str, day: date, target_date: date, publish_date: date, errors: list[str], warnings: list[str], allow_mock_fixture: bool = False) -> None:
     required = ["title", "date", "target_date", "actual_date", "lang", "slug", "summary", "tags", "generated_at", "page_type", "candidate_count", "featured_count", "mentions_count"]
     for key in required:
         if meta.get(key) in (None, "", []):
@@ -139,13 +140,9 @@ def _check_doc(path: Path, meta: dict, body: str, day: date, target_date: date, 
     for pattern in BAD_VISIBLE:
         if re.search(pattern, visible, re.I):
             errors.append(f"Deprecated visible wording matched {pattern}: {path}")
-    _check_no_mock_text(visible, path, publish_date, errors)
+    _check_no_mock_text(visible, path, publish_date, errors, allow_mock_fixture=allow_mock_fixture)
     featured_count = int(meta.get("featured_count") or 0)
-    if (
-        meta.get("page_type") == "brief"
-        and featured_count > 0
-        and str(publish_date) != "2026-06-03"
-    ):
+    if meta.get("page_type") == "brief" and featured_count > 0 and not allow_mock_fixture:
         _check_featured_explanations(path, meta, body, errors)
     if not re.search(r"https://arxiv\.org/abs/\d{4}\.\d{4,5}", body):
         warnings.append(f"No arXiv URL found: {path}")
@@ -215,6 +212,7 @@ def _check_candidate_source(
     docs: dict[str, list[tuple[Path, dict, str]]],
     checked: list[str],
     errors: list[str],
+    allow_mock_fixture: bool = False,
 ) -> None:
     processed = repo_root / "data" / "processed" / str(day)
     paths = {
@@ -283,7 +281,7 @@ def _check_candidate_source(
             parsed_ids = _source_selected_ids(body) if meta.get("page_type") == "sources" else _ids(body)
             if parsed_ids != selected_ids:
                 errors.append(f"{path} selected IDs differ from selected_papers.json")
-    _check_no_mock_text(json.dumps(payloads, ensure_ascii=False), paths["scored"], publish_date, errors)
+    _check_no_mock_text(json.dumps(payloads, ensure_ascii=False), paths["scored"], publish_date, errors, allow_mock_fixture=allow_mock_fixture)
 
 
 def _check_pairs(docs: dict[str, list[tuple[Path, dict, str]]], errors: list[str]) -> None:
@@ -419,11 +417,20 @@ def _scored_json_ids(rows) -> list[str]:
     return ids
 
 
-def _check_no_mock_text(text: str, path: Path, publish_date: date, errors: list[str]) -> None:
-    if str(publish_date) == "2026-06-03":
+def _is_mock_fixture_run(day: date, repo_root: Path) -> bool:
+    manifest_path = repo_root / "data" / "processed" / str(day) / "candidate_manifest.json"
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return False
+    return manifest.get("mock") is True
+
+
+def _check_no_mock_text(text: str, path: Path, publish_date: date, errors: list[str], allow_mock_fixture: bool = False) -> None:
+    if allow_mock_fixture:
         return
     if MOCK_IDS_RE.search(text):
-        errors.append(f"Mock arXiv ID 2606.000xx found outside 2026-06-03 content/source: {path}")
+        errors.append(f"Mock arXiv ID 2606.000xx found in non-mock content/source: {path}")
     for pattern in MOCK_VISIBLE:
         if re.search(pattern, text, re.I):
             errors.append(f"Mock fixture text matched {pattern}: {path}")

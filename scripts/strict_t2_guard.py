@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from datetime import date, timedelta
 from pathlib import Path
@@ -23,12 +24,36 @@ BAD_VISIBLE = [
     r"重点" + r"核验",
     r"The abstract" + r" points to",
 ]
+MOCK_VISIBLE = [
+    r"Self Evolving Agents for Tool Use Skills",
+    r"Alice Chen",
+    r"Bob Smith",
+    r"Carol Li",
+    r"Dan Wang",
+    r"Eva Green",
+    r"Frank Moore",
+    r"Grace Kim",
+    r"Henry Liu",
+    r"Ivy Park",
+    r"Jack Sun",
+    r"Kai Zhao",
+    r"Lina Ortiz",
+    r"Mona Singh",
+    r"Nate Brown",
+    r"Olivia Martin",
+    r"Paul Davis",
+    r"Qian Wu",
+    r"Rita Gomez",
+    r"Sam Taylor",
+]
+MOCK_IDS_RE = re.compile(r"\b2606\.000(?:0[1-9]|1[0-8])\b")
 MAX_EMPTY_DAY_LOOKBACK = 7
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate publication/data-date invariants for generated briefs.")
     parser.add_argument("--report", default="data/reports/runs/last-run.json")
+    parser.add_argument("--skip-diff-scope", action="store_true")
     args = parser.parse_args(argv)
 
     errors: list[str] = []
@@ -74,11 +99,16 @@ def main(argv: list[str] | None = None) -> int:
         errors.append("run report must contain a positive total_candidates count")
     if int(report.get("deduped_papers") or 0) <= 0:
         errors.append("run report must contain a positive deduped_papers count")
+    if int(report.get("candidate_count") or 0) <= 0:
+        errors.append("run report must contain a positive candidate_count count")
 
     docs = _check_content(publish_date, target_date, actual_date, errors)
+    _check_candidate_source(report, publish_date, target_date, actual_date, docs, errors)
     _check_processed(actual_date, errors)
     _check_static(publish_date, docs, errors)
     _check_no_future_public_issue(publish_date, errors)
+    if not args.skip_diff_scope:
+        _check_git_diff_scope(publish_date, actual_date, errors)
     return _finish(errors)
 
 
@@ -134,6 +164,7 @@ def _check_doc(path: Path, meta: dict, body: str, lang: str, publish_date: date,
     for pattern in BAD_VISIBLE:
         if re.search(pattern, visible, re.I):
             errors.append(f"Deprecated visible wording matched {pattern}: {path.relative_to(REPO_ROOT)}")
+    _check_no_mock_text(visible, path, publish_date, errors)
 
 
 def _check_pairs(docs: dict[str, dict[str, tuple[Path, dict, str]]], errors: list[str]) -> None:
@@ -161,6 +192,111 @@ def _check_pairs(docs: dict[str, dict[str, tuple[Path, dict, str]]], errors: lis
                 errors.append(f"zh/en metadata mismatch for {key}")
         if _brief_ids(zh[2]) != _brief_ids(en[2]):
             errors.append("zh/en selected arXiv IDs differ")
+
+
+def _check_candidate_source(
+    report: dict,
+    publish_date: date,
+    target_date: date,
+    actual_date: date,
+    docs: dict[str, dict[str, tuple[Path, dict, str]]],
+    errors: list[str],
+) -> None:
+    paths = _source_paths(report, actual_date)
+    papers = _load_json(REPO_ROOT / paths["processed_papers_file"], errors)
+    scored = _load_json(REPO_ROOT / paths["candidate_file"], errors)
+    selected = _load_json(REPO_ROOT / paths["selected_file"], errors)
+    manifest = _load_json(REPO_ROOT / paths["manifest_file"], errors) if paths.get("manifest_file") else None
+    raw = _load_json(REPO_ROOT / paths["raw_candidate_file"], errors)
+
+    if not isinstance(papers, list) or not isinstance(scored, list) or not isinstance(selected, dict):
+        errors.append("candidate source files must be data/processed actual_date papers/scored/selected artifacts")
+        return
+    candidate_ids = _scored_json_ids(scored)
+    paper_ids = _paper_json_ids(papers)
+    raw_ids = _paper_json_ids(raw) if isinstance(raw, list) else []
+    featured_ids = _scored_json_ids(selected.get("featured", []))
+    mention_ids = _scored_json_ids(selected.get("mentions", []))
+    selected_ids = featured_ids + mention_ids
+
+    if not candidate_ids:
+        errors.append(f"candidate_file has no candidate paper IDs: {paths['candidate_file']}")
+    if len(candidate_ids) != len(set(candidate_ids)):
+        errors.append(f"candidate_file contains duplicate IDs: {paths['candidate_file']}")
+    missing_from_candidates = [paper_id for paper_id in selected_ids if paper_id not in set(candidate_ids)]
+    if missing_from_candidates:
+        errors.append(f"selected papers are not from the current candidate_file: {missing_from_candidates}")
+    missing_from_papers = [paper_id for paper_id in candidate_ids if paper_id not in set(paper_ids)]
+    if missing_from_papers:
+        errors.append(f"scored candidates are not from processed papers.json: {missing_from_papers[:10]}")
+    if raw_ids and set(paper_ids) - set(raw_ids):
+        errors.append("processed papers contain IDs not present in raw actual_date papers.json")
+
+    _check_report_value(report, "candidate_count", len(candidate_ids), errors)
+    _check_report_value(report, "featured_count", len(featured_ids), errors)
+    _check_report_value(report, "mentions_count", len(mention_ids), errors)
+    if report.get("selected_ids") and list(report.get("selected_ids") or []) != selected_ids:
+        errors.append("run report selected_ids do not match selected_papers.json")
+    if report.get("candidate_ids") and list(report.get("candidate_ids") or []) != candidate_ids:
+        errors.append("run report candidate_ids do not match scored_papers.json")
+
+    if isinstance(manifest, dict):
+        for key, expected in {
+            "publish_date": str(publish_date),
+            "target_date": str(target_date),
+            "actual_date": str(actual_date),
+            "candidate_count": len(candidate_ids),
+            "featured_count": len(featured_ids),
+            "mentions_count": len(mention_ids),
+        }.items():
+            if str(manifest.get(key)) != str(expected):
+                errors.append(f"candidate_manifest {key} mismatch: {manifest.get(key)} != {expected}")
+        for key, expected_ids in {
+            "candidate_ids": candidate_ids,
+            "featured_ids": featured_ids,
+            "mention_ids": mention_ids,
+            "selected_ids": selected_ids,
+        }.items():
+            if list(manifest.get(key) or []) != expected_ids:
+                errors.append(f"candidate_manifest {key} mismatch with candidate source files")
+
+    for lang in ("zh", "en"):
+        brief = docs.get(lang, {}).get("brief")
+        source = docs.get(lang, {}).get("sources")
+        for doc in (brief, source):
+            if not doc:
+                continue
+            path, meta, body = doc
+            if int(meta.get("candidate_count") or -1) != len(candidate_ids):
+                errors.append(f"{path.relative_to(REPO_ROOT)} candidate_count does not match current candidate_file")
+            if int(meta.get("featured_count") or -1) != len(featured_ids):
+                errors.append(f"{path.relative_to(REPO_ROOT)} featured_count does not match selected_papers.json")
+            if int(meta.get("mentions_count") or -1) != len(mention_ids):
+                errors.append(f"{path.relative_to(REPO_ROOT)} mentions_count does not match selected_papers.json")
+            parsed_ids = _source_selected_ids(body) if meta.get("page_type") == "sources" else _brief_ids(body)
+            if parsed_ids != selected_ids:
+                errors.append(f"{path.relative_to(REPO_ROOT)} selected IDs do not match selected_papers.json")
+            extra_ids = [paper_id for paper_id in parsed_ids if paper_id not in set(selected_ids)]
+            if extra_ids:
+                errors.append(f"{path.relative_to(REPO_ROOT)} contains IDs outside current selected_papers.json: {extra_ids}")
+
+    _check_no_mock_text(json.dumps({"papers": papers, "scored": scored, "selected": selected}, ensure_ascii=False), REPO_ROOT / paths["candidate_file"], publish_date, errors)
+
+
+def _check_report_value(report: dict, key: str, expected: int, errors: list[str]) -> None:
+    if int(report.get(key) or -1) != expected:
+        errors.append(f"run report {key} mismatch: {report.get(key)} != {expected}")
+
+
+def _source_paths(report: dict, actual_date: date) -> dict[str, str]:
+    prefix = f"data/processed/{actual_date}"
+    return {
+        "raw_candidate_file": str(report.get("raw_candidate_file") or f"data/raw/{actual_date}/papers.json"),
+        "processed_papers_file": str(report.get("processed_papers_file") or f"{prefix}/papers.json"),
+        "candidate_file": str(report.get("candidate_file") or f"{prefix}/scored_papers.json"),
+        "selected_file": str(report.get("selected_file") or f"{prefix}/selected_papers.json"),
+        "manifest_file": str(report.get("candidate_manifest") or f"{prefix}/candidate_manifest.json"),
+    }
 
 
 def _check_processed(actual_date: date, errors: list[str]) -> None:
@@ -235,6 +371,34 @@ def _check_no_future_public_issue(publish_date: date, errors: list[str]) -> None
                 errors.append(f"Future public brief must not be committed before the active publish date {publish_date}: {path.relative_to(REPO_ROOT)} has date {value}")
 
 
+def _check_git_diff_scope(publish_date: date, actual_date: date, errors: list[str]) -> None:
+    changed: set[str] = set()
+    for args in (["git", "diff", "--name-only"], ["git", "diff", "--name-only", "--cached"]):
+        try:
+            proc = subprocess.run(args, cwd=REPO_ROOT, check=False, capture_output=True, text=True)
+        except Exception:
+            return
+        if proc.returncode != 0:
+            return
+        changed.update(line.strip() for line in proc.stdout.splitlines() if line.strip())
+    disallowed = sorted(path for path in changed if not _is_allowed_generated_path(path, publish_date, actual_date))
+    if disallowed:
+        errors.append("Generated commit scope contains disallowed non-current files: " + ", ".join(disallowed))
+
+
+def _is_allowed_generated_path(path: str, publish_date: date, actual_date: date) -> bool:
+    if path.startswith("apps/web/public/"):
+        return True
+    if path in {f"data/reports/runs/{publish_date}.json", "data/reports/runs/last-run.json", f"data/reports/qa/{publish_date}.json"}:
+        return True
+    if path.startswith(f"data/raw/{actual_date}/") or path.startswith(f"data/processed/{actual_date}/"):
+        return True
+    for lang in ("zh", "en"):
+        if path.startswith(f"data/content/{lang}/daily/{publish_date}-") and path.endswith(".md"):
+            return True
+    return False
+
+
 def _parse_markdown(path: Path, errors: list[str]) -> tuple[dict, str] | None:
     text = path.read_text(encoding="utf-8")
     match = FRONTMATTER_RE.match(text)
@@ -266,6 +430,34 @@ def _source_selected_ids(body: str) -> list[str]:
     if end:
         body = body[: end.start()]
     return _brief_ids(body)
+
+
+def _paper_json_ids(rows) -> list[str]:
+    if not isinstance(rows, list):
+        return []
+    return [str(row.get("arxiv_id") or row.get("id") or "") for row in rows if isinstance(row, dict) and (row.get("arxiv_id") or row.get("id"))]
+
+
+def _scored_json_ids(rows) -> list[str]:
+    if not isinstance(rows, list):
+        return []
+    ids: list[str] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        paper = row.get("paper") if isinstance(row.get("paper"), dict) else {}
+        arxiv_id = paper.get("arxiv_id") or paper.get("id") or row.get("arxiv_id") or row.get("id")
+        if arxiv_id:
+            ids.append(str(arxiv_id))
+    return ids
+
+
+def _check_no_mock_text(text: str, path: Path, publish_date: date, errors: list[str]) -> None:
+    if str(publish_date) != "2026-06-03" and MOCK_IDS_RE.search(text):
+        errors.append(f"Mock arXiv ID 2606.000xx found outside 2026-06-03 content/source: {path.relative_to(REPO_ROOT)}")
+    for pattern in MOCK_VISIBLE:
+        if re.search(pattern, text, re.I):
+            errors.append(f"Mock fixture text matched {pattern}: {path.relative_to(REPO_ROOT)}")
 
 
 def _first_future_slug(text: str, publish_date: date) -> str | None:

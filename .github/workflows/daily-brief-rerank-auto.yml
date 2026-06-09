@@ -6,11 +6,11 @@ on:
   workflow_dispatch:
     inputs:
       delay_days:
-        description: "Calendar T+N source target. Default keeps T+2."
+        description: "Primary source delay. 2 means first try publish_date-2."
         required: false
         default: "2"
       fallback_days:
-        description: "Look back when the calendar T+2 arXiv source day is empty."
+        description: "Extra lookback count after publish_date-2. 2 means try publish_date-2, then -3, then -4."
         required: false
         default: "2"
 
@@ -58,10 +58,15 @@ jobs:
           echo "production_mode=real"
           echo "rerank_same_source_date_allowed=true"
           echo "reuse_existing_source=0"
-          echo "delay_days=${DELAY_DAYS}"
-          echo "fallback_days=${FALLBACK_DAYS}"
+          echo "primary_source_delay_days=${DELAY_DAYS}"
+          echo "extra_empty_day_lookback_count=${FALLBACK_DAYS}"
+          echo "source_window=publish_date-2,publish_date-3,publish_date-4"
+          if [ "${DELAY_DAYS}" -ne 2 ]; then
+            echo "::error::delay_days must remain 2 for the production T+2 rule"
+            exit 1
+          fi
           if [ "${FALLBACK_DAYS}" -gt 2 ]; then
-            echo "::error::fallback_days must not exceed 2 for production daily publish"
+            echo "::error::fallback_days is an extra lookback count and must not exceed 2; this still covers publish_date-2, publish_date-3, and publish_date-4"
             exit 1
           fi
           ai-brief run-daily --delay-days "${DELAY_DAYS}" --fallback-days "${FALLBACK_DAYS}" | tee daily-brief-rerank-auto-result.json
@@ -74,7 +79,12 @@ jobs:
               'publish_date': report.get('publish_date'),
               'target_date': report.get('target_date'),
               'actual_date': report.get('actual_date'),
-              'fallback_days': report.get('fallback_days'),
+              'source_window': [
+                  'publish_date-2',
+                  'publish_date-3 if publish_date-2 is empty',
+                  'publish_date-4 if publish_date-3 is also empty',
+              ],
+              'fallback_days_extra_lookback_count': report.get('fallback_days'),
               'fallback_used': report.get('fallback_used'),
               'fallback_from': report.get('fallback_from'),
               'total_candidates': report.get('total_candidates'),

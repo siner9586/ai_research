@@ -25,6 +25,8 @@ BAD_VISIBLE = [
 ]
 MOCK_VISIBLE = [
     r"Self Evolving Agents for Tool Use Skills",
+]
+MOCK_FIXTURE_AUTHOR_NAMES = [
     r"Alice Chen",
     r"Bob Smith",
     r"Carol Li",
@@ -45,6 +47,7 @@ MOCK_VISIBLE = [
     r"Rita Gomez",
     r"Sam Taylor",
 ]
+MOCK_AUTHOR_CO_OCCURRENCE_THRESHOLD = 3
 MOCK_IDS_RE = re.compile(r"\b2606\.000(?:0[1-9]|1[0-8])\b")
 
 
@@ -434,6 +437,10 @@ def _check_no_mock_text(text: str, path: Path, publish_date: date, errors: list[
     for pattern in MOCK_VISIBLE:
         if re.search(pattern, text, re.I):
             errors.append(f"Mock fixture text matched {pattern}: {path}")
+    matched_authors = [pattern for pattern in MOCK_FIXTURE_AUTHOR_NAMES if re.search(pattern, text, re.I)]
+    if len(matched_authors) >= MOCK_AUTHOR_CO_OCCURRENCE_THRESHOLD:
+        authors = ", ".join(matched_authors[:6])
+        errors.append(f"Mock fixture author cluster matched {len(matched_authors)} names ({authors}): {path}")
 
 
 def _strip(text: str) -> str:

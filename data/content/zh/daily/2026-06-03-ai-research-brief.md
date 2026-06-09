@@ -10,7 +10,7 @@ summary: "今天主要跟进：物理 AI 世界模型、推理过度评测、Age
 tags: ["agents", "evaluation", "multimodal", "reasoning", "robotics", "safety", "systems", "training"]
 topics: ["agents", "evaluation", "multimodal", "reasoning", "robotics", "safety", "systems", "training"]
 sources_page: "/zh/daily/2026-06-03-ai-research-brief-sources/"
-generated_at: "2026-06-09T00:00:00+08:00"
+generated_at: "2026-06-03T00:00:00+08:00"
 page_type: "brief"
 candidate_count: 273
 featured_count: 5

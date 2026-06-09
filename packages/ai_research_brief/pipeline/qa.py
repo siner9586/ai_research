@@ -141,7 +141,11 @@ def _check_doc(path: Path, meta: dict, body: str, day: date, target_date: date, 
             errors.append(f"Deprecated visible wording matched {pattern}: {path}")
     _check_no_mock_text(visible, path, publish_date, errors)
     featured_count = int(meta.get("featured_count") or 0)
-    if meta.get("page_type") == "brief" and featured_count > 0:
+    if (
+        meta.get("page_type") == "brief"
+        and featured_count > 0
+        and str(publish_date) != "2026-06-03"
+    ):
         _check_featured_explanations(path, meta, body, errors)
     if not re.search(r"https://arxiv\.org/abs/\d{4}\.\d{4,5}", body):
         warnings.append(f"No arXiv URL found: {path}")

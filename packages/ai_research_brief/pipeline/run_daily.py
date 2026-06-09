@@ -58,13 +58,32 @@ def _fetch_stage_with_stats(day: date, mock: bool = False, fail_on_empty: bool =
             "request_count": 0,
         }
     else:
-        raw_papers, stats = fetch_arxiv_categories_with_stats(
-            categories,
-            int(pipeline.get("max_results_per_category", 80)),
-            day=day,
-            request_delay_seconds=float(pipeline.get("arxiv_request_delay_seconds", 3.5)),
-            max_total_results=int(pipeline.get("max_total_results", 0)) or None,
-        )
+        cached_papers = _read_existing_processed_papers(day) if os.environ.get("AI_RESEARCH_REUSE_EXISTING_SOURCE") == "1" else None
+        if cached_papers:
+            raw_papers = cached_papers
+            stats = {
+                "target": str(day),
+                "categories": categories,
+                "category_counts": _count_by_category(raw_papers, categories),
+                "errors": {},
+                "failed_categories": [],
+                "successful_categories": categories,
+                "total_papers": len(raw_papers),
+                "all_categories_failed": False,
+                "fetch_mode": "existing_processed",
+                "page_stats": {},
+                "page_count": 0,
+                "request_count": 0,
+                "partial_fetch_errors": {},
+            }
+        else:
+            raw_papers, stats = fetch_arxiv_categories_with_stats(
+                categories,
+                int(pipeline.get("max_results_per_category", 80)),
+                day=day,
+                request_delay_seconds=float(pipeline.get("arxiv_request_delay_seconds", 3.5)),
+                max_total_results=int(pipeline.get("max_total_results", 0)) or None,
+            )
     papers = dedupe_papers(normalize_papers(raw_papers))
     stats["total_candidates"] = len(raw_papers)
     stats["deduped_papers"] = len(papers)
@@ -304,6 +323,22 @@ def run_daily(
         _write_run_report(run_report)
         _log_run_summary("failed", run_report)
         raise
+
+
+def _read_existing_processed_papers(day: date) -> list[Paper] | None:
+    path = REPO_ROOT / "data" / "processed" / str(day) / "papers.json"
+    if not path.exists():
+        return None
+    try:
+        rows = json.loads(path.read_text(encoding="utf-8"))
+        papers = [Paper(**row) for row in rows]
+    except Exception as exc:
+        logger.warning("Could not reuse existing processed source papers for %s: %s", day, exc)
+        return None
+    if not papers:
+        return None
+    logger.info("Reusing existing processed source papers for %s: %s papers", day, len(papers))
+    return papers
 
 
 def _processed_dir(day: date) -> Path:

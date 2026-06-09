@@ -46,7 +46,7 @@ jobs:
         run: |
           git checkout -- data apps/web/public || true
           git clean -fd data/raw/2026-06-03 data/processed/2026-06-03 data/reports data/content/zh/daily/2026-06-03-* data/content/en/daily/2026-06-03-* || true
-          rm -rf data/raw/${{ github.event.inputs.source_date }} data/processed/${{ github.event.inputs.source_date }}
+          # Preserve committed source_date candidates; manual backfill must reuse the selected source file.
           rm -f data/content/zh/daily/${{ github.event.inputs.publish_date }}-*.md
           rm -f data/content/en/daily/${{ github.event.inputs.publish_date }}-*.md
           rm -f data/reports/qa/${{ github.event.inputs.publish_date }}.json data/reports/runs/${{ github.event.inputs.publish_date }}.json
@@ -68,6 +68,7 @@ jobs:
       - name: Generate brief from source date
         env:
           AI_RESEARCH_PUBLISH_DATE: ${{ github.event.inputs.publish_date }}
+          AI_RESEARCH_REUSE_EXISTING_SOURCE: "1"
           LLM_PROVIDER: mock
         run: |
           ai-brief run-daily --date "${{ github.event.inputs.source_date }}" --fallback-days 0 | tee manual-source-backfill-result.json

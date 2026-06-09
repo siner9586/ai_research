@@ -61,9 +61,12 @@ jobs:
           publish = date.fromisoformat('${{ github.event.inputs.publish_date }}')
           source = date.fromisoformat('${{ github.event.inputs.source_date }}')
           calendar_t2 = publish - timedelta(days=2)
+          delta = (calendar_t2 - source).days
           if source > calendar_t2:
               raise SystemExit(f"source_date cannot be after calendar T+2: source={source} calendar_t2={calendar_t2}")
-          print(f"validated_source_override publish_date={publish} calendar_t2_date={calendar_t2} source_date={source} fallback_days=0 fallback_used=false")
+          if delta > 4:
+              raise SystemExit(f"source_date is outside maximum fallback window: publish={publish} calendar_t2={calendar_t2} source={source} max_fallback_days=4")
+          print(f"validated_source_override publish_date={publish} calendar_t2_date={calendar_t2} source_date={source} fallback_delta={delta} max_fallback_days=4")
           PY
 
       - name: Inspect committed source candidates
@@ -137,7 +140,7 @@ jobs:
           if report.get('actual_date') != source:
               raise SystemExit('actual_date/source_date mismatch')
           if report.get('fallback_days') != 0 or report.get('fallback_used'):
-              raise SystemExit('fallback must remain disabled')
+              raise SystemExit('manual backfill run itself must keep fallback disabled; source_date already encodes the selected source')
           if report.get('mock'):
               raise SystemExit('manual production backfill must not be mock')
           if int(report.get('total_candidates') or 0) <= 0:
@@ -153,6 +156,9 @@ jobs:
           if report.get('errors'):
               raise SystemExit('run report contains errors')
           PY
+
+      - name: Run candidate lineage guard
+        run: python scripts/candidate_lineage_guard.py --mode manual --max-fallback-days 4 --allow-reuse-existing-source
 
       - name: Build Astro site
         run: |

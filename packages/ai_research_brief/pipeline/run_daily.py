@@ -71,12 +71,15 @@ def _fetch_stage_with_stats(day: date, mock: bool = False, fail_on_empty: bool =
                 "total_papers": len(raw_papers),
                 "all_categories_failed": False,
                 "fetch_mode": "existing_processed",
+                "reuse_existing_source": True,
                 "page_stats": {},
                 "page_count": 0,
                 "request_count": 0,
                 "partial_fetch_errors": {},
             }
         else:
+            if os.environ.get("AI_RESEARCH_REUSE_EXISTING_SOURCE") == "1":
+                logger.warning("AI_RESEARCH_REUSE_EXISTING_SOURCE=1 but no complete processed papers file was reusable for %s; fallback refetch is allowed", day)
             raw_papers, stats = fetch_arxiv_categories_with_stats(
                 categories,
                 int(pipeline.get("max_results_per_category", 80)),
@@ -84,6 +87,7 @@ def _fetch_stage_with_stats(day: date, mock: bool = False, fail_on_empty: bool =
                 request_delay_seconds=float(pipeline.get("arxiv_request_delay_seconds", 3.5)),
                 max_total_results=int(pipeline.get("max_total_results", 0)) or None,
             )
+            stats["reuse_existing_source"] = False
     papers = dedupe_papers(normalize_papers(raw_papers))
     stats["total_candidates"] = len(raw_papers)
     stats["deduped_papers"] = len(papers)
@@ -185,7 +189,8 @@ def qa_stage(day: date, allow_warnings: bool = False, target_date: date | None =
         publish_date=publish_date,
     )
     if report.errors:
-        raise RuntimeError(f"QA failed for data date {day}: {len(report.errors)} errors, {len(report.warnings)} warnings")
+        detail = "\n".join(f"- {err}" for err in report.errors[:10])
+        raise RuntimeError(f"QA failed for data date {day}: {len(report.errors)} errors, {len(report.warnings)} warnings\n{detail}")
     return report
 
 
@@ -203,6 +208,9 @@ def run_daily(
     try:
         actual_day, papers, fetch_stats, attempts = _resolve_fetch_day(day, mock=mock, fallback_days=fallback_days)
         fallback_from = day if actual_day != day else None
+        reuse_existing_source = bool(fetch_stats.get("reuse_existing_source") and _has_existing_selection(actual_day))
+        if reuse_existing_source:
+            fetch_stats["fetch_mode"] = "existing_processed"
         run_report.update({
             "actual_date": str(actual_day),
             "fallback_used": actual_day != day,
@@ -214,6 +222,7 @@ def run_daily(
             "total_candidates": fetch_stats.get("total_candidates", fetch_stats.get("total_papers", 0)),
             "deduped_papers": fetch_stats.get("deduped_papers", len(papers)),
             "fetch_mode": fetch_stats.get("fetch_mode"),
+            "reuse_existing_source": reuse_existing_source,
             "page_count": fetch_stats.get("page_count", 0),
             "request_count": fetch_stats.get("request_count", 0),
             "page_stats": fetch_stats.get("page_stats", {}),
@@ -222,8 +231,17 @@ def run_daily(
         })
         _log_run_summary("fetch", run_report)
 
-        enrich_stage(actual_day, mock=mock)
-        scored, featured, mentions = score_stage(actual_day)
+        if reuse_existing_source:
+            logger.info("Reusing committed scored and selected source candidates for %s", actual_day)
+            scored = _read_scored(actual_day)
+            selected = _read_selected(actual_day)
+            featured = selected["featured"]
+            mentions = selected["mentions"]
+            guard_summary = _read_optional_json(_processed_dir(actual_day) / "repeat_guard_summary.json", {})
+        else:
+            enrich_stage(actual_day, mock=mock)
+            scored, featured, mentions = score_stage(actual_day)
+            guard_summary = _read_optional_json(_processed_dir(actual_day) / "repeat_guard_summary.json", {})
         manifest = _write_candidate_manifest(
             publish_date=publish_date,
             target_date=day,
@@ -236,7 +254,6 @@ def run_daily(
             featured=featured,
             mentions=mentions,
         )
-        guard_summary = _read_optional_json(_processed_dir(actual_day) / "repeat_guard_summary.json", {})
         generated, slugs = generate_stage(actual_day, target_date=day, fallback_from=fallback_from, publish_date=publish_date)
         static_files = build_static_stage()
 
@@ -288,6 +305,7 @@ def run_daily(
             "candidate_file": run_report["candidate_file"],
             "selected_file": run_report["selected_file"],
             "fetch_mode": run_report["fetch_mode"],
+            "reuse_existing_source": run_report.get("reuse_existing_source", False),
             "page_count": run_report["page_count"],
             "request_count": run_report["request_count"],
             "page_stats": run_report["page_stats"],
@@ -341,6 +359,25 @@ def _read_existing_processed_papers(day: date) -> list[Paper] | None:
     return papers
 
 
+def _has_existing_selection(day: date) -> bool:
+    paths = _candidate_source_paths(day)
+    scored = REPO_ROOT / paths["candidate_file"]
+    selected = REPO_ROOT / paths["selected_file"]
+    if not scored.exists() or not selected.exists():
+        return False
+    try:
+        scored_rows = json.loads(scored.read_text(encoding="utf-8"))
+        selected_rows = json.loads(selected.read_text(encoding="utf-8"))
+    except Exception as exc:
+        logger.warning("Could not reuse existing scored/selected candidates for %s: %s", day, exc)
+        return False
+    if not isinstance(scored_rows, list) or not scored_rows:
+        return False
+    if not isinstance(selected_rows, dict):
+        return False
+    return bool(selected_rows.get("featured") or selected_rows.get("mentions"))
+
+
 def _processed_dir(day: date) -> Path:
     path = REPO_ROOT / "data" / "processed" / str(day)
     path.mkdir(parents=True, exist_ok=True)
@@ -390,6 +427,7 @@ def _resolve_fetch_day(day: date, mock: bool, fallback_days: int) -> tuple[date,
                 "total_candidates": 0,
                 "deduped_papers": 0,
                 "fetch_mode": None,
+                "reuse_existing_source": False,
                 "page_count": 0,
                 "request_count": 0,
                 "partial_fetch_errors": {},
@@ -452,6 +490,7 @@ def _base_run_report(day: date, publish_date: date, mock: bool, fallback_days: i
         "processed_papers_file": None,
         "selected_file": None,
         "fetch_mode": None,
+        "reuse_existing_source": False,
         "page_count": 0,
         "request_count": 0,
         "page_stats": {},
@@ -499,6 +538,7 @@ def _write_candidate_manifest(
         "fallback_from": str(fallback_from) if fallback_from else None,
         "mock": mock,
         "fetch_mode": fetch_stats.get("fetch_mode"),
+        "reuse_existing_source": fetch_stats.get("reuse_existing_source", False),
         "candidate_count": len(scored),
         "raw_candidate_count": len(papers),
         "featured_count": len(featured),
@@ -581,6 +621,7 @@ def _attempt_summary(day: date, stats: dict, error: str | None = None) -> dict:
         "total_candidates": stats.get("total_candidates", stats.get("total_papers", 0)),
         "deduped_papers": stats.get("deduped_papers", 0),
         "fetch_mode": stats.get("fetch_mode"),
+        "reuse_existing_source": stats.get("reuse_existing_source", False),
         "page_count": stats.get("page_count", 0),
         "request_count": stats.get("request_count", 0),
         "page_stats": stats.get("page_stats", {}),
@@ -593,6 +634,8 @@ def _fetch_warnings(stats: dict, target_day: date, actual_day: date) -> list[str
     warnings: list[str] = []
     if actual_day != target_day:
         warnings.append(f"Fallback used internally: target_date={target_day}, actual_date={actual_day}")
+    if stats.get("reuse_existing_source"):
+        warnings.append(f"Reused committed source candidates for actual_date={actual_day}")
     partial_errors = stats.get("partial_fetch_errors") or {}
     if partial_errors:
         warnings.append("Partial fetch fallback used for categories: " + ", ".join(sorted(partial_errors)))

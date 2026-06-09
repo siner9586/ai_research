@@ -1,16 +1,16 @@
 ---
 title: "Make agents use tools and reusable skills more reliably, Improve model reasoning, planning, and verification, Strengthen multimodal understanding of charts, documents, and visual evidence"
 date: "2026-06-09"
-target_date: "2026-06-07"
+target_date: "2026-06-05"
 actual_date: "2026-06-05"
-fallback_from: "2026-06-07"
+fallback_from: ""
 lang: "en"
 slug: "2026-06-09-beyond-waypoints-a-trajectory-centric-waypointing-paradigm"
 summary: "Today tracks: make agents use tools and reusable skills more reliably, improve model reasoning, planning, and verification, strengthen multimodal understanding of charts, documents, and visual evidence."
 tags: ["agents", "code", "evaluation", "interpretability", "robotics", "speech-audio", "training", "vision-generation"]
 topics: ["agents", "code", "evaluation", "interpretability", "robotics", "speech-audio", "training", "vision-generation"]
 sources_page: "/en/daily/2026-06-09-beyond-waypoints-a-trajectory-centric-waypointing-paradigm-sources/"
-generated_at: "2026-06-09T00:16:55.932051+00:00"
+generated_at: "2026-06-09T07:15:36.461544+00:00"
 page_type: "brief"
 candidate_count: 344
 featured_count: 6

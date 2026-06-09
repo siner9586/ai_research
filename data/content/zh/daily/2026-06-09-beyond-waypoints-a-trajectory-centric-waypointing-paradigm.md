@@ -1,16 +1,16 @@
 ---
 title: "让 Agent 更可靠地调用工具和复用技能、提升模型推理、规划和验证能力、增强多模态模型理解图表和文档的能力"
 date: "2026-06-09"
-target_date: "2026-06-07"
+target_date: "2026-06-05"
 actual_date: "2026-06-05"
-fallback_from: "2026-06-07"
+fallback_from: ""
 lang: "zh"
 slug: "2026-06-09-beyond-waypoints-a-trajectory-centric-waypointing-paradigm"
 summary: "今天主要跟进：让 Agent 更可靠地调用工具和复用技能、提升模型推理、规划和验证能力、增强多模态模型理解图表和文档的能力。"
 tags: ["agents", "code", "evaluation", "interpretability", "robotics", "speech-audio", "training", "vision-generation"]
 topics: ["agents", "code", "evaluation", "interpretability", "robotics", "speech-audio", "training", "vision-generation"]
 sources_page: "/zh/daily/2026-06-09-beyond-waypoints-a-trajectory-centric-waypointing-paradigm-sources/"
-generated_at: "2026-06-09T00:16:55.465349+00:00"
+generated_at: "2026-06-09T07:15:35.923345+00:00"
 page_type: "brief"
 candidate_count: 344
 featured_count: 6

@@ -168,9 +168,22 @@ jobs:
           git add data apps/web/public
           git status --short data apps/web/public || true
           if git diff --cached --quiet; then
-            echo "No generated changes to commit."
+            echo "No generated changes to commit. Deploying current main anyway."
           else
             git diff --cached --stat
             git commit -m "chore: backfill ${{ github.event.inputs.publish_date }} brief from source ${{ github.event.inputs.source_date }}"
             git push origin HEAD:main
           fi
+          echo "DEPLOY_REF=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Trigger Cloudflare Pages deploy
+        env:
+          CLOUDFLARE_PAGES_DEPLOY_HOOK: ${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_PAGES_DEPLOY_HOOK:-}" ]; then
+            echo "::error::CLOUDFLARE_PAGES_DEPLOY_HOOK is required so a successful content backfill cannot leave production stale. Add this repository secret from Cloudflare Pages > Deploy hooks."
+            exit 1
+          fi
+          curl -fsSL -X POST "$CLOUDFLARE_PAGES_DEPLOY_HOOK"
+          echo "deploy_hook_status=triggered ref=${DEPLOY_REF:-unknown}"

@@ -29,6 +29,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Sync latest main before generation
+        run: git pull --ff-only origin main
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -43,13 +46,10 @@ jobs:
           pip install -r requirements.txt -e .
 
       - name: Run tests before generation
-        env:
-          AI_RESEARCH_PUBLISH_DATE: "2026-06-03"
         run: pytest -q
 
       - name: Generate reranked real daily brief
         env:
-          LLM_PROVIDER: mock
           DELAY_DAYS: ${{ github.event.inputs.delay_days || '2' }}
           FALLBACK_DAYS: ${{ github.event.inputs.fallback_days || '4' }}
         run: |
@@ -77,10 +77,14 @@ jobs:
               'mentions': report.get('mentions'),
               'qa_passed': report.get('qa_passed'),
               'excluded_recent_duplicates_count': report.get('excluded_recent_duplicates_count'),
+              'fetch_mode': report.get('fetch_mode'),
+              'request_count': report.get('request_count'),
               'errors': report.get('errors'),
           }, ensure_ascii=False))
           if report.get('status') != 'success':
               raise SystemExit('run report is not successful')
+          if report.get('mock'):
+              raise SystemExit('production run must not be mock')
           if int(report.get('total_candidates') or 0) <= 0:
               raise SystemExit('no candidates fetched')
           if int(report.get('deduped_papers') or 0) <= 0:
@@ -97,6 +101,47 @@ jobs:
           cd apps/web
           npm install
           npm run build
+
+      - name: Prevent stale checkout from overwriting existing issues
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          if ! git diff --quiet HEAD origin/main; then
+            echo "main branch changed while this run was executing; aborting to avoid overwriting historical briefs. Re-run the workflow from the latest main."
+            exit 1
+          fi
+          python - <<'PY'
+          import json, subprocess, sys
+          from pathlib import Path
+          report = json.loads(Path('data/reports/runs/last-run.json').read_text())
+          publish = str(report['publish_date'])
+          actual = str(report['actual_date'])
+          allowed_prefixes = (
+              f'data/content/zh/daily/{publish}-',
+              f'data/content/en/daily/{publish}-',
+              f'data/reports/runs/{publish}.json',
+              f'data/reports/qa/{publish}.json',
+              'data/reports/runs/last-run.json',
+              f'data/raw/{actual}/',
+              f'data/processed/{actual}/',
+              'apps/web/public/',
+          )
+          changed = subprocess.check_output(['git', 'status', '--porcelain'], text=True).splitlines()
+          bad = []
+          for line in changed:
+              path = line[3:]
+              if path.startswith('?? '):
+                  path = path[3:]
+              if not path:
+                  continue
+              if not path.startswith(allowed_prefixes):
+                  bad.append(path)
+          if bad:
+              print('Refusing to commit changes outside the current publish scope:')
+              print('\n'.join(bad))
+              sys.exit(1)
+          print(f'change_scope_guard=passed publish_date={publish} actual_date={actual}')
+          PY
 
       - name: Commit and push generated content
         run: |
@@ -116,7 +161,6 @@ jobs:
           print(f"chore: publish reranked daily AI brief {report.get('publish_date')}")
           PY
             git commit -F /tmp/brief-commit-message.txt
-            git pull --rebase origin main
             git push origin HEAD:main
             echo "commit_sha=$(git rev-parse HEAD)"
             echo "push_status=success"

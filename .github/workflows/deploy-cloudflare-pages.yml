@@ -1,0 +1,36 @@
+name: Deploy Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "data/**"
+      - "apps/web/**"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-pages-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Cloudflare Pages deploy hook
+        env:
+          CLOUDFLARE_PAGES_DEPLOY_HOOK_SECRET: ${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
+          CLOUDFLARE_PAGES_DEPLOY_HOOK_VAR: ${{ vars.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
+        run: |
+          set -euo pipefail
+          DEPLOY_HOOK="${CLOUDFLARE_PAGES_DEPLOY_HOOK_SECRET:-${CLOUDFLARE_PAGES_DEPLOY_HOOK_VAR:-}}"
+          if [ -z "$DEPLOY_HOOK" ]; then
+            echo "::error::CLOUDFLARE_PAGES_DEPLOY_HOOK must be configured as a repository secret or repository variable."
+            exit 1
+          fi
+          curl -fsSL -X POST "$DEPLOY_HOOK"
+          echo "deploy_hook_status=triggered ref=${GITHUB_SHA}"

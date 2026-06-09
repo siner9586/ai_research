@@ -21,7 +21,7 @@ mentions_count: 10
 
 ## What is worth tracking today
 
-This is an independent restored historical issue based on the real 2026-06-01 arXiv candidate pool. It does not call, reuse, or depend on the 2026-06-09 latest issue content.
+This is an independent restored historical issue based on the real 2026-06-01 arXiv candidate pool. It keeps the lightweight structure: featured papers, other papers worth tracking, and reading boundaries.
 
 ## Featured papers: core problem, method signal, and keywords
 

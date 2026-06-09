@@ -178,12 +178,14 @@ jobs:
 
       - name: Trigger Cloudflare Pages deploy
         env:
-          CLOUDFLARE_PAGES_DEPLOY_HOOK: ${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
+          CLOUDFLARE_PAGES_DEPLOY_HOOK_SECRET: ${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
+          CLOUDFLARE_PAGES_DEPLOY_HOOK_VAR: ${{ vars.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
         run: |
           set -euo pipefail
-          if [ -z "${CLOUDFLARE_PAGES_DEPLOY_HOOK:-}" ]; then
-            echo "::error::CLOUDFLARE_PAGES_DEPLOY_HOOK is required so a successful content backfill cannot leave production stale. Add this repository secret from Cloudflare Pages > Deploy hooks."
+          DEPLOY_HOOK="${CLOUDFLARE_PAGES_DEPLOY_HOOK_SECRET:-${CLOUDFLARE_PAGES_DEPLOY_HOOK_VAR:-}}"
+          if [ -z "$DEPLOY_HOOK" ]; then
+            echo "::error::CLOUDFLARE_PAGES_DEPLOY_HOOK is required as a repository secret or variable so a successful content backfill cannot leave production stale."
             exit 1
           fi
-          curl -fsSL -X POST "$CLOUDFLARE_PAGES_DEPLOY_HOOK"
+          curl -fsSL -X POST "$DEPLOY_HOOK"
           echo "deploy_hook_status=triggered ref=${DEPLOY_REF:-unknown}"

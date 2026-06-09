@@ -10,7 +10,7 @@ summary: "内部生成元数据：本期候选论文 344 篇。"
 tags: ["internal"]
 topics: ["internal"]
 brief_page: "/zh/daily/2026-06-09-beyond-waypoints-a-trajectory-centric-waypointing-paradigm/"
-generated_at: "2026-06-09T00:16:55.467037+00:00"
+generated_at: "2026-06-09T05:28:00+00:00"
 page_type: "sources"
 candidate_count: 344
 featured_count: 6
@@ -19,7 +19,7 @@ mentions_count: 20
 
 # 内部生成记录
 
-内部生成记录。抓取时间 2026-06-09T00:16:16.298042+00:00，生成时间 2026-06-09T00:16:55.467037+00:00；机器可读明细保留在 data/processed 与 data/reports。
+内部生成记录。抓取时间 2026-06-09T00:16:16.298042+00:00，生成时间 2026-06-09T05:28:00+00:00；候选源文件为 data/processed/2026-06-05/scored_papers.json，本期候选论文 344 篇；机器可读明细保留在 data/processed 与 data/reports。
 
 ## 入选论文
 

@@ -60,6 +60,10 @@ jobs:
           echo "reuse_existing_source=0"
           echo "delay_days=${DELAY_DAYS}"
           echo "fallback_days=${FALLBACK_DAYS}"
+          if [ "${FALLBACK_DAYS}" -gt 4 ]; then
+            echo "::error::fallback_days must not exceed 4 for production daily publish"
+            exit 1
+          fi
           ai-brief run-daily --delay-days "${DELAY_DAYS}" --fallback-days "${FALLBACK_DAYS}" | tee daily-brief-rerank-auto-result.json
           python - <<'PY'
           import json
@@ -93,6 +97,8 @@ jobs:
               raise SystemExit('production run must not be mock')
           if report.get('reuse_existing_source'):
               raise SystemExit('daily production run must fetch/rerank from the current target or fallback date, not reuse a committed source snapshot')
+          if int(report.get('request_count') or 0) <= 0:
+              raise SystemExit('daily production run must make at least one arXiv request')
           if int(report.get('total_candidates') or 0) <= 0:
               raise SystemExit('no candidates fetched')
           if int(report.get('deduped_papers') or 0) <= 0:
@@ -103,6 +109,9 @@ jobs:
 
       - name: Run publication guard
         run: python scripts/strict_t2_guard.py
+
+      - name: Run candidate lineage guard
+        run: python scripts/candidate_lineage_guard.py --mode daily --max-fallback-days 4
 
       - name: Build Astro site
         run: |

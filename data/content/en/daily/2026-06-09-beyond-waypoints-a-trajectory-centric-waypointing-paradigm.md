@@ -10,7 +10,7 @@ summary: "Today tracks: make agents use tools and reusable skills more reliably,
 tags: ["agents", "code", "evaluation", "interpretability", "robotics", "speech-audio", "training", "vision-generation"]
 topics: ["agents", "code", "evaluation", "interpretability", "robotics", "speech-audio", "training", "vision-generation"]
 sources_page: "/en/daily/2026-06-09-beyond-waypoints-a-trajectory-centric-waypointing-paradigm-sources/"
-generated_at: "2026-06-09T07:15:36.461544+00:00"
+generated_at: "2026-06-09T07:57:23.049263+00:00"
 page_type: "brief"
 candidate_count: 344
 featured_count: 6

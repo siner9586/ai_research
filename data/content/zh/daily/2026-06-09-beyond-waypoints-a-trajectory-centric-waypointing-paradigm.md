@@ -10,7 +10,7 @@ summary: "今天主要跟进：让 Agent 更可靠地调用工具和复用技能
 tags: ["agents", "code", "evaluation", "interpretability", "robotics", "speech-audio", "training", "vision-generation"]
 topics: ["agents", "code", "evaluation", "interpretability", "robotics", "speech-audio", "training", "vision-generation"]
 sources_page: "/zh/daily/2026-06-09-beyond-waypoints-a-trajectory-centric-waypointing-paradigm-sources/"
-generated_at: "2026-06-09T07:15:35.923345+00:00"
+generated_at: "2026-06-09T07:57:22.593542+00:00"
 page_type: "brief"
 candidate_count: 344
 featured_count: 6

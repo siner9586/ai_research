@@ -10,7 +10,7 @@ summary: "Internal generation metadata: 344 candidate papers."
 tags: ["internal"]
 topics: ["internal"]
 brief_page: "/en/daily/2026-06-09-beyond-waypoints-a-trajectory-centric-waypointing-paradigm/"
-generated_at: "2026-06-09T07:15:36.463335+00:00"
+generated_at: "2026-06-09T07:57:23.050942+00:00"
 page_type: "sources"
 candidate_count: 344
 featured_count: 6
@@ -19,7 +19,7 @@ mentions_count: 20
 
 # Internal Generation Record
 
-Internal generation record. Fetched at 2026-06-09T00:16:16.298042+00:00. Generated at 2026-06-09T07:15:36.463335+00:00. Machine-readable details stay under data/processed and data/reports.
+Internal generation record. Fetched at 2026-06-09T00:16:16.298042+00:00. Generated at 2026-06-09T07:57:23.050942+00:00. Machine-readable details stay under data/processed and data/reports.
 
 ## Selected papers
 

@@ -10,7 +10,7 @@ summary: "Today tracks: physical AI world models, reasoning evaluation, edge age
 tags: ["agents", "evaluation", "multimodal", "reasoning", "robotics", "systems", "training"]
 topics: ["agents", "evaluation", "multimodal", "reasoning", "robotics", "systems", "training"]
 sources_page: "/en/daily/2026-06-03-ai-research-brief-sources/"
-generated_at: "2026-06-09T00:00:00+08:00"
+generated_at: "2026-06-03T00:00:00+08:00"
 page_type: "brief"
 candidate_count: 273
 featured_count: 5

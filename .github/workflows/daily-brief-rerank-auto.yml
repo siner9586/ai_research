@@ -52,10 +52,12 @@ jobs:
         env:
           DELAY_DAYS: ${{ github.event.inputs.delay_days || '2' }}
           FALLBACK_DAYS: ${{ github.event.inputs.fallback_days || '4' }}
+          AI_RESEARCH_REUSE_EXISTING_SOURCE: "0"
         run: |
           set -euo pipefail
           echo "production_mode=real"
           echo "rerank_same_source_date_allowed=true"
+          echo "reuse_existing_source=0"
           echo "delay_days=${DELAY_DAYS}"
           echo "fallback_days=${FALLBACK_DAYS}"
           ai-brief run-daily --delay-days "${DELAY_DAYS}" --fallback-days "${FALLBACK_DAYS}" | tee daily-brief-rerank-auto-result.json
@@ -73,11 +75,15 @@ jobs:
               'fallback_from': report.get('fallback_from'),
               'total_candidates': report.get('total_candidates'),
               'deduped_papers': report.get('deduped_papers'),
+              'candidate_count': report.get('candidate_count'),
               'featured': report.get('featured'),
               'mentions': report.get('mentions'),
               'qa_passed': report.get('qa_passed'),
               'excluded_recent_duplicates_count': report.get('excluded_recent_duplicates_count'),
               'fetch_mode': report.get('fetch_mode'),
+              'reuse_existing_source': report.get('reuse_existing_source'),
+              'candidate_file': report.get('candidate_file'),
+              'selected_file': report.get('selected_file'),
               'request_count': report.get('request_count'),
               'errors': report.get('errors'),
           }, ensure_ascii=False))
@@ -85,6 +91,8 @@ jobs:
               raise SystemExit('run report is not successful')
           if report.get('mock'):
               raise SystemExit('production run must not be mock')
+          if report.get('reuse_existing_source'):
+              raise SystemExit('daily production run must fetch/rerank from the current target or fallback date, not reuse a committed source snapshot')
           if int(report.get('total_candidates') or 0) <= 0:
               raise SystemExit('no candidates fetched')
           if int(report.get('deduped_papers') or 0) <= 0:
@@ -151,7 +159,7 @@ jobs:
           git add data apps/web/public
           git status --short data apps/web/public || true
           if git diff --cached --quiet; then
-            echo "No generated changes to commit."
+            echo "No generated changes to commit. Deploying current main anyway."
           else
             git diff --cached --stat
             python - <<'PY' > /tmp/brief-commit-message.txt
@@ -165,3 +173,16 @@ jobs:
             echo "commit_sha=$(git rev-parse HEAD)"
             echo "push_status=success"
           fi
+          echo "DEPLOY_REF=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Trigger Cloudflare Pages deploy
+        env:
+          CLOUDFLARE_PAGES_DEPLOY_HOOK: ${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_PAGES_DEPLOY_HOOK:-}" ]; then
+            echo "::error::CLOUDFLARE_PAGES_DEPLOY_HOOK is required so a successful daily publish cannot leave production stale. Add this repository secret from Cloudflare Pages > Deploy hooks."
+            exit 1
+          fi
+          curl -fsSL -X POST "$CLOUDFLARE_PAGES_DEPLOY_HOOK"
+          echo "deploy_hook_status=triggered ref=${DEPLOY_REF:-unknown}"

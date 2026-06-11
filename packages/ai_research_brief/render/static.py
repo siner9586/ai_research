@@ -17,6 +17,9 @@ DEPRECATED_TEXT_PATTERNS = [
     (r"The\s+abstract\s+points\s+to[:：]?", "Core signal:"),
     (r"Verify\s+whether[^.]*\.", "Code/data availability and transfer limits should be checked in the source paper."),
     (r"evaluation\s+setup", "evaluation details"),
+    (r"without\s+reintroducing\s+mock\s+content", "while using only real arXiv candidates"),
+    (r"does\s+not\s+include\s+any\s+mock\s+papers", "uses only real arXiv candidate papers"),
+    (r"不包含\s*mock\s*论文", "仅包含真实 arXiv 候选论文"),
 ]
 
 
@@ -46,21 +49,23 @@ def read_content_documents(lang: str | None = None) -> list[dict]:
 
 def build_search_index() -> str:
     rows = []
-    for doc in _public_briefs(read_content_documents()):
+    for doc in _public_search_documents(read_content_documents()):
         meta = doc["meta"]
         text = _clean_generated_text(_strip_markdown(doc["body"]))
+        page_type = str(meta.get("page_type", "page"))
+        source_url = meta.get("sources_page", "") if page_type == "brief" else doc["url"]
         rows.append({
             "title": _clean_title(meta.get("title", "")),
             "date": meta.get("date", ""),
             "lang": doc["lang"],
             "url": doc["url"],
-            "source_url": meta.get("sources_page", ""),
+            "source_url": source_url,
             "summary": _clean_generated_text(meta.get("summary", "")),
             "tags": meta.get("tags", []),
             "topics": meta.get("topics", meta.get("tags", [])),
             "authors": _extract_authors(doc["body"]),
             "content_excerpt": _clean_generated_text(_clean_title(text[:800])),
-            "type": meta.get("page_type", "page"),
+            "type": page_type,
             "text": _clean_generated_text(_clean_title(text[:5000])),
         })
     out = REPO_ROOT / "apps" / "web" / "public" / "search-index.json"
@@ -145,6 +150,20 @@ def _public_briefs(docs: list[dict]) -> list[dict]:
         if meta.get("page_type") != "brief":
             continue
         key = (doc["lang"], str(meta.get("date", "")))
+        existing = by_key.get(key)
+        if existing is None or _doc_sort_key(doc) > _doc_sort_key(existing):
+            by_key[key] = doc
+    return sorted(by_key.values(), key=_doc_sort_key, reverse=True)
+
+
+def _public_search_documents(docs: list[dict]) -> list[dict]:
+    by_key: dict[tuple[str, str, str], dict] = {}
+    for doc in docs:
+        meta = doc["meta"]
+        page_type = str(meta.get("page_type", ""))
+        if page_type not in {"brief", "sources"}:
+            continue
+        key = (doc["lang"], str(meta.get("date", "")), page_type)
         existing = by_key.get(key)
         if existing is None or _doc_sort_key(doc) > _doc_sort_key(existing):
             by_key[key] = doc

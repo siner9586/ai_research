@@ -47,7 +47,7 @@ MOCK_VISIBLE = [
     r"Sam Taylor",
 ]
 MOCK_IDS_RE = re.compile(r"\b2606\.000(?:0[1-9]|1[0-8])\b")
-MAX_EMPTY_DAY_LOOKBACK = 7
+MAX_EMPTY_DAY_LOOKBACK = 2
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -335,18 +335,19 @@ def _check_static(publish_date: date, docs: dict[str, dict[str, tuple[Path, dict
     if search_path.exists():
         rows = _load_json(search_path, errors)
         if isinstance(rows, list):
-            keys: set[tuple[str, str]] = set()
+            keys: set[tuple[str, str, str]] = set()
             for row in rows:
                 if not isinstance(row, dict):
                     errors.append("search-index.json contains a non-object row")
                     continue
-                key = (str(row.get("lang", "")), str(row.get("date", "")))
+                key = (str(row.get("lang", "")), str(row.get("date", "")), str(row.get("type", "")))
                 if key in keys:
-                    errors.append(f"search-index.json contains duplicate public issue for {key}")
+                    errors.append(f"search-index.json contains duplicate public document for {key}")
                 keys.add(key)
             for lang in ("zh", "en"):
-                if (lang, str(publish_date)) not in keys:
-                    errors.append(f"search-index.json missing {lang} issue for {publish_date}")
+                for page_type in ("brief", "sources"):
+                    if (lang, str(publish_date), page_type) not in keys:
+                        errors.append(f"search-index.json missing {lang}/{page_type} document for {publish_date}")
     sitemap = (public / "sitemap.xml").read_text(encoding="utf-8", errors="ignore") if (public / "sitemap.xml").exists() else ""
     for lang in ("zh", "en"):
         for page_type in ("brief", "sources"):

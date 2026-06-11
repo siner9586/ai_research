@@ -15,3 +15,8 @@ def test_mock_run_generates_content_without_keys(monkeypatch):
     assert result["generated"]
     rows = json.loads((REPO_ROOT / "apps/web/public/search-index.json").read_text(encoding="utf-8"))
     assert {"title", "date", "lang", "url", "summary", "tags", "topics", "authors", "content_excerpt"}.issubset(rows[0])
+    assert {row["type"] for row in rows if row["date"] == "2026-06-03" and row["lang"] == "zh"} == {"brief", "sources"}
+    report = json.loads((REPO_ROOT / "data/reports/runs/last-run.json").read_text(encoding="utf-8"))
+    assert report["candidate_manifest"].endswith("candidate_manifest-2026-06-03.json")
+    assert (REPO_ROOT / report["candidate_manifest"]).exists()
+    assert (REPO_ROOT / "data/processed/2026-06-03/candidate_manifest.json").exists()

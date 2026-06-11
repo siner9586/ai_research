@@ -107,7 +107,7 @@ def main(argv: list[str] | None = None) -> int:
     if not args.allow_reuse_existing_source and int(report.get("request_count") or 0) <= 0:
         errors.append("daily production run must perform at least one arXiv request")
 
-    paths = _expected_paths(actual_date)
+    paths = _expected_paths(actual_date, publish_date, report)
     for key, expected in paths.items():
         report_key = "candidate_manifest" if key == "manifest_file" else key
         if report.get(report_key) and str(report.get(report_key)) != expected:
@@ -202,14 +202,23 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-def _expected_paths(actual_date: date) -> dict[str, str]:
+def _expected_paths(actual_date: date, publish_date: date | None = None, report: dict | None = None) -> dict[str, str]:
     prefix = f"data/processed/{actual_date}"
+    legacy_manifest = f"{prefix}/candidate_manifest.json"
+    unique_manifest = f"{prefix}/candidate_manifest-{publish_date}.json" if publish_date else legacy_manifest
+    report_manifest = str((report or {}).get("candidate_manifest") or "")
+    if report_manifest in {legacy_manifest, unique_manifest}:
+        manifest_file = report_manifest
+    elif (REPO_ROOT / unique_manifest).exists():
+        manifest_file = unique_manifest
+    else:
+        manifest_file = legacy_manifest
     return {
         "raw_candidate_file": f"data/raw/{actual_date}/papers.json",
         "processed_papers_file": f"{prefix}/papers.json",
         "candidate_file": f"{prefix}/scored_papers.json",
         "selected_file": f"{prefix}/selected_papers.json",
-        "manifest_file": f"{prefix}/candidate_manifest.json",
+        "manifest_file": manifest_file,
     }
 
 
@@ -293,18 +302,19 @@ def _check_static(publish_date: date, docs: dict[str, dict[str, tuple[Path, dict
     search_path = REPO_ROOT / "apps" / "web" / "public" / "search-index.json"
     rows = _load_json(search_path, errors)
     if isinstance(rows, list):
-        keys: set[tuple[str, str]] = set()
+        keys: set[tuple[str, str, str]] = set()
         for row in rows:
             if not isinstance(row, dict):
                 errors.append("search-index.json contains a non-object row")
                 continue
-            key = (str(row.get("lang", "")), str(row.get("date", "")))
+            key = (str(row.get("lang", "")), str(row.get("date", "")), str(row.get("type", "")))
             if key in keys:
-                errors.append(f"search-index.json contains duplicate public issue for {key}")
+                errors.append(f"search-index.json contains duplicate public document for {key}")
             keys.add(key)
         for lang in ("zh", "en"):
-            if (lang, str(publish_date)) not in keys:
-                errors.append(f"search-index.json missing {lang} issue for {publish_date}")
+            for page_type in ("brief", "sources"):
+                if (lang, str(publish_date), page_type) not in keys:
+                    errors.append(f"search-index.json missing {lang}/{page_type} document for {publish_date}")
     sitemap = REPO_ROOT / "apps" / "web" / "public" / "sitemap.xml"
     sitemap_text = sitemap.read_text(encoding="utf-8", errors="ignore") if sitemap.exists() else ""
     if not sitemap_text:

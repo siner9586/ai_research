@@ -15,11 +15,11 @@ The project learns from the information architecture of daily AI paper brief pro
 
 ## Publishing Cadence / 发布节奏
 
-- Daily schedule: **07:12 Beijing/Taipei time**.
-- Cron schedule: **23:12 UTC** on the previous UTC day.
+- Daily schedule: starts at **05:12 Beijing/Taipei time**, then checks every 10 minutes through **18:22**.
+- Cron schedule: **80 idempotent UTC cron entries** from 21:12 UTC on the previous UTC day through 10:22 UTC.
 - Data cadence: **T+2**. Each production run normally covers arXiv papers from two Beijing/Taipei calendar days earlier.
-- Example: a run at Beijing/Taipei **2026-06-05 07:12** normally generates the **2026-06-03** AI research brief.
-- If the T+2 date has no usable arXiv papers in the configured categories, the job searches backward up to `pipeline.fallback_days` days and records `target_date`, `actual_date`, and `fallback_from`.
+- Example: a run on Beijing/Taipei **2026-06-05** publishes the **2026-06-05** issue and normally uses **2026-06-03** as `target_date`.
+- If the T+2 date has no usable arXiv papers in the configured categories, the job searches backward up to `pipeline.fallback_days` days, currently 2, and records `target_date`, `actual_date`, and `fallback_from`.
 - Production real mode never publishes mock papers as real content.
 
 ## Coverage / 技术方向
@@ -59,13 +59,13 @@ The selection rules are still score-first and source-grounded. The daily paper p
 
 ```mermaid
 flowchart TD
-  A[GitHub Actions 23:12 UTC / Beijing 07:12] --> B[Python pipeline]
+  A[GitHub Actions 80 checks from Beijing 05:12] --> B[Python pipeline]
   B --> C[Fetch arXiv T+2]
   C --> D[Normalize and dedupe]
   D --> E[Optional HF / Semantic Scholar / GitHub signals]
   E --> F[Score and classify topics]
   F --> G[Select featured and honorable mentions]
-  G --> H[LLM or mock provider generation]
+  G --> H[Source-grounded Markdown rendering]
   H --> I[QA checks]
   I --> J[Markdown / JSON / RSS / sitemap / search-index]
   J --> K[git commit and push to main]
@@ -91,8 +91,8 @@ npm run build
 
 ```bash
 ai-brief run-daily --delay-days 2
-ai-brief run-daily --delay-days 2 --fallback-days 4
-ai-brief run-daily --date 2026-06-03 --fallback-days 4
+ai-brief run-daily --delay-days 2 --fallback-days 2
+ai-brief run-daily --date 2026-06-03 --fallback-days 2
 ai-brief fetch --date 2026-06-03
 ai-brief enrich --date 2026-06-03
 ai-brief score --date 2026-06-03
@@ -100,13 +100,13 @@ ai-brief build-content --date 2026-06-03
 ai-brief qa --date 2026-06-03
 ```
 
-Production runs query arXiv for the target date. The default target is T+2: today in Beijing/Taipei time minus `pipeline.delay_days` from `configs/site.yaml`, currently 2 days. If that target date has no real arXiv papers in the configured categories, `run-daily` searches backward up to `pipeline.fallback_days`, currently 4 days, and uses the nearest date with real arXiv data.
+Production runs query arXiv for the target date. The default target is T+2: today in Beijing/Taipei time minus `pipeline.delay_days` from `configs/site.yaml`, currently 2 days. If that target date has no real arXiv papers in the configured categories, `run-daily` searches backward up to `pipeline.fallback_days`, currently 2 days, and uses the nearest date with real arXiv data. With the default settings, the allowed source window is `publish_date - 2`, then `publish_date - 3`, then `publish_date - 4`.
 
 Brief and source pages record both `target_date` and `actual_date`; fallback pages also record `fallback_from`. If every fallback date has no real papers, or every arXiv category fails, the command fails clearly and does not publish mock content. Use `ai-brief mock-run` only for local demo, CI validation, and manual mock workflow runs.
 
 ## LLM Configuration
 
-Default:
+The production daily brief renderer is source-grounded and does not require an LLM key. The mock provider remains available for local tests and any experimental prompt-based helpers:
 
 ```bash
 export LLM_PROVIDER=mock
@@ -177,44 +177,42 @@ SITE_URL
 CLOUDFLARE_PAGES_DEPLOY_HOOK
 ```
 
-No secret is required for `mock-run`. Without API keys, the default `LLM_PROVIDER=mock` can still generate deterministic text from real arXiv metadata; optional enrichers are skipped unless configured. The built-in `GITHUB_TOKEN` is provided by GitHub Actions and does not need to be added as a repository secret.
+No secret is required for `mock-run` or the default rule-based production renderer. Optional enrichers are skipped unless configured. The built-in `GITHUB_TOKEN` is provided by GitHub Actions and does not need to be added as a repository secret.
 
-`CLOUDFLARE_PAGES_DEPLOY_HOOK` is optional. When set, the workflow POSTs it after a successful push as a Pages deployment fallback. If it is missing or the hook call fails, the GitHub push remains the source of truth.
+`CLOUDFLARE_PAGES_DEPLOY_HOOK` is optional but recommended. When set as a repository secret or variable, the workflow POSTs it after a successful push as a Pages deployment fallback. If it is missing, Cloudflare Pages must be configured to deploy automatically from pushes to `main`.
 
 ## GitHub Actions Automation
 
-`.github/workflows/daily-brief.yml` runs every day at **UTC 23:12**, which is **07:12 the next day in Beijing/Taipei time**. GitHub scheduled workflows can be delayed during platform load, so the repository also supports manual `workflow_dispatch`, external `repository_dispatch`, and a one-shot `.github/daily-brief.force` push trigger.
+`.github/workflows/daily-brief-auto.yml` is the authoritative production workflow. It starts at **05:12 Beijing/Taipei time** and schedules **80 checks every 10 minutes** through **18:22**. GitHub scheduled workflows cannot cancel later ticks for the same day, so the workflow fast-forwards to `main` and exits at the first gate when both current-date zh/en brief files already exist.
 
 The job:
 
-1. Installs Python 3.11 and Node 22.
-2. Installs `requirements.txt` and the editable package.
-3. Runs `ai-brief run-daily --delay-days 2 --fallback-days 4` or `ai-brief mock-run` for manual mock dispatch.
-4. Runs `pytest -q`.
-5. Builds Astro.
-6. Commits generated `data/`, including `data/reports/runs/`, and `apps/web/public/` artifacts.
-7. Pushes to `main`.
-8. Optionally triggers a Cloudflare Pages deploy hook.
-9. Optionally sends Telegram and Resend email notifications.
+1. Fast-forwards to latest `main`.
+2. Checks `data/content/zh/daily/{publish_date}-*.md` and `data/content/en/daily/{publish_date}-*.md`, excluding `*-sources.md`.
+3. Exits before Python/Node setup when the current bilingual issue already exists.
+4. Installs Python 3.11 and Node 22 only when generation is needed.
+5. Runs `ai-brief run-daily --delay-days 2 --fallback-days 2`.
+6. Verifies non-mock production output, positive arXiv request count, positive candidate counts, empty errors, candidate lineage, and publication scope.
+7. Builds Astro.
+8. Commits generated `data/` and `apps/web/public/` artifacts with `chore: publish daily AI brief YYYY-MM-DD`.
+9. Pushes to `main` and triggers the Cloudflare Pages deploy hook when configured.
 
 Manual run:
 
 ```text
 GitHub repository
 -> Actions
--> Daily AI Research Brief
+-> Daily AI Brief Auto Publish
 -> Run workflow
--> mode = real
--> optional date, delay_days, fallback_days
+-> optional delay_days, fallback_days
 -> Run workflow
 ```
 
 Useful GitHub CLI commands:
 
 ```bash
-gh workflow run daily-brief.yml -f mode=real -f delay_days=2 -f fallback_days=4
-gh workflow run daily-brief.yml -f mode=mock
-gh run list --workflow=daily-brief.yml --limit 10
+gh workflow run daily-brief-auto.yml -f delay_days=2 -f fallback_days=2
+gh run list --workflow=daily-brief-auto.yml --limit 10
 gh run view --log
 ```
 
@@ -300,9 +298,9 @@ QA errors fail the CLI and GitHub Actions. Warnings are reported but do not fail
 
 ## FAQ
 
-**Why T+2?** It gives arXiv metadata and early community signals time to settle while keeping the brief recent. If the T+2 date has no arXiv publications in the configured categories, the production job searches backward up to 4 days and labels the actual data date in the brief and source page.
+**Why T+2?** It gives arXiv metadata and early community signals time to settle while keeping the brief recent. If the T+2 date has no arXiv publications in the configured categories, the production job searches backward up to 2 additional days and labels the actual data date in the brief and source page.
 
-**Can it run without keys?** Yes. `mock-run` is keyless; production runs can use arXiv-only data when optional enrichers are disabled. If no LLM key is configured, `LLM_PROVIDER=mock` keeps generation deterministic and source-grounded.
+**Can it run without keys?** Yes. `mock-run` is keyless; production runs can use arXiv-only data when optional enrichers are disabled. The default production renderer is rule-based and source-grounded.
 
 **What happens when arXiv is unavailable?** Production generation tries the fallback date window. If no real arXiv data is found, it fails clearly, writes a run report, and does not publish mock content.
 

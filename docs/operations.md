@@ -5,24 +5,21 @@
 GitHub Actions workflow:
 
 ```text
-.github/workflows/daily-brief.yml
-Schedule: UTC 02:30 daily, 10:30 Beijing/Taipei
-Mode: real by default
-Manual mode: mock or real
-External fallback trigger: repository_dispatch type daily-brief
+.github/workflows/daily-brief-auto.yml
+Schedule: 80 idempotent checks from 05:12 to 18:22 Beijing/Taipei
+Mode: real arXiv production only
+Manual mode: workflow_dispatch with optional delay_days and fallback_days
 ```
 
-The scheduled run installs Python 3.11 and Node 22, runs `ai-brief run-daily --delay-days 3 --fallback-days 4`, executes `pytest -q`, builds Astro, commits generated `data/` and `apps/web/public/`, pushes to `main`, optionally triggers a Cloudflare Pages deploy hook, and optionally sends notifications.
+Each scheduled tick first fast-forwards to `main` and checks whether current-date zh/en brief files already exist. If both exist, it exits before Python/Node setup. If generation is needed, it installs Python 3.11 and Node 22, runs `ai-brief run-daily --delay-days 2 --fallback-days 2`, validates the run report, runs `candidate_lineage_guard.py` and `strict_t2_guard.py`, builds Astro, commits generated `data/` and `apps/web/public/`, pushes to `main`, and triggers a Cloudflare Pages deploy hook when configured.
 
 ## Manual Trigger
 
 With GitHub CLI:
 
 ```bash
-gh workflow run daily-brief.yml -f mode=mock
-gh workflow run daily-brief.yml -f mode=real -f delay_days=3 -f fallback_days=4
-gh workflow run daily-brief.yml -f mode=real -f date=YYYY-MM-DD -f fallback_days=4
-gh run list --workflow=daily-brief.yml --limit 5
+gh workflow run daily-brief-auto.yml -f delay_days=2 -f fallback_days=2
+gh run list --workflow=daily-brief-auto.yml --limit 5
 gh run view --log
 ```
 
@@ -31,14 +28,13 @@ In the browser:
 ```text
 GitHub repository
 → Actions
-→ Daily AI Research Brief
+→ Daily AI Brief Auto Publish
 → Run workflow
-→ mode = mock or real
-→ optional date, delay_days, fallback_days
+→ optional delay_days, fallback_days
 → Run workflow
 ```
 
-## Switch From Mock To Real
+## Production Vs Mock
 
 Mock mode is only for validation:
 
@@ -49,10 +45,10 @@ ai-brief mock-run
 Real mode uses arXiv for the target date:
 
 ```bash
-ai-brief run-daily --delay-days 3 --fallback-days 4
+ai-brief run-daily --delay-days 2 --fallback-days 2
 ```
 
-Scheduled GitHub Actions runs use real mode unless the manual dispatch input is `mock`. Production real mode never publishes mock papers. If the target date has no real arXiv papers, it searches backward within the fallback window and labels `target_date`, `actual_date`, and `fallback_from` in generated pages and run reports.
+Scheduled GitHub Actions runs use real arXiv production mode only. Production real mode never publishes mock papers. If the target date has no real arXiv papers, it searches backward within the fallback window and labels `target_date`, `actual_date`, and `fallback_from` in generated pages and run reports. With `delay_days=2` and `fallback_days=2`, the maximum source date is `publish_date - 4`.
 
 ## Rollback
 
@@ -133,12 +129,12 @@ Missing config prints `missing config, skipped` and exits 0.
 
 ## arXiv Failures
 
-If `ai-brief run-daily --delay-days 3 --fallback-days 4` fails:
+If `ai-brief run-daily --delay-days 2 --fallback-days 2` fails:
 
 1. Check network access to `https://export.arxiv.org/api/query`.
 2. Confirm the target date has papers in configured categories.
 3. Inspect `data/reports/runs/last-run.json` or the JSON summary printed in the `Generate daily brief` Actions step.
-4. Re-run with a specific date: `ai-brief run-daily --date YYYY-MM-DD --fallback-days 4`.
+4. Re-run with a specific source date only for controlled backfill: `ai-brief run-daily --date YYYY-MM-DD --fallback-days 0`.
 5. Do not commit mock content as a real daily issue.
 6. Use `ai-brief mock-run` only for workflow validation.
 
@@ -153,7 +149,7 @@ Project: ai-research
 Production branch: main
 Root directory: apps/web
 Build command: npm install && npm run build
-Output directory: dist
+Build output directory: dist
 ```
 
 If deployment fails, inspect:
@@ -173,7 +169,7 @@ Common fixes:
 - DNS not resolving: add `CNAME aici -> ai-research.pages.dev` in the `ccwu.cc` zone.
 - Certificate pending: wait for Cloudflare validation and keep the custom domain attached.
 - Push succeeded but Pages did not deploy: confirm Pages watches branch `main`; optionally configure GitHub secret `CLOUDFLARE_PAGES_DEPLOY_HOOK` so the workflow POSTs a deploy hook after a successful push.
-- GitHub schedule is delayed or skipped: use manual `workflow_dispatch`, or configure the Cloudflare Workers Cron fallback in `docs/cloudflare-cron-dispatch.md` to call GitHub `repository_dispatch`.
+- GitHub schedule is delayed or skipped: the authoritative workflow already has 80 scheduled checks; use manual `workflow_dispatch` only if all checks miss.
 
 ## Workers KV
 

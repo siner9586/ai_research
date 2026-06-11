@@ -527,7 +527,7 @@ def _write_candidate_manifest(
     featured: list[ScoredPaper],
     mentions: list[ScoredPaper],
 ) -> dict:
-    paths = _candidate_source_paths(actual_date)
+    paths = _candidate_source_paths(actual_date, publish_date=publish_date)
     manifest = {
         "schema_version": 1,
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -551,17 +551,22 @@ def _write_candidate_manifest(
         **paths,
     }
     _write(REPO_ROOT / paths["manifest_file"], manifest)
+    legacy_manifest_file = _candidate_source_paths(actual_date)["manifest_file"]
+    if legacy_manifest_file != paths["manifest_file"]:
+        legacy_manifest = {**manifest, "manifest_file": legacy_manifest_file, "canonical_manifest_file": paths["manifest_file"]}
+        _write(REPO_ROOT / legacy_manifest_file, legacy_manifest)
     return manifest
 
 
-def _candidate_source_paths(actual_date: date) -> dict[str, str]:
+def _candidate_source_paths(actual_date: date, publish_date: date | None = None) -> dict[str, str]:
     prefix = f"data/processed/{actual_date}"
+    manifest_name = f"candidate_manifest-{publish_date}.json" if publish_date else "candidate_manifest.json"
     return {
         "raw_candidate_file": f"data/raw/{actual_date}/papers.json",
         "processed_papers_file": f"{prefix}/papers.json",
         "candidate_file": f"{prefix}/scored_papers.json",
         "selected_file": f"{prefix}/selected_papers.json",
-        "manifest_file": f"{prefix}/candidate_manifest.json",
+        "manifest_file": f"{prefix}/{manifest_name}",
     }
 
 

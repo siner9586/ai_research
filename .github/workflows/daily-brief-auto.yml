@@ -29,16 +29,12 @@ on:
         description: "Extra lookback days after T+2. 2 means publish_date-2/-3/-4."
         required: false
         default: "2"
-  push:
-    paths:
-      - ".github/workflows/daily-brief-auto.yml"
-      - "configs/site.yaml"
 
 permissions:
   contents: write
 
 concurrency:
-  group: daily-ai-brief-auto-publish-${{ github.ref }}
+  group: daily-ai-research-brief-main
   cancel-in-progress: false
 
 jobs:
@@ -105,7 +101,6 @@ jobs:
       - name: Generate real daily brief
         if: steps.publish_state.outputs.skip != 'true'
         env:
-          LLM_PROVIDER: mock
           DELAY_DAYS: ${{ github.event.inputs.delay_days || '2' }}
           FALLBACK_DAYS: ${{ github.event.inputs.fallback_days || '2' }}
         run: |
@@ -147,6 +142,8 @@ jobs:
               raise SystemExit('no deduped papers fetched')
           if int(report.get('candidate_count') or 0) <= 0:
               raise SystemExit('no scored candidates produced')
+          if int(report.get('request_count') or 0) <= 0:
+              raise SystemExit('daily production run must make at least one arXiv request')
           if report.get('errors'):
               raise SystemExit('run report contains errors')
           PY
@@ -156,6 +153,11 @@ jobs:
         run: |
           python scripts/candidate_lineage_guard.py --mode daily --max-fallback-days 2
 
+      - name: Run publication scope guard
+        if: steps.publish_state.outputs.skip != 'true'
+        run: |
+          python scripts/strict_t2_guard.py
+
       - name: Build Astro site
         if: steps.publish_state.outputs.skip != 'true'
         run: |
@@ -164,6 +166,7 @@ jobs:
           npm run build
 
       - name: Commit and push generated content
+        id: commit
         if: steps.publish_state.outputs.skip != 'true'
         run: |
           set -euo pipefail
@@ -173,6 +176,7 @@ jobs:
           git status --short data apps/web/public || true
           if git diff --cached --quiet; then
             echo "No generated changes to commit."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
             git diff --cached --stat
             python - <<'PY' > /tmp/brief-commit-message.txt
@@ -186,4 +190,21 @@ jobs:
             git push origin HEAD:main
             echo "commit_sha=$(git rev-parse HEAD)"
             echo "push_status=success"
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "deploy_ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Trigger Cloudflare Pages deploy hook
+        if: steps.publish_state.outputs.skip != 'true' && steps.commit.outputs.has_changes == 'true'
+        env:
+          CLOUDFLARE_PAGES_DEPLOY_HOOK_SECRET: ${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
+          CLOUDFLARE_PAGES_DEPLOY_HOOK_VAR: ${{ vars.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
+        run: |
+          set -euo pipefail
+          DEPLOY_HOOK="${CLOUDFLARE_PAGES_DEPLOY_HOOK_SECRET:-${CLOUDFLARE_PAGES_DEPLOY_HOOK_VAR:-}}"
+          if [ -z "$DEPLOY_HOOK" ]; then
+            echo "::warning::CLOUDFLARE_PAGES_DEPLOY_HOOK is not configured; relying on Cloudflare Pages Git integration for main."
+            exit 0
+          fi
+          curl -fsSL -X POST "$DEPLOY_HOOK"
+          echo "deploy_hook_status=triggered ref=${{ steps.commit.outputs.deploy_ref }}"

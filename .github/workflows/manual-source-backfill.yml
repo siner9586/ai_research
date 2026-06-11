@@ -108,7 +108,6 @@ jobs:
       - name: Generate brief from source date
         env:
           AI_RESEARCH_PUBLISH_DATE: ${{ github.event.inputs.publish_date }}
-          LLM_PROVIDER: mock
         run: |
           ai-brief run-daily --date "${{ github.event.inputs.source_date }}" --fallback-days 0 | tee manual-source-backfill-result.json
           python - <<'PY'

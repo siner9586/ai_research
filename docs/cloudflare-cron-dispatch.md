@@ -1,6 +1,6 @@
 # Cloudflare Workers Cron Dispatch
 
-This is an optional fallback trigger for GitHub Actions schedule delays or missed runs. Cloudflare Workers Cron only calls the GitHub API. The daily brief is still generated, tested, committed, pushed, and deployed by GitHub Actions.
+This is an optional last-resort fallback trigger for GitHub Actions schedule delays or missed runs. The repository already schedules 80 idempotent checks in `.github/workflows/daily-brief-auto.yml`; use a Worker only if you want an external watchdog. Cloudflare Workers Cron only calls the GitHub API. The daily brief is still generated, tested, committed, pushed, and deployed by GitHub Actions.
 
 ## GitHub Token
 
@@ -13,13 +13,7 @@ Actions: write
 Contents: read
 ```
 
-Alternative permissions for `repository_dispatch`:
-
-```text
-Contents: write
-```
-
-Use `workflow_dispatch` when you want to target `.github/workflows/daily-brief.yml` directly. Use `repository_dispatch` when you want an external event type such as `daily-brief`.
+Use `workflow_dispatch` to target `.github/workflows/daily-brief-auto.yml` directly.
 
 ## Cloudflare Worker Secrets
 
@@ -29,17 +23,14 @@ Set these with `wrangler secret put` or in the Cloudflare dashboard:
 GITHUB_TOKEN
 GITHUB_OWNER=siner9586
 GITHUB_REPO=ai_research
-GITHUB_WORKFLOW=daily-brief.yml
+GITHUB_WORKFLOW=daily-brief-auto.yml
 ```
 
 Optional variables:
 
 ```text
 GITHUB_REF=main
-DISPATCH_KIND=workflow
 ```
-
-Set `DISPATCH_KIND=repository` to call `repository_dispatch` instead of `workflow_dispatch`.
 
 ## Worker Example
 
@@ -62,7 +53,6 @@ async function triggerGitHub(env) {
   const owner = env.GITHUB_OWNER || "siner9586";
   const repo = env.GITHUB_REPO || "ai_research";
   const ref = env.GITHUB_REF || "main";
-  const kind = env.DISPATCH_KIND || "workflow";
 
   if (!env.GITHUB_TOKEN) {
     throw new Error("Missing GITHUB_TOKEN");
@@ -76,27 +66,16 @@ async function triggerGitHub(env) {
   };
 
   const inputs = {
-    mode: "real",
     delay_days: "2",
-    fallback_days: "4",
+    fallback_days: "2",
   };
 
-  let url;
-  let body;
-  if (kind === "repository") {
-    url = `https://api.github.com/repos/${owner}/${repo}/dispatches`;
-    body = {
-      event_type: "daily-brief",
-      client_payload: inputs,
-    };
-  } else {
-    const workflow = env.GITHUB_WORKFLOW || "daily-brief.yml";
-    url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/dispatches`;
-    body = {
-      ref,
-      inputs,
-    };
-  }
+  const workflow = env.GITHUB_WORKFLOW || "daily-brief-auto.yml";
+  const url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/dispatches`;
+  const body = {
+    ref,
+    inputs,
+  };
 
   const response = await fetch(url, {
     method: "POST",
@@ -113,7 +92,7 @@ async function triggerGitHub(env) {
 
 ## wrangler.toml
 
-Run at the same nominal time as GitHub Actions. Beijing/Taipei 07:12 is UTC 23:12 on the previous UTC day:
+Run after the first native GitHub Actions check. Beijing/Taipei 05:12 is UTC 21:12 on the previous UTC day:
 
 ```toml
 name = "ai-research-daily-dispatch"
@@ -121,24 +100,19 @@ main = "src/index.js"
 compatibility_date = "2026-06-05"
 
 [triggers]
-crons = ["12 23 * * *"]
+crons = ["17 21 * * *"]
 ```
 
-Or run a few minutes later so GitHub's native schedule gets the first chance:
+The native GitHub workflow already checks every 10 minutes through 18:22 Beijing/Taipei, so a Worker should normally dispatch at most once as an external watchdog.
 
-```toml
-[triggers]
-crons = ["17 23 * * *"]
-```
-
-The target time is UTC 23:12, which is 07:12 the next day in Beijing/Taipei time. The production cadence is T+2: each run normally covers arXiv papers from two Beijing/Taipei calendar days earlier.
+The production cadence is T+2: each run normally covers arXiv papers from two Beijing/Taipei calendar days earlier.
 
 ## Verification
 
 After deployment, check:
 
 ```bash
-gh run list --workflow=daily-brief.yml --limit 10
+gh run list --workflow=daily-brief-auto.yml --limit 10
 ```
 
 Expected events:
@@ -146,11 +120,4 @@ Expected events:
 ```text
 workflow_dispatch
 ```
-
-or, if `DISPATCH_KIND=repository`:
-
-```text
-repository_dispatch
-```
-
-The workflow logs should show `mode=real`, `delay_days=2`, and `fallback_days=4`.
+The workflow logs should show `production_mode=real`, `delay_days=2`, and `fallback_days=2`.

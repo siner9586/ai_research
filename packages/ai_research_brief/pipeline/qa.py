@@ -222,7 +222,7 @@ def _check_candidate_source(
         "papers": processed / "papers.json",
         "scored": processed / "scored_papers.json",
         "selected": processed / "selected_papers.json",
-        "manifest": processed / "candidate_manifest.json",
+        "manifest": _candidate_manifest_path(processed, publish_date),
     }
     payloads: dict[str, object] = {}
     for key, path in paths.items():
@@ -275,16 +275,31 @@ def _check_candidate_source(
             if not doc:
                 continue
             path, meta, body = doc
-            if int(meta.get("candidate_count") or -1) != len(candidate_ids):
+            if _meta_int(meta, "candidate_count") != len(candidate_ids):
                 errors.append(f"{path} candidate_count does not match scored_papers.json")
-            if int(meta.get("featured_count") or -1) != len(featured_ids):
+            if _meta_int(meta, "featured_count") != len(featured_ids):
                 errors.append(f"{path} featured_count does not match selected_papers.json")
-            if int(meta.get("mentions_count") or -1) != len(mention_ids):
+            if _meta_int(meta, "mentions_count") != len(mention_ids):
                 errors.append(f"{path} mentions_count does not match selected_papers.json")
             parsed_ids = _source_selected_ids(body) if meta.get("page_type") == "sources" else _ids(body)
             if parsed_ids != selected_ids:
                 errors.append(f"{path} selected IDs differ from selected_papers.json")
     _check_no_mock_text(json.dumps(payloads, ensure_ascii=False), paths["scored"], publish_date, errors, allow_mock_fixture=allow_mock_fixture)
+
+
+def _candidate_manifest_path(processed: Path, publish_date: date) -> Path:
+    unique = processed / f"candidate_manifest-{publish_date}.json"
+    return unique if unique.exists() else processed / "candidate_manifest.json"
+
+
+def _meta_int(meta: dict, key: str, default: int = -1) -> int:
+    value = meta.get(key)
+    if value in (None, ""):
+        return default
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
 
 
 def _check_pairs(docs: dict[str, list[tuple[Path, dict, str]]], errors: list[str]) -> None:
@@ -339,12 +354,14 @@ def _check_static(day: date, repo_root: Path, checked: list[str], errors: list[s
                 for field in ["title", "date", "lang", "url", "source_url", "summary", "tags", "topics", "authors", "content_excerpt", "type", "text"]:
                     if field not in row:
                         errors.append(f"Search index missing field: {field}")
-                key = (row.get("lang"), row.get("date"))
+                key = (row.get("lang"), row.get("date"), row.get("type"))
                 if key in seen:
-                    errors.append(f"Search index contains duplicate public issue for {key}")
+                    errors.append(f"Search index contains duplicate public document for {key}")
                 seen.add(key)
-            if not any(str(row.get("date")) == str(day) for row in rows):
-                errors.append(f"Search index does not include publication date {day}")
+            for lang in ("zh", "en"):
+                for page_type in ("brief", "sources"):
+                    if (lang, str(day), page_type) not in seen:
+                        errors.append(f"Search index missing {lang}/{page_type} document for {day}")
     sitemap_text = (public / "sitemap.xml").read_text(encoding="utf-8") if (public / "sitemap.xml").exists() else ""
     for lang in ("zh", "en"):
         for doc in (_first(docs, lang, "brief"), _first(docs, lang, "sources")):

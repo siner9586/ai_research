@@ -2,8 +2,13 @@ name: Daily AI Brief Auto Publish
 
 on:
   schedule:
-    # 07:12 Beijing/Taipei time. GitHub cron uses UTC.
-    - cron: "12 23 * * *"
+    # Redundant UTC schedules for Beijing/Taipei morning.
+    # GitHub scheduled workflows can be delayed or occasionally skipped, so later idempotent runs catch up.
+    - cron: "12 23 * * *"  # 07:12 Asia/Taipei
+    - cron: "42 23 * * *"  # 07:42 Asia/Taipei
+    - cron: "12 0 * * *"   # 08:12 Asia/Taipei
+    - cron: "42 0 * * *"   # 08:42 Asia/Taipei
+    - cron: "12 1 * * *"   # 09:12 Asia/Taipei
   workflow_dispatch:
     inputs:
       delay_days:
@@ -34,24 +39,59 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fast-forward to latest main
+        run: |
+          git fetch origin main
+          git checkout main
+          git pull --ff-only origin main
+
+      - name: Decide whether today's brief already exists
+        id: publish_state
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          from datetime import datetime
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+          today = datetime.now(ZoneInfo('Asia/Taipei')).date().isoformat()
+          zh_dir = Path('data/content/zh/daily')
+          en_dir = Path('data/content/en/daily')
+          zh_briefs = [p for p in zh_dir.glob(f'{today}-*.md') if not p.stem.endswith('-sources')]
+          en_briefs = [p for p in en_dir.glob(f'{today}-*.md') if not p.stem.endswith('-sources')]
+          skip = bool(zh_briefs and en_briefs)
+          print(f'publish_date={today}')
+          print(f'skip={str(skip).lower()}')
+          print(f'zh_count={len(zh_briefs)}')
+          print(f'en_count={len(en_briefs)}')
+          PY
+
+      - name: Explain idempotent skip
+        if: steps.publish_state.outputs.skip == 'true'
+        run: |
+          echo "daily_brief_already_exists publish_date=${{ steps.publish_state.outputs.publish_date }} zh=${{ steps.publish_state.outputs.zh_count }} en=${{ steps.publish_state.outputs.en_count }}"
+
       - uses: actions/setup-python@v5
+        if: steps.publish_state.outputs.skip != 'true'
         with:
           python-version: "3.11"
 
       - uses: actions/setup-node@v4
+        if: steps.publish_state.outputs.skip != 'true'
         with:
           node-version: "22"
 
       - name: Install dependencies
+        if: steps.publish_state.outputs.skip != 'true'
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt -e .
 
       - name: Preflight syntax check
+        if: steps.publish_state.outputs.skip != 'true'
         run: |
           python -m compileall packages tests scripts
 
       - name: Generate real daily brief
+        if: steps.publish_state.outputs.skip != 'true'
         env:
           LLM_PROVIDER: mock
           DELAY_DAYS: ${{ github.event.inputs.delay_days || '2' }}
@@ -100,16 +140,19 @@ jobs:
           PY
 
       - name: Run candidate lineage guard
+        if: steps.publish_state.outputs.skip != 'true'
         run: |
           python scripts/candidate_lineage_guard.py --mode daily --max-fallback-days 2
 
       - name: Build Astro site
+        if: steps.publish_state.outputs.skip != 'true'
         run: |
           cd apps/web
           npm install
           npm run build
 
       - name: Commit and push generated content
+        if: steps.publish_state.outputs.skip != 'true'
         run: |
           set -euo pipefail
           git config user.name "ai-brief-bot"

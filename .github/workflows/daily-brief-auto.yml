@@ -2,15 +2,23 @@ name: Daily AI Brief Auto Publish
 
 on:
   schedule:
-    # Redundant UTC schedules for Beijing/Taipei morning.
-    # GitHub scheduled workflows can be delayed or occasionally skipped, so later idempotent runs catch up.
-    - cron: "12 23 * * *"  # 07:12 Asia/Taipei
-    - cron: "42 23 * * *"  # 07:42 Asia/Taipei
-    - cron: "12 0 * * *"   # 08:12 Asia/Taipei
-    - cron: "42 0 * * *"   # 08:42 Asia/Taipei
-    - cron: "12 1 * * *"   # 09:12 Asia/Taipei
-    - cron: "42 1 * * *"   # 09:42 Asia/Taipei
-    - cron: "12 2 * * *"   # 10:12 Asia/Taipei
+    # 80 idempotent attempts every 10 minutes from 05:12 to 18:22 Asia/Taipei.
+    # GitHub cron uses UTC. These compressed cron entries expand to 80 checks.
+    # Once the current issue exists, later scheduled runs exit after the fast existence gate.
+    - cron: "12,22,32,42,52 21 * * *"       # 05:12-05:52 Asia/Taipei · attempts 01-05/80
+    - cron: "2,12,22,32,42,52 22 * * *"    # 06:02-06:52 Asia/Taipei · attempts 06-11/80
+    - cron: "2,12,22,32,42,52 23 * * *"    # 07:02-07:52 Asia/Taipei · attempts 12-17/80
+    - cron: "2,12,22,32,42,52 0 * * *"     # 08:02-08:52 Asia/Taipei · attempts 18-23/80
+    - cron: "2,12,22,32,42,52 1 * * *"     # 09:02-09:52 Asia/Taipei · attempts 24-29/80
+    - cron: "2,12,22,32,42,52 2 * * *"     # 10:02-10:52 Asia/Taipei · attempts 30-35/80
+    - cron: "2,12,22,32,42,52 3 * * *"     # 11:02-11:52 Asia/Taipei · attempts 36-41/80
+    - cron: "2,12,22,32,42,52 4 * * *"     # 12:02-12:52 Asia/Taipei · attempts 42-47/80
+    - cron: "2,12,22,32,42,52 5 * * *"     # 13:02-13:52 Asia/Taipei · attempts 48-53/80
+    - cron: "2,12,22,32,42,52 6 * * *"     # 14:02-14:52 Asia/Taipei · attempts 54-59/80
+    - cron: "2,12,22,32,42,52 7 * * *"     # 15:02-15:52 Asia/Taipei · attempts 60-65/80
+    - cron: "2,12,22,32,42,52 8 * * *"     # 16:02-16:52 Asia/Taipei · attempts 66-71/80
+    - cron: "2,12,22,32,42,52 9 * * *"     # 17:02-17:52 Asia/Taipei · attempts 72-77/80
+    - cron: "2,12,22 10 * * *"             # 18:02-18:22 Asia/Taipei · attempts 78-80/80
   workflow_dispatch:
     inputs:
       delay_days:
@@ -47,7 +55,7 @@ jobs:
           git checkout main
           git pull --ff-only origin main
 
-      - name: Decide whether today's brief already exists
+      - name: Decide whether current issue already exists
         id: publish_state
         run: |
           python - <<'PY' >> "$GITHUB_OUTPUT"
@@ -66,10 +74,12 @@ jobs:
           print(f'en_count={len(en_briefs)}')
           PY
 
-      - name: Explain idempotent skip
+      - name: End compensation checks when current issue exists
         if: steps.publish_state.outputs.skip == 'true'
         run: |
           echo "daily_brief_already_exists publish_date=${{ steps.publish_state.outputs.publish_date }} zh=${{ steps.publish_state.outputs.zh_count }} en=${{ steps.publish_state.outputs.en_count }}"
+          echo "compensation_check_ended=true"
+          echo "Later scheduled ticks for the same issue will no-op at this same gate until the next publication date starts."
 
       - uses: actions/setup-python@v5
         if: steps.publish_state.outputs.skip != 'true'

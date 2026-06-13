@@ -208,3 +208,31 @@ jobs:
           fi
           curl -fsSL -X POST "$DEPLOY_HOOK"
           echo "deploy_hook_status=triggered ref=${{ steps.commit.outputs.deploy_ref }}"
+
+
+      - name: Verify production pages contain publish date
+        if: steps.publish_state.outputs.skip != 'true' && steps.commit.outputs.has_changes == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PUBLISH_DATE="$(python -c "import json,pathlib; print(json.loads(pathlib.Path('data/reports/runs/last-run.json').read_text(encoding='utf-8'))['publish_date'])")"
+
+          echo "Verifying production pages for ${PUBLISH_DATE}"
+          sleep 60
+
+          for url in \
+            "https://aici.ccwu.cc/" \
+            "https://aici.ccwu.cc/zh/" \
+            "https://aici.ccwu.cc/en/" \
+            "https://aici.ccwu.cc/search-index.json"
+          do
+            echo "Checking $url"
+            curl -fsSL \
+              -H "Cache-Control: no-cache" \
+              -H "Pragma: no-cache" \
+              "${url}?v=${PUBLISH_DATE}-$(date +%s)" \
+              | grep -q "${PUBLISH_DATE}"
+          done
+
+          echo "production_verify=success date=${PUBLISH_DATE}"

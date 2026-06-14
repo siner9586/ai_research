@@ -53,8 +53,7 @@ const topicNames: Record<string, string> = {
               {latestFeaturedTitles.map((item, index: number) => (
                 <li>
                   <span class="featured-paper-number">{index + 1}</span>
-                  <span class="featured-paper-title-text">{item.title}</span>
-                  {item.url && <a class="featured-paper-link" href={item.url} aria-label={`打开原论文：${item.title}`} target="_blank" rel="noopener noreferrer">↗</a>}
+                  <span class="featured-paper-title-text">{item.title}{item.url && <a class="featured-paper-link" href={item.url} aria-label={`打开原论文：${item.title}`} target="_blank" rel="noopener noreferrer">🔗</a>}</span>
                 </li>
               ))}
             </ol>
@@ -111,11 +110,11 @@ const topicNames: Record<string, string> = {
   .featured-paper-strip { margin: 12px 0 14px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-soft); }
   .featured-paper-kicker { margin: 0 0 8px; color: var(--muted); font-size: 13px; font-weight: 800; letter-spacing: 0.02em; }
   .featured-paper-title-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
-  .featured-paper-title-list li { display: grid; grid-template-columns: 24px minmax(0, 1fr) 22px; gap: 8px; align-items: start; color: var(--text); font-size: clamp(13px, 1.35vw, 15px); line-height: 1.45; }
+  .featured-paper-title-list li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 8px; align-items: start; color: var(--text); font-size: clamp(13px, 1.35vw, 15px); line-height: 1.45; }
   .featured-paper-number { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; background: var(--surface); color: var(--muted); font-size: 12px; font-weight: 800; }
   .featured-paper-title-text { min-width: 0; }
-  .featured-paper-link { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; color: var(--accent); text-decoration: none; font-weight: 900; line-height: 1; }
-  .featured-paper-link:hover { background: var(--surface); }
+  .featured-paper-link { display: inline; margin-left: 0; color: var(--accent); text-decoration: none; font-weight: 400; line-height: 1; }
+  .featured-paper-link:hover { text-decoration: underline; background: transparent; }
   .issue-meta-row, .issue-keyword-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-start; }
   .issue-meta-row { color: var(--muted); font-size: 14px; }
   .issue-source-link { font-weight: 700; text-decoration: none; }
@@ -123,6 +122,6 @@ const topicNames: Record<string, string> = {
     .home-hero h1 { font-size: clamp(20px, 6vw, 29px); line-height: 1.16; }
     .hero-subtitle { font-size: 14px; }
     .action-row .button { font-size: 13px; padding: 8px 11px; }
-    .featured-paper-title-list li { grid-template-columns: 22px minmax(0, 1fr) 20px; font-size: 13px; }
+    .featured-paper-title-list li { grid-template-columns: 22px minmax(0, 1fr); font-size: 13px; }
   }
 </style>

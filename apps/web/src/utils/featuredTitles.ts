@@ -45,9 +45,9 @@ export function renderFeaturedPaperTitlesHtml(items: FeaturedPaperTitle[] | stri
   const itemsHtml = normalized
     .map((item, index) => {
       const link = item.url
-        ? `<a class="featured-paper-link" href="${escapeHtml(item.url)}" aria-label="打开原论文：${escapeHtml(item.title)}" target="_blank" rel="noopener noreferrer">↗</a>`
+        ? `<a class="featured-paper-link" href="${escapeHtml(item.url)}" aria-label="打开原论文：${escapeHtml(item.title)}" target="_blank" rel="noopener noreferrer">🔗</a>`
         : '';
-      return `<li><span class="featured-paper-index">${index + 1}</span><span class="featured-paper-title-text">${escapeHtml(item.title)}</span>${link}</li>`;
+      return `<li><span class="featured-paper-index">${index + 1}</span><span class="featured-paper-title-text">${escapeHtml(item.title)}${link}</span></li>`;
     })
     .join('');
   return `<section class="featured-paper-digest" aria-label="${heading}"><p class="featured-paper-digest-kicker">${heading}</p><ol class="featured-paper-digest-list">${itemsHtml}</ol></section>`;

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { displayBriefTitle, loadBriefs, loadSite } from '../utils/content';
+import { getFeaturedPaperTitles } from '../utils/featuredTitles';
 
 const lang = 'zh';
 const site = loadSite()[lang];
@@ -8,6 +9,7 @@ const briefs = loadBriefs(lang);
 const latest = briefs[0];
 const recent = briefs.slice(0, 7);
 const latestTopics = latest?.meta.tags?.slice(0, 6) || [];
+const latestFeaturedTitles = getFeaturedPaperTitles(latest, 'zh', 6);
 const topicNames: Record<string, string> = {
   agents: 'Agent',
   reasoning: '推理',
@@ -44,6 +46,16 @@ const topicNames: Record<string, string> = {
       <div class="latest-main">
         <p class="section-kicker">最新一期 · {latest.meta.date} · {latest.meta.candidate_count || 0} 篇候选</p>
         <h2><a href={latest.url}>{displayBriefTitle(latest.meta.title)}</a></h2>
+        {latestFeaturedTitles.length > 0 && (
+          <div class="featured-paper-strip" aria-label="本期重点论文题目">
+            <p class="featured-paper-kicker">本期重点论文题目</p>
+            <ol class="featured-paper-title-list">
+              {latestFeaturedTitles.map((title: string, index: number) => (
+                <li><span>{index + 1}</span>{title}</li>
+              ))}
+            </ol>
+          </div>
+        )}
         <div class="issue-meta-row">
           <span>{latest.meta.featured_count || 0} 篇重点</span>
           <span>{latest.meta.mentions_count || 0} 篇补充</span>
@@ -90,6 +102,11 @@ const topicNames: Record<string, string> = {
   .latest-stack { grid-template-columns: minmax(0, 1fr); align-items: flex-start; gap: 14px; }
   .latest-main { min-width: 0; }
   .latest-panel h2 { margin-bottom: 12px; font-size: clamp(22px, 3.4vw, 32px); overflow-wrap: anywhere; }
+  .featured-paper-strip { margin: 12px 0 14px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-soft); }
+  .featured-paper-kicker { margin: 0 0 8px; color: var(--muted); font-size: 13px; font-weight: 800; letter-spacing: 0.02em; }
+  .featured-paper-title-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .featured-paper-title-list li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 8px; align-items: start; color: var(--text); font-size: clamp(14px, 1.45vw, 16px); line-height: 1.45; }
+  .featured-paper-title-list li span { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; background: var(--surface); color: var(--muted); font-size: 12px; font-weight: 800; }
   .issue-meta-row, .issue-keyword-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-start; }
   .issue-meta-row { color: var(--muted); font-size: 14px; }
   .issue-source-link { font-weight: 700; text-decoration: none; }

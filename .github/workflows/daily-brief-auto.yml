@@ -4,7 +4,7 @@ on:
   schedule:
     # 80 idempotent attempts every 10 minutes from 05:12 to 18:22 Asia/Taipei.
     # GitHub cron uses UTC. These compressed cron entries expand to 80 checks.
-    # Once the current issue exists, later scheduled runs exit after the fast existence gate.
+    # Once the current issue exists, later scheduled runs skip generation but still verify production.
     - cron: "12,22,32,42,52 21 * * *"       # 05:12-05:52 Asia/Taipei · attempts 01-05/80
     - cron: "2,12,22,32,42,52 22 * * *"    # 06:02-06:52 Asia/Taipei · attempts 06-11/80
     - cron: "2,12,22,32,42,52 23 * * *"    # 07:02-07:52 Asia/Taipei · attempts 12-17/80
@@ -70,12 +70,23 @@ jobs:
           print(f'en_count={len(en_briefs)}')
           PY
 
-      - name: End compensation checks when current issue exists
+      - name: Skip generation when current issue exists
         if: steps.publish_state.outputs.skip == 'true'
         run: |
           echo "daily_brief_already_exists publish_date=${{ steps.publish_state.outputs.publish_date }} zh=${{ steps.publish_state.outputs.zh_count }} en=${{ steps.publish_state.outputs.en_count }}"
-          echo "compensation_check_ended=true"
-          echo "Later scheduled ticks for the same issue will no-op at this same gate until the next publication date starts."
+          echo "generation_skipped=true"
+          echo "Production verification and deploy-hook self-healing will still run for this scheduled tick."
+
+      - name: Verify existing issue is live and self-heal if stale
+        if: steps.publish_state.outputs.skip == 'true'
+        env:
+          PUBLISH_DATE: ${{ steps.publish_state.outputs.publish_date }}
+          CLOUDFLARE_PAGES_DEPLOY_HOOK_SECRET: ${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
+          CLOUDFLARE_PAGES_DEPLOY_HOOK_VAR: ${{ vars.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
+          VERIFY_ATTEMPTS: "20"
+          VERIFY_INTERVAL_SECONDS: "30"
+        run: |
+          bash scripts/deploy_and_verify_production.sh
 
       - uses: actions/setup-python@v5
         if: steps.publish_state.outputs.skip != 'true'
@@ -194,45 +205,21 @@ jobs:
             echo "deploy_ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Trigger Cloudflare Pages deploy hook
+      - name: Deploy and verify production pages
         if: steps.publish_state.outputs.skip != 'true' && steps.commit.outputs.has_changes == 'true'
         env:
           CLOUDFLARE_PAGES_DEPLOY_HOOK_SECRET: ${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
           CLOUDFLARE_PAGES_DEPLOY_HOOK_VAR: ${{ vars.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
+          VERIFY_ATTEMPTS: "20"
+          VERIFY_INTERVAL_SECONDS: "30"
         run: |
           set -euo pipefail
-          DEPLOY_HOOK="${CLOUDFLARE_PAGES_DEPLOY_HOOK_SECRET:-${CLOUDFLARE_PAGES_DEPLOY_HOOK_VAR:-}}"
-          if [ -z "$DEPLOY_HOOK" ]; then
-            echo "::warning::CLOUDFLARE_PAGES_DEPLOY_HOOK is not configured; relying on Cloudflare Pages Git integration for main."
-            exit 0
-          fi
-          curl -fsSL -X POST "$DEPLOY_HOOK"
-          echo "deploy_hook_status=triggered ref=${{ steps.commit.outputs.deploy_ref }}"
-
-
-      - name: Verify production pages contain publish date
-        if: steps.publish_state.outputs.skip != 'true' && steps.commit.outputs.has_changes == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          PUBLISH_DATE="$(python -c "import json,pathlib; print(json.loads(pathlib.Path('data/reports/runs/last-run.json').read_text(encoding='utf-8'))['publish_date'])")"
-
-          echo "Verifying production pages for ${PUBLISH_DATE}"
-          sleep 60
-
-          for url in \
-            "https://aici.ccwu.cc/" \
-            "https://aici.ccwu.cc/zh/" \
-            "https://aici.ccwu.cc/en/" \
-            "https://aici.ccwu.cc/search-index.json"
-          do
-            echo "Checking $url"
-            curl -fsSL \
-              -H "Cache-Control: no-cache" \
-              -H "Pragma: no-cache" \
-              "${url}?v=${PUBLISH_DATE}-$(date +%s)" \
-              | grep -q "${PUBLISH_DATE}"
-          done
-
-          echo "production_verify=success date=${PUBLISH_DATE}"
+          PUBLISH_DATE="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('data/reports/runs/last-run.json').read_text(encoding='utf-8'))
+          print(report['publish_date'])
+          PY
+          )"
+          export PUBLISH_DATE
+          bash scripts/deploy_and_verify_production.sh

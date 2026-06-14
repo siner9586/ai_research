@@ -126,7 +126,7 @@ export function markdownToHtml(markdown: string) {
     if (heading) {
       closeList();
       const level = heading[1].length;
-      const h1Attrs = level === 1 ? ' class="daily-brief-title" style="font-size: clamp(28px, 4.2vw, 34px); line-height: 1.18; letter-spacing: -0.025em;"' : '';
+      const h1Attrs = level === 1 ? ' class="daily-brief-title" style="font-size: clamp(23px, 3.2vw, 30px); line-height: 1.2; letter-spacing: -0.02em;"' : '';
       out.push(`<h${level}${h1Attrs}>${inline(heading[2])}</h${level}>`);
       continue;
     }
@@ -199,10 +199,10 @@ function sanitizeGeneratedLine(line: string) {
   return line
     .replace(new RegExp('建议' + '先看每篇[^。]*。?', 'g'), '下面按核心问题、方法线索、主要论点和关键词整理。')
     .replace(new RegExp('摘要' + '显示[:：]', 'g'), '核心线索：')
-    .replace(new RegExp('\\s*重点' + '核验[:：][^。]*。?', 'g'), ' 代码/数据可用性需查看原文确认。')
-    .replace(new RegExp('Open the original' + ' paper[^.]*\\.', 'g'), 'The notes below focus on the core problem, method signal, main claim, and keywords.')
+    .replace(new RegExp('\s*重点' + '核验[:：][^。]*。?', 'g'), ' 代码/数据可用性需查看原文确认。')
+    .replace(new RegExp('Open the original' + ' paper[^.]*\.', 'g'), 'The notes below focus on the core problem, method signal, main claim, and keywords.')
     .replace(new RegExp('The abstract' + ' points to[:：]', 'g'), 'Core signal:')
-    .replace(new RegExp('Verify' + ' whether[^.]*\\.', 'g'), 'Code/data availability and transfer limits should be confirmed in the original paper.');
+    .replace(new RegExp('Verify' + ' whether[^.]*\.', 'g'), 'Code/data availability and transfer limits should be confirmed in the original paper.');
 }
 
 function inline(text: string) {

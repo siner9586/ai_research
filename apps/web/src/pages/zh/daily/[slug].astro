@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { displayBriefTitle, loadDocs, markdownToHtml } from '../../../utils/content';
+import { getFeaturedPaperTitles, renderFeaturedPaperTitlesHtml } from '../../../utils/featuredTitles';
 
 export function getStaticPaths() {
   return loadDocs('zh').map((doc) => ({ params: { slug: doc.slug }, props: { doc } }));
@@ -14,6 +15,11 @@ const sourceDate = doc.meta.actual_date || doc.meta.target_date || doc.meta.date
 const body = doc.meta.page_type === 'brief'
   ? doc.body.replace(/\n\*\*日期\*\*:\s*\d{4}-\d{2}-\d{2}\n\n/, '\n')
   : doc.body;
+const featuredTitles = !isSources ? getFeaturedPaperTitles(doc, 'zh', 6) : [];
+const articleHtml = markdownToHtml(body);
+const articleHtmlWithFeaturedTitles = !isSources && featuredTitles.length > 0
+  ? articleHtml.replace('</h1>', `</h1>\n${renderFeaturedPaperTitlesHtml(featuredTitles, 'zh')}`)
+  : articleHtml;
 ---
 <BaseLayout lang="zh" title={pageTitle} description={doc.meta.summary}>
   <article class="prose">
@@ -31,7 +37,7 @@ const body = doc.meta.page_type === 'brief'
         本期从 <strong>{sourceDate}</strong> 论文源抓取并去重 <strong>{doc.meta.candidate_count || 0}</strong> 篇候选论文，筛选 <strong>{doc.meta.featured_count || 0}</strong> 篇重点论文与 <strong>{doc.meta.mentions_count || 0}</strong> 篇补充关注。
       </p>
     )}
-    <Fragment set:html={markdownToHtml(body)} />
+    <Fragment set:html={articleHtmlWithFeaturedTitles} />
   </article>
 </BaseLayout>
 
@@ -39,4 +45,9 @@ const body = doc.meta.page_type === 'brief'
   .issue-meta-line { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
   .candidate-note { margin: 14px 0 22px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-soft); color: var(--muted); font-size: 0.94rem; }
   .candidate-note strong { color: var(--text); }
+  :global(.featured-paper-digest) { margin: 12px 0 24px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-soft); }
+  :global(.featured-paper-digest-kicker) { margin: 0 0 8px; color: var(--muted); font-size: 13px; font-weight: 800; letter-spacing: 0.02em; }
+  :global(.featured-paper-digest-list) { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
+  :global(.featured-paper-digest-list li) { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 8px; align-items: start; color: var(--text); font-size: clamp(14px, 1.35vw, 16px); line-height: 1.48; }
+  :global(.featured-paper-index) { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; background: var(--surface); color: var(--muted); font-size: 12px; font-weight: 800; }
 </style>

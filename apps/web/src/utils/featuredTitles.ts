@@ -3,28 +3,58 @@ export type FeaturedTitleDoc = {
   body?: string;
 };
 
-export function getFeaturedPaperTitles(doc: FeaturedTitleDoc | undefined | null, lang: 'zh' | 'en' = 'zh', limit = 6): string[] {
+export type FeaturedPaperTitle = {
+  title: string;
+  url: string;
+};
+
+export function getFeaturedPaperTitleItems(doc: FeaturedTitleDoc | undefined | null, lang: 'zh' | 'en' = 'zh', limit = 6): FeaturedPaperTitle[] {
   if (!doc) return [];
   const meta = doc.meta || {};
-  const structured = lang === 'zh'
+  const structuredTitles = lang === 'zh'
     ? firstStringArray(meta.featured_paper_titles_zh, meta.featured_titles_zh, meta.featured_paper_titles, meta.featured_titles)
     : firstStringArray(meta.featured_paper_titles_en, meta.featured_paper_titles, meta.featured_titles);
-  const parsed = structured.length > 0 ? structured : extractTitlesFromBody(doc.body || '', Number(meta.featured_count || limit) || limit);
-  const clean = parsed
-    .map((title) => normalizeTitle(title))
-    .filter(Boolean)
-    .slice(0, limit);
-  const localized = lang === 'zh' ? clean.map(localizePaperTitleZh) : clean;
-  return Array.from(new Set(localized)).slice(0, limit);
+  const structuredUrls = firstStringArray(meta.featured_paper_urls, meta.featured_urls, meta.paper_urls);
+  const parsed = structuredTitles.length > 0
+    ? structuredTitles.map((title, index) => ({ title, url: structuredUrls[index] || '' }))
+    : extractTitleItemsFromBody(doc.body || '', Number(meta.featured_count || limit) || limit);
+
+  const seen = new Set<string>();
+  const items: FeaturedPaperTitle[] = [];
+  for (const item of parsed) {
+    const cleanTitle = normalizeTitle(item.title || '');
+    if (!cleanTitle) continue;
+    const localizedTitle = lang === 'zh' ? localizePaperTitleZh(cleanTitle) : cleanTitle;
+    const key = localizedTitle.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    items.push({ title: localizedTitle, url: String(item.url || '').trim() });
+    if (items.length >= limit) break;
+  }
+  return items;
 }
 
-export function renderFeaturedPaperTitlesHtml(titles: string[], lang: 'zh' | 'en' = 'zh'): string {
-  if (!titles.length) return '';
+export function getFeaturedPaperTitles(doc: FeaturedTitleDoc | undefined | null, lang: 'zh' | 'en' = 'zh', limit = 6): string[] {
+  return getFeaturedPaperTitleItems(doc, lang, limit).map((item) => item.title);
+}
+
+export function renderFeaturedPaperTitlesHtml(items: FeaturedPaperTitle[] | string[], lang: 'zh' | 'en' = 'zh'): string {
+  const normalized = normalizeItems(items);
+  if (!normalized.length) return '';
   const heading = lang === 'zh' ? '本期重点论文题目' : 'Featured paper titles';
-  const items = titles
-    .map((title, index) => `<li><span class="featured-paper-index">${index + 1}</span><span>${escapeHtml(title)}</span></li>`)
+  const itemsHtml = normalized
+    .map((item, index) => {
+      const link = item.url
+        ? `<a class="featured-paper-link" href="${escapeHtml(item.url)}" aria-label="打开原论文：${escapeHtml(item.title)}" target="_blank" rel="noopener noreferrer">↗</a>`
+        : '';
+      return `<li><span class="featured-paper-index">${index + 1}</span><span class="featured-paper-title-text">${escapeHtml(item.title)}</span>${link}</li>`;
+    })
     .join('');
-  return `<section class="featured-paper-digest" aria-label="${heading}"><p class="featured-paper-digest-kicker">${heading}</p><ol class="featured-paper-digest-list">${items}</ol></section>`;
+  return `<section class="featured-paper-digest" aria-label="${heading}"><p class="featured-paper-digest-kicker">${heading}</p><ol class="featured-paper-digest-list">${itemsHtml}</ol></section>`;
+}
+
+function normalizeItems(items: FeaturedPaperTitle[] | string[]): FeaturedPaperTitle[] {
+  return items.map((item) => typeof item === 'string' ? { title: item, url: '' } : item).filter((item) => item.title);
 }
 
 function firstStringArray(...values: any[]): string[] {
@@ -37,13 +67,14 @@ function firstStringArray(...values: any[]): string[] {
   return [];
 }
 
-function extractTitlesFromBody(body: string, limit: number): string[] {
-  const titles: string[] = [];
-  const regex = /<p class="paper-meta-line"><span>(.*?)<\/span>/g;
+function extractTitleItemsFromBody(body: string, limit: number): FeaturedPaperTitle[] {
+  const titles: FeaturedPaperTitle[] = [];
+  const regex = /<p class="paper-meta-line"><span>(.*?)<\/span>\s*<a class="paper-meta-link" href="([^"]+)"/g;
   let match: RegExpExecArray | null;
   while ((match = regex.exec(body)) && titles.length < limit) {
     const title = normalizeTitle(stripTrailingAuthors(decodeHtml(match[1])));
-    if (title) titles.push(title);
+    const url = decodeHtml(match[2]);
+    if (title) titles.push({ title, url });
   }
   return titles;
 }

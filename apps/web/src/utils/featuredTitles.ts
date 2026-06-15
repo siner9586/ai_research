@@ -41,11 +41,11 @@ export function getFeaturedPaperTitles(doc: FeaturedTitleDoc | undefined | null,
 export function renderFeaturedPaperTitlesHtml(items: FeaturedPaperTitle[] | string[], lang: 'zh' | 'en' = 'zh'): string {
   const normalized = normalizeItems(items);
   if (!normalized.length) return '';
-  const heading = lang === 'zh' ? '本期重点论文题目' : 'Featured paper titles';
+  const heading = lang === 'zh' ? '本期重点' : 'Featured';
   const itemsHtml = normalized
     .map((item, index) => {
       const link = item.url
-        ? `<a class="featured-paper-link" href="${escapeHtml(item.url)}" aria-label="打开原论文：${escapeHtml(item.title)}" target="_blank" rel="noopener noreferrer">🔗</a>`
+        ? `<a class="featured-paper-link" href="${escapeHtml(item.url)}" aria-label="${lang === 'zh' ? '打开原论文：' : 'Open source paper: '}${escapeHtml(item.title)}" target="_blank" rel="noopener noreferrer">🔗</a>`
         : '';
       return `<li><span class="featured-paper-index">${index + 1}</span><span class="featured-paper-title-text">${escapeHtml(item.title)}${link}</span></li>`;
     })
@@ -108,6 +108,12 @@ function localizePaperTitleZh(title: string): string {
     'AgentBeats: Agentifying Agent Assessment for Openness, Standardization, and Reproducibility': 'AgentBeats：面向开放性、标准化与可复现性的 Agent 化评测框架',
     'SPARC: Reliable Spatial Annotations from Robot Demonstrations at Scale': 'SPARC：从大规模机器人示范中生成可靠空间标注',
     'Mod-Guide: An LLM-based Content Moderation Feedback System to Address Insensitive Speech toward Indigenous Ethnic and Religious Minority Communities': 'Mod-Guide：面向原住民、少数族裔与宗教少数群体不敏感言论的 LLM 内容审核反馈系统',
+    'An Embodied Simulation Platform, Benchmark, and Data-Efficient Augmentation Framework for Wet-Lab Robotics': '面向湿实验室机器人的具身仿真平台、基准与数据高效增强框架',
+    'MAStrike: Shapley-Guided Collusive Red-Teaming on Multi-Agent Systems': 'MAStrike：面向多智能体系统的 Shapley 引导合谋红队测试',
+    'SafeLLM: Extraction as a Hallucination-Resistant Alternative to Rewriting in Safety-Critical Settings': 'SafeLLM：安全关键场景中以抽取替代改写的抗幻觉方案',
+    'LongSpike: Fractional Order Spiking State Space Models for Efficient Long Sequence Learning': 'LongSpike：用于高效长序列学习的分数阶脉冲状态空间模型',
+    'SMGFM: Spectral Multimodal Graph Pretraining for Multimodal-Attributed Graphs': 'SMGFM：面向多模态属性图的谱域多模态图预训练',
+    'LabVLA: Grounding Vision-Language-Action Models in Scientific Laboratories': 'LabVLA：将视觉-语言-动作模型落地到科学实验室',
   };
   if (exact[title]) return exact[title];
 
@@ -120,6 +126,20 @@ function localizePaperTitleZh(title: string): string {
     [/Remote Data Science/gi, '远程数据科学'],
     [/Inter-Institutional/gi, '跨机构'],
     [/Student Retention Prediction/gi, '学生留存预测'],
+    [/Embodied Simulation Platform/gi, '具身仿真平台'],
+    [/Wet-Lab Robotics/gi, '湿实验室机器人'],
+    [/Data-Efficient Augmentation Framework/gi, '数据高效增强框架'],
+    [/Shapley-Guided/gi, 'Shapley 引导'],
+    [/Collusive Red-Teaming/gi, '合谋红队测试'],
+    [/Multi-Agent Systems/gi, '多智能体系统'],
+    [/Hallucination-Resistant/gi, '抗幻觉'],
+    [/Safety-Critical Settings/gi, '安全关键场景'],
+    [/Fractional Order Spiking State Space Models/gi, '分数阶脉冲状态空间模型'],
+    [/Long Sequence Learning/gi, '长序列学习'],
+    [/Spectral Multimodal Graph Pretraining/gi, '谱域多模态图预训练'],
+    [/Multimodal-Attributed Graphs/gi, '多模态属性图'],
+    [/Vision-Language-Action Models/gi, '视觉-语言-动作模型'],
+    [/Scientific Laboratories/gi, '科学实验室'],
     [/Reverse-Engineering/gi, '逆向解析'],
     [/Tensor Compute Path/gi, '张量计算路径'],
     [/Autonomous Scientific Discovery/gi, '自主科学发现'],
@@ -135,11 +155,15 @@ function localizePaperTitleZh(title: string): string {
     [/Indigenous Ethnic and Religious Minority Communities/gi, '原住民、少数族裔与宗教少数群体'],
     [/LLM-based/gi, '基于 LLM 的'],
     [/Framework/gi, '框架'],
+    [/Platform/gi, '平台'],
     [/Benchmark/gi, '基准'],
     [/Evaluation/gi, '评测'],
     [/Assessment/gi, '评估'],
     [/Agentifying/gi, 'Agent 化'],
     [/Agent/gi, 'Agent'],
+    [/Extraction/gi, '抽取'],
+    [/Rewriting/gi, '改写'],
+    [/Grounding/gi, '落地'],
     [/at Scale/gi, '的大规模方法'],
     [/Using/gi, '使用'],
     [/for/gi, '面向'],

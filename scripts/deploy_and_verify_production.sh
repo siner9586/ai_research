@@ -51,12 +51,22 @@ verify_once() {
   local stamp
   stamp="$(date +%s)"
   for url in "${urls[@]}"; do
+    local body
+    body="$(mktemp)"
     echo "Checking ${url} for ${PUBLISH_DATE}"
-    curl -fsSL \
+    if ! curl -fsSL \
       -H "Cache-Control: no-cache" \
       -H "Pragma: no-cache" \
-      "${url}?v=${PUBLISH_DATE}-${stamp}" \
-      | grep -q "${PUBLISH_DATE}"
+      --output "${body}" \
+      "${url}?v=${PUBLISH_DATE}-${stamp}"; then
+      rm -f "${body}"
+      return 1
+    fi
+    if ! grep -Fq -- "${PUBLISH_DATE}" "${body}"; then
+      rm -f "${body}"
+      return 1
+    fi
+    rm -f "${body}"
   done
 }
 

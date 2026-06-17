@@ -4,8 +4,8 @@ import path from 'node:path';
 const repoRoot = path.resolve(process.cwd(), '../..');
 const contentRoot = path.join(repoRoot, 'data/content');
 const configsRoot = path.join(repoRoot, 'configs');
-const DAILY_PUBLISH_READY_HOUR = 7;
-const DAILY_PUBLISH_READY_MINUTE = 12;
+const DAILY_PUBLISH_READY_HOUR = 1;
+const DAILY_PUBLISH_READY_MINUTE = 0;
 
 export type Doc = {
   meta: Record<string, any>;
@@ -218,29 +218,25 @@ function escapeHtml(text: string) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-export function dedupeBriefsByDate(docs: Doc[]) {
-  const byDate = new Map<string, Doc>();
-  for (const doc of docs.sort(compareDocs)) {
-    const date = String(doc.meta.date || '');
-    if (!date) continue;
-    const existing = byDate.get(date);
-    if (!existing || compareDocs(doc, existing) < 0) byDate.set(date, doc);
-  }
-  return Array.from(byDate.values()).sort(compareDocs);
+function isPaperLink(label: string, href: string) {
+  return /arxiv\.org|huggingface\.co|github\.com/i.test(href) || /^\d{4}\.\d{4,5}/.test(label);
 }
 
 function compareDocs(a: Doc, b: Doc) {
-  const dateCompare = String(b.meta.date || '').localeCompare(String(a.meta.date || ''));
-  if (dateCompare) return dateCompare;
-  const generatedCompare = String(b.meta.generated_at || '').localeCompare(String(a.meta.generated_at || ''));
-  if (generatedCompare) return generatedCompare;
-  const countCompare = Number(b.meta.candidate_count || 0) - Number(a.meta.candidate_count || 0);
-  if (countCompare) return countCompare;
-  const mtimeCompare = b.mtimeMs - a.mtimeMs;
-  if (mtimeCompare) return mtimeCompare;
-  return b.slug.localeCompare(a.slug);
+  const date = String(b.meta.date || '').localeCompare(String(a.meta.date || ''));
+  if (date !== 0) return date;
+  if ((a.meta.page_type === 'brief') !== (b.meta.page_type === 'brief')) return a.meta.page_type === 'brief' ? -1 : 1;
+  return b.mtimeMs - a.mtimeMs;
 }
 
-function isPaperLink(label: string, href: string) {
-  return /^\d{4}\.\d{4,5}$/.test(label) || String(href || '').includes('arxiv.org') || label === 'PDF';
+function dedupeBriefsByDate(docs: Doc[]) {
+  const seen = new Set<string>();
+  const out: Doc[] = [];
+  for (const doc of docs) {
+    const key = String(doc.meta.date || doc.slug);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(doc);
+  }
+  return out;
 }

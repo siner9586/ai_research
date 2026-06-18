@@ -9,103 +9,10 @@ from ..config import REPO_ROOT, load_yaml
 from ..models import BriefPaper, DailyBrief, ScoredPaper, utc_now
 from ..utils.slug import slugify
 from ..utils.text import first_sentence
+from ..utils.title_localizer import localize_title_zh
 
 _CODE_DATA_ZH = "代码/数据可用性需查看原文确认。"
 _CODE_DATA_EN = "Code/data availability should be checked in the source paper."
-
-
-_TITLE_ZH_EXACT: dict[str, str] = {
-    "A Privacy-Preserving Framework Using Remote Data Science for Inter-Institutional Student Retention Prediction": "一种利用远程数据科学进行跨机构学生留存预测的隐私保护框架",
-    "Rigel: Reverse-Engineering the Metal 4.1 Tensor Compute Path on the Apple M4 Max GPU": "Rigel：逆向解析 Apple M4 Max GPU 上 Metal 4.1 张量计算路径",
-    "EurekAgent: Agent Environment Engineering is All You Need For Autonomous Scientific Discovery": "EurekAgent：面向自主科学发现的 Agent 环境工程",
-    "AgentBeats: Agentifying Agent Assessment for Openness, Standardization, and Reproducibility": "AgentBeats：面向开放性、标准化与可复现性的 Agent 化评测框架",
-    "SPARC: Reliable Spatial Annotations from Robot Demonstrations at Scale": "SPARC：从大规模机器人示范中生成可靠空间标注",
-    "Mod-Guide: An LLM-based Content Moderation Feedback System to Address Insensitive Speech toward Indigenous Ethnic and Religious Minority Communities": "Mod-Guide：面向原住民、少数族裔与宗教少数群体不敏感言论的 LLM 内容审核反馈系统",
-    "An Embodied Simulation Platform, Benchmark, and Data-Efficient Augmentation Framework for Wet-Lab Robotics": "面向湿实验室机器人的具身仿真平台、基准与数据高效增强框架",
-    "MAStrike: Shapley-Guided Collusive Red-Teaming on Multi-Agent Systems": "MAStrike：面向多智能体系统的 Shapley 引导合谋红队测试",
-    "SafeLLM: Extraction as a Hallucination-Resistant Alternative to Rewriting in Safety-Critical Settings": "SafeLLM：安全关键场景中以抽取替代改写的抗幻觉方案",
-    "LongSpike: Fractional Order Spiking State Space Models for Efficient Long Sequence Learning": "LongSpike：用于高效长序列学习的分数阶脉冲状态空间模型",
-    "SMGFM: Spectral Multimodal Graph Pretraining for Multimodal-Attributed Graphs": "SMGFM：面向多模态属性图的谱域多模态图预训练",
-    "LabVLA: Grounding Vision-Language-Action Models in Scientific Laboratories": "LabVLA：将视觉-语言-动作模型落地到科学实验室",
-    "ActiveSAM: Image-Conditional Class Pruning for Fast and Accurate Open-Vocabulary Segmentation": "ActiveSAM：面向快速准确开放词汇分割的图像条件类别剪枝",
-    "ARB4WM: An Adversarial Robustness Benchmark for World Models in Continuous Control": "ARB4WM：面向连续控制世界模型的对抗鲁棒性基准",
-    "When Confidence Lacks Concepts: Interpretable OOD Detection via Representation Perturbations": "当置信度缺少概念：基于表征扰动的可解释分布外检测",
-    "Selection Without Signal, Recovery Through Expression: A Measurement Study of Post-Hoc Falsification Operators for Frozen Small Code Models": "无信号选择与表达恢复：面向冻结小型代码模型的事后证伪算子测量研究",
-    "Semantic Flip: Synthetic OOD Generation for Robust Refusal in Embodied Question Answering and Spatial Localization": "语义翻转：面向具身问答与空间定位鲁棒拒答的合成式分布外样本生成",
-    "Decoupling Semantics from Distortions: Multi-Scale Two-Stream Vision-Language Alignment for AI-Generated Image Quality Assessment": "解耦语义与失真：面向 AI 生成图像质量评估的多尺度双流视觉语言对齐",
-    "All Smoke, No Alarm: Oracle Signals in Agent-Authored Test Code": "烟雾缭绕却未报警：Agent 编写测试代码中的 Oracle 信号",
-}
-
-_TITLE_ZH_RULES: list[tuple[re.Pattern[str], str]] = [
-    (re.compile(r"^A\s+", re.I), "一种"),
-    (re.compile(r"^An\s+", re.I), "一种"),
-    (re.compile(r"^The\s+", re.I), ""),
-    (re.compile(r"Privacy-Preserving", re.I), "隐私保护"),
-    (re.compile(r"Remote Data Science", re.I), "远程数据科学"),
-    (re.compile(r"Inter-Institutional", re.I), "跨机构"),
-    (re.compile(r"Student Retention Prediction", re.I), "学生留存预测"),
-    (re.compile(r"Embodied Simulation Platform", re.I), "具身仿真平台"),
-    (re.compile(r"Wet-Lab Robotics", re.I), "湿实验室机器人"),
-    (re.compile(r"Data-Efficient Augmentation Framework", re.I), "数据高效增强框架"),
-    (re.compile(r"Shapley-Guided", re.I), "Shapley 引导"),
-    (re.compile(r"Collusive Red-Teaming", re.I), "合谋红队测试"),
-    (re.compile(r"Multi-Agent Systems", re.I), "多智能体系统"),
-    (re.compile(r"Hallucination-Resistant", re.I), "抗幻觉"),
-    (re.compile(r"Safety-Critical Settings", re.I), "安全关键场景"),
-    (re.compile(r"Fractional Order Spiking State Space Models", re.I), "分数阶脉冲状态空间模型"),
-    (re.compile(r"Long Sequence Learning", re.I), "长序列学习"),
-    (re.compile(r"Spectral Multimodal Graph Pretraining", re.I), "谱域多模态图预训练"),
-    (re.compile(r"Multimodal-Attributed Graphs", re.I), "多模态属性图"),
-    (re.compile(r"Vision-Language-Action Models", re.I), "视觉-语言-动作模型"),
-    (re.compile(r"Scientific Laboratories", re.I), "科学实验室"),
-    (re.compile(r"Open-Vocabulary Segmentation", re.I), "开放词汇分割"),
-    (re.compile(r"Image-Conditional Class Pruning", re.I), "图像条件类别剪枝"),
-    (re.compile(r"Adversarial Robustness Benchmark", re.I), "对抗鲁棒性基准"),
-    (re.compile(r"World Models", re.I), "世界模型"),
-    (re.compile(r"Continuous Control", re.I), "连续控制"),
-    (re.compile(r"Interpretable OOD Detection", re.I), "可解释分布外检测"),
-    (re.compile(r"Representation Perturbations", re.I), "表征扰动"),
-    (re.compile(r"Post-Hoc Falsification Operators", re.I), "事后证伪算子"),
-    (re.compile(r"Frozen Small Code Models", re.I), "冻结小型代码模型"),
-    (re.compile(r"Synthetic OOD Generation", re.I), "合成式分布外样本生成"),
-    (re.compile(r"Robust Refusal", re.I), "鲁棒拒答"),
-    (re.compile(r"Embodied Question Answering", re.I), "具身问答"),
-    (re.compile(r"Spatial Localization", re.I), "空间定位"),
-    (re.compile(r"AI-Generated Image Quality Assessment", re.I), "AI 生成图像质量评估"),
-    (re.compile(r"Multi-Scale Two-Stream Vision-Language Alignment", re.I), "多尺度双流视觉语言对齐"),
-    (re.compile(r"Oracle Signals", re.I), "Oracle 信号"),
-    (re.compile(r"Agent-Authored Test Code", re.I), "Agent 编写测试代码"),
-    (re.compile(r"Reverse-Engineering", re.I), "逆向解析"),
-    (re.compile(r"Tensor Compute Path", re.I), "张量计算路径"),
-    (re.compile(r"Autonomous Scientific Discovery", re.I), "自主科学发现"),
-    (re.compile(r"Agent Environment Engineering", re.I), "Agent 环境工程"),
-    (re.compile(r"Agent Assessment", re.I), "Agent 评测"),
-    (re.compile(r"Openness", re.I), "开放性"),
-    (re.compile(r"Standardization", re.I), "标准化"),
-    (re.compile(r"Reproducibility", re.I), "可复现性"),
-    (re.compile(r"Reliable Spatial Annotations", re.I), "可靠空间标注"),
-    (re.compile(r"Robot Demonstrations", re.I), "机器人示范"),
-    (re.compile(r"Content Moderation Feedback System", re.I), "内容审核反馈系统"),
-    (re.compile(r"Insensitive Speech", re.I), "不敏感言论"),
-    (re.compile(r"Indigenous Ethnic and Religious Minority Communities", re.I), "原住民、少数族裔与宗教少数群体"),
-    (re.compile(r"LLM-based", re.I), "基于 LLM 的"),
-    (re.compile(r"Framework", re.I), "框架"),
-    (re.compile(r"Platform", re.I), "平台"),
-    (re.compile(r"Benchmark", re.I), "基准"),
-    (re.compile(r"Evaluation", re.I), "评测"),
-    (re.compile(r"Assessment", re.I), "评估"),
-    (re.compile(r"Agentifying", re.I), "Agent 化"),
-    (re.compile(r"Agent", re.I), "Agent"),
-    (re.compile(r"Extraction", re.I), "抽取"),
-    (re.compile(r"Rewriting", re.I), "改写"),
-    (re.compile(r"Grounding", re.I), "落地"),
-    (re.compile(r"at Scale", re.I), "的大规模方法"),
-    (re.compile(r"Using", re.I), "使用"),
-    (re.compile(r"for", re.I), "面向"),
-    (re.compile(r"from", re.I), "来自"),
-    (re.compile(r"toward", re.I), "面向"),
-    (re.compile(r"and", re.I), "与"),
-]
 
 
 def render_daily_markdown(
@@ -187,7 +94,7 @@ def _brief_markdown(brief: DailyBrief, candidates: list[ScoredPaper], data_date:
         "featured_paper_urls": featured_urls,
     }
     if brief.lang == "zh":
-        frontmatter["featured_paper_titles_zh"] = [_paper_title_zh(title) for title in featured_titles]
+        frontmatter["featured_paper_titles_zh"] = [localize_title_zh(title) for title in featured_titles]
     lines = [
         *_frontmatter(frontmatter),
         "",
@@ -447,21 +354,6 @@ def _topic_label(row: ScoredPaper, lang: str) -> str:
         if topic.get("slug") == row.topic_slug:
             return topic.get(lang) or topic.get("en") or row.topic
     return "其他" if lang == "zh" else row.topic
-
-
-def _paper_title_zh(title: str) -> str:
-    clean = re.sub(r"\s+", " ", title or "").strip()
-    if not clean:
-        return "未命名论文"
-    if clean in _TITLE_ZH_EXACT:
-        return _TITLE_ZH_EXACT[clean]
-    text = clean
-    for pattern, replacement in _TITLE_ZH_RULES:
-        text = pattern.sub(replacement, text)
-    text = re.sub(r"\s*:\s*", "：", text)
-    text = re.sub(r"\s*,\s*", "，", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text or clean
 
 
 def _labels(lang: str) -> dict[str, str]:

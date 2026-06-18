@@ -235,7 +235,7 @@ def _paper_section(index: int, paper: BriefPaper, lang: str) -> list[str]:
 def _compact_explanation(paper: BriefPaper, lang: str) -> str:
     keywords = _format_keywords(paper.bullets, lang)
     if lang == "zh":
-        return f"核心：这篇论文主要解决{_trim_clause(paper.problem)}；方法上通过{_trim_clause(paper.method)}实现{paper.short_title}；信号显示：{_trim_clause(paper.practitioner_takeaway)}。关键词：{keywords}。{_CODE_DATA_ZH}"
+        return f"信号显示：{_trim_clause(paper.practitioner_takeaway)}。关键词：{keywords}。{_CODE_DATA_ZH}"
     return f"Core idea: this paper targets {_trim_clause(paper.problem)}. It uses {_trim_clause(paper.method)} to improve {paper.short_title}. The main claim is {_trim_clause(paper.practitioner_takeaway)}. Keywords: {keywords}. {_CODE_DATA_EN}"
 
 

@@ -7,6 +7,7 @@ from html import escape as html_escape
 
 from ..config import REPO_ROOT, load_yaml
 from ..models import BriefPaper, DailyBrief, ScoredPaper, utc_now
+from ..utils.signal_localizer import localize_signal_zh
 from ..utils.slug import slugify
 from ..utils.text import first_sentence
 from ..utils.title_localizer import localize_title_zh
@@ -181,7 +182,7 @@ def _brief_paper(row: ScoredPaper, lang: str) -> BriefPaper:
     if lang == "zh":
         problem = f"{focus}这一方向中的具体研究问题"
         method = _method_signal(row, keywords, lang)
-        claim = f"标题、摘要和公开信号显示：{abstract_sentence}"
+        claim = localize_signal_zh(abstract_sentence)
         limit = _CODE_DATA_ZH
     else:
         problem = f"the concrete research problem behind {focus}"
@@ -222,9 +223,10 @@ def _paper_section(index: int, paper: BriefPaper, lang: str) -> list[str]:
         f"### {index}. {paper.short_title}",
         "",
         f"<p class=\"paper-meta-line\"><span>{meta_text}</span> <a class=\"paper-meta-link\" href=\"{abs_url}\">{html_escape(paper.arxiv_id)}</a> <a class=\"paper-meta-link\" href=\"{pdf_url}\">PDF</a></p>",
-        "",
-        _compact_explanation(paper, lang),
     ]
+    if lang == "zh":
+        lines.extend(["", f"中文标题：{localize_title_zh(paper.original_title)}"])
+    lines.extend(["", _compact_explanation(paper, lang)])
     if paper.code_url:
         lines.append(f"<p class=\"paper-meta-line\"><a class=\"paper-meta-link\" href=\"{html_escape(paper.code_url, quote=True)}\">{labels['code']}</a></p>")
     return lines
@@ -233,14 +235,18 @@ def _paper_section(index: int, paper: BriefPaper, lang: str) -> list[str]:
 def _compact_explanation(paper: BriefPaper, lang: str) -> str:
     keywords = _format_keywords(paper.bullets, lang)
     if lang == "zh":
-        return f"核心：这篇论文主要解决{_trim_clause(paper.problem)}；方法上通过{_trim_clause(paper.method)}实现{paper.short_title}；主要论点是{_trim_clause(paper.practitioner_takeaway)}。关键词：{keywords}。{_CODE_DATA_ZH}"
+        return f"核心：这篇论文主要解决{_trim_clause(paper.problem)}；方法上通过{_trim_clause(paper.method)}实现{paper.short_title}；信号显示：{_trim_clause(paper.practitioner_takeaway)}。关键词：{keywords}。{_CODE_DATA_ZH}"
     return f"Core idea: this paper targets {_trim_clause(paper.problem)}. It uses {_trim_clause(paper.method)} to improve {paper.short_title}. The main claim is {_trim_clause(paper.practitioner_takeaway)}. Keywords: {keywords}. {_CODE_DATA_EN}"
 
 
 def _mention_lines(paper: BriefPaper, lang: str) -> list[str]:
     reason = _mention_reason(paper, lang)
     if lang == "zh":
-        return [f"- [{paper.original_title}]({paper.abs_url})：{reason}"]
+        return [
+            f"- [{paper.original_title}]({paper.abs_url})",
+            f"中文标题：{localize_title_zh(paper.original_title)}",
+            f"关注理由：{reason}",
+        ]
     return [f"- [{paper.original_title}]({paper.abs_url}): {reason}"]
 
 

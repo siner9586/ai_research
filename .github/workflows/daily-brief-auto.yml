@@ -114,6 +114,8 @@ jobs:
         env:
           DELAY_DAYS: ${{ github.event.inputs.delay_days || '2' }}
           FALLBACK_DAYS: ${{ github.event.inputs.fallback_days || '2' }}
+          TITLE_TRANSLATION_USE_NETWORK: "1"
+          TITLE_TRANSLATION_TIMEOUT: "4"
         run: |
           set -euo pipefail
           echo "production_mode=real"

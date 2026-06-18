@@ -17,7 +17,7 @@ featured_count: 6
 mentions_count: 20
 featured_paper_titles: ["LiveStarPro: Proactive Streaming Video Understanding with Hierarchical Memory for Long-Horizon Streams", "All Smoke, No Alarm: Oracle Signals in Agent-Authored Test Code", "Reasoning as Intersection: Consensus-Frame Alignment for Visual Focus in Video-MLLMs", "RubricsTree: Scalable and Evolving Open-Ended Evaluation of Personal Health Agents across Health Memory and Medical Skills", "Do Generative Recommenders Deepen the Information Cocoon? A Closed-Loop Simulation with LLM-powered User Simulators", "Temporal Preference Optimization for Unsupervised Retrieval"]
 featured_paper_urls: ["https://arxiv.org/abs/2606.17798", "https://arxiv.org/abs/2606.18168", "https://arxiv.org/abs/2606.18441", "https://arxiv.org/abs/2606.18203", "https://arxiv.org/abs/2606.17707", "https://arxiv.org/abs/2606.17664"]
-featured_paper_titles_zh: ["LiveStarPro：Proactive Streaming Video Underst与ing with Hierarchical Memory 面向 Long-Horizon Streams", "烟雾缭绕却未报警：Agent 编写测试代码中的 Oracle 信号", "Reasoning as Intersection：Consensus-Frame Alignment 面向 Visual Focus in Video-MLLMs", "RubricsTree：Scalable 与 Evolving Open-Ended 评测 of Personal Health Agents across Health Memory 与 Medical Skills", "Do Generative Recommenders Deepen the In面向mation Cocoon? A Closed-Loop Simulation with LLM-powered User Simulators", "Temporal Preference Optimization 面向 Unsupervised Retrieval"]
+featured_paper_titles_zh: ["LiveStarPro：面向长时程视频流的层级记忆主动式流式视频理解", "烟雾缭绕却未报警：Agent 编写测试代码中的 Oracle 信号", "推理即交集：面向 Video-MLLM 视觉聚焦的共识帧对齐", "RubricsTree：面向个人健康 Agent 的健康记忆与医疗技能开放式可扩展评测", "生成式推荐会加深信息茧房吗？基于 LLM 用户模拟器的闭环仿真", "无监督检索的时间偏好优化"]
 ---
 
 # 提升 RAG 检索和知识库问答可靠性、让 Agent 更可靠地调用工具和复用技能、提升模型推理、规划和验证能力

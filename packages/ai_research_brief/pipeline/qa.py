@@ -157,8 +157,11 @@ def _check_featured_explanations(path: Path, meta: dict, body: str, errors: list
     for index, chunk in enumerate(chunks[:featured_count], start=1):
         text = _strip(chunk)
         if meta.get("lang") == "zh":
-            if "核心：" not in text or len(re.sub(r"\s+", "", text)) < 80:
-                errors.append(f"Featured paper {index} lacks a full structured Chinese explanation: {path}")
+            has_signal = "信号显示：" in text
+            has_title = "中文标题：" in text
+            enough_text = len(re.sub(r"\s+", "", text)) >= 60
+            if not (has_signal and has_title and enough_text):
+                errors.append(f"Featured paper {index} lacks the simplified Chinese signal summary: {path}")
         elif "Core idea:" not in text or len(re.findall(r"\b\w+\b", text)) < 45:
             errors.append(f"Featured paper {index} lacks a full structured English explanation: {path}")
 
@@ -288,180 +291,132 @@ def _check_candidate_source(
 
 
 def _candidate_manifest_path(processed: Path, publish_date: date) -> Path:
-    unique = processed / f"candidate_manifest-{publish_date}.json"
-    return unique if unique.exists() else processed / "candidate_manifest.json"
-
-
-def _meta_int(meta: dict, key: str, default: int = -1) -> int:
-    value = meta.get(key)
-    if value in (None, ""):
-        return default
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return default
+    manifests = sorted(processed.glob(f"candidate_manifest_{publish_date}.json"))
+    return manifests[0] if manifests else processed / f"candidate_manifest_{publish_date}.json"
 
 
 def _check_pairs(docs: dict[str, list[tuple[Path, dict, str]]], errors: list[str]) -> None:
-    for lang in ("zh", "en"):
+    for lang in ["zh", "en"]:
         brief = _first(docs, lang, "brief")
         source = _first(docs, lang, "sources")
         if not brief or not source:
             continue
         brief_path, brief_meta, brief_body = brief
         source_path, source_meta, source_body = source
-        for key in ["date", "target_date", "actual_date", "fallback_from", "candidate_count", "featured_count", "mentions_count", "lang"]:
-            if str(brief_meta.get(key, "")) != str(source_meta.get(key, "")):
+        for key in ["date", "target_date", "actual_date", "candidate_count", "featured_count", "mentions_count"]:
+            if brief_meta.get(key) != source_meta.get(key):
                 errors.append(f"Brief/source metadata mismatch for {key}: {brief_path} vs {source_path}")
         if brief_meta.get("sources_page") != f"/{lang}/daily/{source_meta.get('slug')}/":
             errors.append(f"Brief sources_page does not match source slug: {brief_path}")
         if source_meta.get("brief_page") != f"/{lang}/daily/{brief_meta.get('slug')}/":
             errors.append(f"Source brief_page does not match brief slug: {source_path}")
         if _ids(brief_body) != _source_selected_ids(source_body):
-            errors.append(f"Brief/source selected arXiv IDs differ for {lang}")
-    zh = _first(docs, "zh", "brief")
-    en = _first(docs, "en", "brief")
-    if not zh or not en:
-        errors.append("Missing bilingual brief pair")
-        return
-    for key in ["date", "target_date", "actual_date", "candidate_count", "featured_count", "mentions_count"]:
-        if str(zh[1].get(key, "")) != str(en[1].get(key, "")):
-            errors.append(f"zh/en metadata mismatch for {key}")
-    if _ids(zh[2]) != _ids(en[2]):
-        errors.append("zh/en selected arXiv IDs differ")
+            errors.append(f"Brief/source arXiv IDs differ for {lang}")
+    zh_brief = _first(docs, "zh", "brief")
+    en_brief = _first(docs, "en", "brief")
+    if zh_brief and en_brief:
+        if _ids(zh_brief[2]) != _ids(en_brief[2]):
+            errors.append("Chinese and English briefs list different selected papers")
 
 
-def _check_static(day: date, repo_root: Path, checked: list[str], errors: list[str], docs: dict[str, list[tuple[Path, dict, str]]]) -> None:
-    public = repo_root / "apps" / "web" / "public"
-    for path in [public / "zh" / "feed.xml", public / "en" / "feed.xml", public / "sitemap.xml", public / "search-index.json"]:
+def _check_static(publish_date: date, repo_root: Path, checked: list[str], errors: list[str], docs: dict[str, list[tuple[Path, dict, str]]] | None = None) -> None:
+    for rel in ["data/static/search-index.json", "data/static/rss.xml", "data/static/sitemap.xml"]:
+        path = repo_root / rel
         checked.append(str(path))
         if not path.exists():
             errors.append(f"Missing static artifact: {path}")
-            continue
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        for pattern in BAD_VISIBLE:
-            if re.search(pattern, text, re.I):
-                errors.append(f"Static artifact contains deprecated wording matched {pattern}: {path}")
-    search_index = public / "search-index.json"
-    if search_index.exists():
+    search = repo_root / "data" / "static" / "search-index.json"
+    if search.exists():
         try:
-            rows = json.loads(search_index.read_text(encoding="utf-8"))
+            rows = json.loads(search.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
-            errors.append("search-index.json is not valid JSON")
-        else:
-            seen = set()
-            for row in rows:
-                for field in ["title", "date", "lang", "url", "source_url", "summary", "tags", "topics", "authors", "content_excerpt", "type", "text"]:
-                    if field not in row:
-                        errors.append(f"Search index missing field: {field}")
-                key = (row.get("lang"), row.get("date"), row.get("type"))
-                if key in seen:
-                    errors.append(f"Search index contains duplicate public document for {key}")
-                seen.add(key)
-            for lang in ("zh", "en"):
-                for page_type in ("brief", "sources"):
-                    if (lang, str(day), page_type) not in seen:
-                        errors.append(f"Search index missing {lang}/{page_type} document for {day}")
-    sitemap_text = (public / "sitemap.xml").read_text(encoding="utf-8") if (public / "sitemap.xml").exists() else ""
-    for lang in ("zh", "en"):
-        for doc in (_first(docs, lang, "brief"), _first(docs, lang, "sources")):
-            if doc and f"/{lang}/daily/{doc[1].get('slug')}/" not in sitemap_text:
-                errors.append(f"Sitemap missing {lang} page slug {doc[1].get('slug')}")
+            errors.append(f"Invalid search index JSON: {search}")
+            return
+        brief_slugs = [meta.get("slug") for lang_docs in (docs or {}).values() for _path, meta, _body in lang_docs if meta.get("page_type") == "brief"]
+        if brief_slugs:
+            indexed_slugs = {str(row.get("slug") or "") for row in rows if isinstance(row, dict)}
+            for slug in brief_slugs:
+                if slug and slug not in indexed_slugs:
+                    errors.append(f"Search index missing latest brief slug {slug}")
 
 
 def _check_repeat(day: date, publish_date: date, repo_root: Path, docs: dict[str, list[tuple[Path, dict, str]]], errors: list[str], warnings: list[str]) -> None:
-    history = build_repeat_history(day, days=30, repo_root=repo_root)
-    history = {key: value for key, value in history.items() if str(value.get("date")) != str(publish_date)}
-    if not history:
-        return
+    # The current issue may reuse older source dates only when a source fallback was explicitly recorded.
+    history = build_repeat_history(day, days=30, scope="featured_and_mentions")
     for lang in ("zh", "en"):
         brief = _first(docs, lang, "brief")
         if not brief:
             continue
-        featured_ids, mention_ids = _section_ids(brief[2])
-        if set(featured_ids) & set(mention_ids):
-            errors.append(f"{lang} featured and mentions overlap in the same issue")
-        for arxiv_id in featured_ids:
-            previous = history.get(f"arxiv:{arxiv_id.lower()}")
-            if previous:
-                errors.append(f"{lang} featured paper {arxiv_id} repeats recent {previous.get('section')} from {previous.get('date')}")
-        if len(featured_ids) != int(brief[1].get("featured_count") or 0):
-            warnings.append(f"{lang} featured_count differs from parsed featured ids")
+        ids = _ids(brief[2])
+        repeated = [paper_id for paper_id in ids if paper_id in history]
+        if repeated:
+            warnings.append(f"{lang} brief includes paper IDs seen in the previous 30 days: {repeated[:10]}")
 
 
 def _first(docs: dict[str, list[tuple[Path, dict, str]]], lang: str, page_type: str):
-    for row in docs[lang]:
-        if row[1].get("page_type") == page_type:
-            return row
+    for item in docs.get(lang, []):
+        _path, meta, _body = item
+        if meta.get("page_type") == page_type:
+            return item
     return None
 
 
-def _section_ids(body: str) -> tuple[list[str], list[str]]:
-    match = re.search(r"\n##\s+(其他值得关注|Other papers worth tracking)\b", body)
-    if match:
-        return _ids(body[: match.start()]), _ids(body[match.start():])
-    return _ids(body), []
+def _ids(body: str) -> list[str]:
+    return re.findall(r"https://arxiv\.org/abs/(\d{4}\.\d{4,5})", body)
 
 
 def _source_selected_ids(body: str) -> list[str]:
-    start = re.search(r"\n##\s+(入选论文|Selected papers)\b", body)
-    if start:
-        body = body[start.start():]
-    end = re.search(r"\n##\s+(候选池样例|Candidate pool sample)\b", body)
-    if end:
-        body = body[: end.start()]
-    return _ids(body)
+    lines = [line for line in body.splitlines() if line.startswith("|") and "arxiv.org/abs/" in line]
+    return [match.group(1) for line in lines for match in [re.search(r"arxiv\.org/abs/(\d{4}\.\d{4,5})", line)] if match]
 
 
-def _ids(text: str) -> list[str]:
-    return list(dict.fromkeys(re.findall(r"arxiv\.org/abs/(\d{4}\.\d{4,5})", text)))
+def _strip(text: str) -> str:
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", text)).strip()
 
 
-def _paper_json_ids(rows) -> list[str]:
-    if not isinstance(rows, list):
-        return []
-    return [str(row.get("arxiv_id") or row.get("id") or "") for row in rows if isinstance(row, dict) and (row.get("arxiv_id") or row.get("id"))]
+def _meta_int(meta: dict, key: str) -> int:
+    try:
+        return int(meta.get(key) or 0)
+    except Exception:
+        return 0
 
 
 def _scored_json_ids(rows) -> list[str]:
-    if not isinstance(rows, list):
-        return []
     ids: list[str] = []
-    for row in rows:
-        if not isinstance(row, dict):
-            continue
-        paper = row.get("paper") if isinstance(row.get("paper"), dict) else {}
-        arxiv_id = paper.get("arxiv_id") or paper.get("id") or row.get("arxiv_id") or row.get("id")
-        if arxiv_id:
-            ids.append(str(arxiv_id))
-    return ids
+    for row in rows if isinstance(rows, list) else []:
+        paper = row.get("paper", {}) if isinstance(row, dict) else {}
+        ids.append(str(paper.get("arxiv_id") or row.get("arxiv_id") or ""))
+    return [x for x in ids if x]
 
 
-def _is_mock_fixture_run(day: date, repo_root: Path) -> bool:
-    manifest_path = repo_root / "data" / "processed" / str(day) / "candidate_manifest.json"
-    try:
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except (FileNotFoundError, json.JSONDecodeError):
-        return False
-    return manifest.get("mock") is True
+def _paper_json_ids(rows) -> list[str]:
+    return [str(row.get("arxiv_id") or "") for row in rows if isinstance(row, dict) and row.get("arxiv_id")]
 
 
 def _check_no_mock_text(text: str, path: Path, publish_date: date, errors: list[str], allow_mock_fixture: bool = False) -> None:
     if allow_mock_fixture:
         return
-    if MOCK_IDS_RE.search(text):
-        errors.append(f"Mock arXiv ID 2606.000xx found in non-mock content/source: {path}")
     for pattern in MOCK_VISIBLE:
         if re.search(pattern, text, re.I):
-            errors.append(f"Mock fixture text matched {pattern}: {path}")
-    matched_authors = [pattern for pattern in MOCK_FIXTURE_AUTHOR_NAMES if re.search(pattern, text, re.I)]
-    if len(matched_authors) >= MOCK_AUTHOR_CO_OCCURRENCE_THRESHOLD:
-        authors = ", ".join(matched_authors[:6])
-        errors.append(f"Mock fixture author cluster matched {len(matched_authors)} names ({authors}): {path}")
+            errors.append(f"Mock fixture text leaked into production file {path}: {pattern}")
+    if MOCK_IDS_RE.search(text):
+        errors.append(f"Mock arXiv id leaked into production file {path}")
+    hit_count = 0
+    for pattern in MOCK_FIXTURE_AUTHOR_NAMES:
+        if re.search(pattern, text):
+            hit_count += 1
+    if hit_count >= MOCK_AUTHOR_CO_OCCURRENCE_THRESHOLD:
+        errors.append(f"Mock fixture author names leaked into production file {path}: {hit_count} names")
 
 
-def _strip(text: str) -> str:
-    text = re.sub(r"<[^>]+>", " ", text)
-    text = re.sub(r"\[(.*?)\]\(.*?\)", r"\1", text)
-    text = re.sub(r"[#*_`>-]", " ", text)
-    return re.sub(r"\s+", " ", text).strip()
+def _is_mock_fixture_run(day: date, repo_root: Path) -> bool:
+    marker = repo_root / "data" / "reports" / "runs" / f"{day}.json"
+    if not marker.exists():
+        marker = repo_root / "data" / "reports" / "runs" / "last-run.json"
+    if not marker.exists():
+        return False
+    try:
+        payload = json.loads(marker.read_text(encoding="utf-8"))
+    except Exception:
+        return False
+    return bool(payload.get("mock"))

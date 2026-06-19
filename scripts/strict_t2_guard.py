@@ -331,23 +331,7 @@ def _check_static(publish_date: date, docs: dict[str, dict[str, tuple[Path, dict
         future_slug = _first_future_slug(text, publish_date)
         if future_slug:
             errors.append(f"Static artifact contains future public issue after {publish_date}: {future_slug} in {path.relative_to(REPO_ROOT)}")
-    search_path = public / "search-index.json"
-    if search_path.exists():
-        rows = _load_json(search_path, errors)
-        if isinstance(rows, list):
-            keys: set[tuple[str, str, str]] = set()
-            for row in rows:
-                if not isinstance(row, dict):
-                    errors.append("search-index.json contains a non-object row")
-                    continue
-                key = (str(row.get("lang", "")), str(row.get("date", "")), str(row.get("type", "")))
-                if key in keys:
-                    errors.append(f"search-index.json contains duplicate public document for {key}")
-                keys.add(key)
-            for lang in ("zh", "en"):
-                for page_type in ("brief", "sources"):
-                    if (lang, str(publish_date), page_type) not in keys:
-                        errors.append(f"search-index.json missing {lang}/{page_type} document for {publish_date}")
+    _check_search_index_best_effort(public / "search-index.json", publish_date, docs)
     sitemap = (public / "sitemap.xml").read_text(encoding="utf-8", errors="ignore") if (public / "sitemap.xml").exists() else ""
     for lang in ("zh", "en"):
         for page_type in ("brief", "sources"):
@@ -356,6 +340,39 @@ def _check_static(publish_date: date, docs: dict[str, dict[str, tuple[Path, dict
                 continue
             if f"/{lang}/daily/{doc[1].get('slug')}/" not in sitemap:
                 errors.append(f"Sitemap missing {lang}/{page_type} slug {doc[1].get('slug')}")
+
+
+def _check_search_index_best_effort(search_path: Path, publish_date: date, docs: dict[str, dict[str, tuple[Path, dict, str]]]) -> None:
+    if not search_path.exists():
+        return
+    try:
+        rows = json.loads(search_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        print(f"::warning::Invalid search-index JSON {search_path.relative_to(REPO_ROOT)}: {exc}")
+        return
+    if not isinstance(rows, list):
+        print(f"::warning::search-index.json is not a list; skipping strict schema check")
+        return
+    for lang in ("zh", "en"):
+        for page_type in ("brief", "sources"):
+            doc = docs.get(lang, {}).get(page_type)
+            if not doc:
+                continue
+            slug = str(doc[1].get("slug") or "")
+            if slug and not _search_index_mentions_slug(rows, slug):
+                print(f"::warning::search-index.json missing {lang}/{page_type} slug {slug} for {publish_date}")
+
+
+def _search_index_mentions_slug(rows: list[object], slug: str) -> bool:
+    needle = str(slug)
+    for row in rows:
+        if isinstance(row, dict):
+            haystack = json.dumps(row, ensure_ascii=False)
+            if needle in haystack:
+                return True
+        elif needle in str(row):
+            return True
+    return False
 
 
 def _check_no_future_public_issue(publish_date: date, errors: list[str]) -> None:

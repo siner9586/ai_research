@@ -291,8 +291,15 @@ def _check_candidate_source(
 
 
 def _candidate_manifest_path(processed: Path, publish_date: date) -> Path:
-    manifests = sorted(processed.glob(f"candidate_manifest_{publish_date}.json"))
-    return manifests[0] if manifests else processed / f"candidate_manifest_{publish_date}.json"
+    candidates = [
+        processed / f"candidate_manifest_{publish_date}.json",
+        processed / f"candidate_manifest-{publish_date}.json",
+    ]
+    for path in candidates:
+        if path.exists():
+            return path
+    matches = sorted(processed.glob(f"candidate_manifest*{publish_date}.json"))
+    return matches[0] if matches else candidates[0]
 
 
 def _check_pairs(docs: dict[str, list[tuple[Path, dict, str]]], errors: list[str]) -> None:
@@ -320,13 +327,23 @@ def _check_pairs(docs: dict[str, list[tuple[Path, dict, str]]], errors: list[str
 
 
 def _check_static(publish_date: date, repo_root: Path, checked: list[str], errors: list[str], docs: dict[str, list[tuple[Path, dict, str]]] | None = None) -> None:
-    for rel in ["data/static/search-index.json", "data/static/rss.xml", "data/static/sitemap.xml"]:
-        path = repo_root / rel
-        checked.append(str(path))
-        if not path.exists():
-            errors.append(f"Missing static artifact: {path}")
-    search = repo_root / "data" / "static" / "search-index.json"
-    if search.exists():
+    required_groups = [
+        [repo_root / "apps" / "web" / "public" / "search-index.json", repo_root / "data" / "static" / "search-index.json"],
+        [repo_root / "apps" / "web" / "public" / "sitemap.xml", repo_root / "data" / "static" / "sitemap.xml"],
+        [repo_root / "apps" / "web" / "public" / "zh" / "feed.xml", repo_root / "data" / "static" / "rss.xml"],
+        [repo_root / "apps" / "web" / "public" / "en" / "feed.xml"],
+    ]
+    resolved: dict[str, Path] = {}
+    for group in required_groups:
+        for path in group:
+            checked.append(str(path))
+        existing = next((path for path in group if path.exists()), None)
+        if not existing:
+            errors.append("Missing static artifact; tried: " + ", ".join(str(path) for path in group))
+        else:
+            resolved[str(group[0].name)] = existing
+    search = next((path for path in required_groups[0] if path.exists()), None)
+    if search:
         try:
             rows = json.loads(search.read_text(encoding="utf-8"))
         except json.JSONDecodeError:

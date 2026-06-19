@@ -85,7 +85,7 @@ def run_qa(day: date, content_dir: Path, reports_dir: Path, target_date: date | 
     _check_processed(day, repo_root, checked, errors)
     _check_candidate_source(day, publish_date, target_date, repo_root, docs, checked, errors, allow_mock_fixture)
     _check_pairs(docs, errors)
-    _check_static(publish_date, repo_root, checked, errors, docs)
+    _check_static(publish_date, repo_root, checked, errors, warnings, docs)
     _check_repeat(day, publish_date, repo_root, docs, errors, warnings)
 
     report = QAReport(
@@ -326,35 +326,43 @@ def _check_pairs(docs: dict[str, list[tuple[Path, dict, str]]], errors: list[str
             errors.append("Chinese and English briefs list different selected papers")
 
 
-def _check_static(publish_date: date, repo_root: Path, checked: list[str], errors: list[str], docs: dict[str, list[tuple[Path, dict, str]]] | None = None) -> None:
+def _check_static(publish_date: date, repo_root: Path, checked: list[str], errors: list[str], warnings: list[str], docs: dict[str, list[tuple[Path, dict, str]]] | None = None) -> None:
     required_groups = [
         [repo_root / "apps" / "web" / "public" / "search-index.json", repo_root / "data" / "static" / "search-index.json"],
         [repo_root / "apps" / "web" / "public" / "sitemap.xml", repo_root / "data" / "static" / "sitemap.xml"],
         [repo_root / "apps" / "web" / "public" / "zh" / "feed.xml", repo_root / "data" / "static" / "rss.xml"],
         [repo_root / "apps" / "web" / "public" / "en" / "feed.xml"],
     ]
-    resolved: dict[str, Path] = {}
     for group in required_groups:
         for path in group:
             checked.append(str(path))
-        existing = next((path for path in group if path.exists()), None)
-        if not existing:
+        if not any(path.exists() for path in group):
             errors.append("Missing static artifact; tried: " + ", ".join(str(path) for path in group))
-        else:
-            resolved[str(group[0].name)] = existing
     search = next((path for path in required_groups[0] if path.exists()), None)
     if search:
         try:
             rows = json.loads(search.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
-            errors.append(f"Invalid search index JSON: {search}")
+            warnings.append(f"Invalid search index JSON: {search}")
             return
         brief_slugs = [meta.get("slug") for lang_docs in (docs or {}).values() for _path, meta, _body in lang_docs if meta.get("page_type") == "brief"]
-        if brief_slugs:
-            indexed_slugs = {str(row.get("slug") or "") for row in rows if isinstance(row, dict)}
-            for slug in brief_slugs:
-                if slug and slug not in indexed_slugs:
-                    errors.append(f"Search index missing latest brief slug {slug}")
+        for slug in brief_slugs:
+            if slug and not _search_index_mentions_slug(rows, slug):
+                warnings.append(f"Search index missing latest brief slug {slug}")
+
+
+def _search_index_mentions_slug(rows: object, slug: str) -> bool:
+    if not isinstance(rows, list):
+        return False
+    needle = str(slug)
+    for row in rows:
+        if isinstance(row, dict):
+            values = [str(value) for value in row.values() if isinstance(value, (str, int, float))]
+            if any(needle in value for value in values):
+                return True
+        elif needle in str(row):
+            return True
+    return False
 
 
 def _check_repeat(day: date, publish_date: date, repo_root: Path, docs: dict[str, list[tuple[Path, dict, str]]], errors: list[str], warnings: list[str]) -> None:

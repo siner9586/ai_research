@@ -28,9 +28,9 @@ on:
         required: false
         default: "2"
       fallback_days:
-        description: "Extra lookback days after T+2. 3 means publish_date-2/-3/-4/-5."
+        description: "Extra lookback days after T+2. Default tries 8 source dates."
         required: false
-        default: "3"
+        default: "7"
 
 permissions:
   contents: write
@@ -115,7 +115,7 @@ jobs:
         if: steps.publish_state.outputs.skip != 'true'
         env:
           DELAY_DAYS: ${{ github.event.inputs.delay_days || '2' }}
-          FALLBACK_DAYS: ${{ github.event.inputs.fallback_days || '3' }}
+          FALLBACK_DAYS: ${{ github.event.inputs.fallback_days || '7' }}
           TITLE_TRANSLATION_USE_NETWORK: "1"
           TITLE_TRANSLATION_TIMEOUT: "4"
         run: |
@@ -166,7 +166,7 @@ jobs:
       - name: Run candidate lineage guard
         if: steps.publish_state.outputs.skip != 'true'
         run: |
-          python scripts/candidate_lineage_guard.py --mode daily --max-fallback-days 3
+          python scripts/candidate_lineage_guard.py --mode daily --max-fallback-days 7
 
       - name: Run publication scope guard
         if: steps.publish_state.outputs.skip != 'true'

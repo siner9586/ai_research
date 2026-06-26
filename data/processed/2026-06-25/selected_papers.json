@@ -1,0 +1,2685 @@
+{
+  "featured": [
+    {
+      "paper": {
+        "id": "2606.26535",
+        "arxiv_id": "2606.26535",
+        "title": "From Hallucination to Grounding: Diagnosing Visual Spatial Intelligence via CRISP",
+        "abstract": "Current VLM evaluations often conflate language priors with genuine spatial reasoning. To address this, we introduce CRISP, a novel structural-diagnostic evaluation paradigm that assesses visual spatial intelligence through consistency, the alignment between implicit perception and explicit reasoning. Unlike traditional black-box QA, CRISP utilizes metric 3D Scene Graphs and an oracle intervention protocol to decouple latent reasoning capabilities from perceptual bottlenecks. This granular diagnosis uncovers a systematic perception-reasoning disconnect. Crucially, we reveal that while proprietary models possess robust latent reasoning engines, they suffer from inaccurate metric estimation and a critical failure to leverage their implicit structural representations. Conversely, open-source models remain fundamentally bottlenecked by their lack of multi-hop compositional reasoning. By shifting the focus from merely ``guessing correctly'' via language priors to genuinely ``perceiving, verifying, and reasoning,'' CRISP offers a rigorous roadmap for multimodal alignment beyond end-to-end post-training. The code and dataset are available at https://github.com/iiyamayuki/CRISP-Bench.",
+        "authors": [
+          "Zhixing Li",
+          "Yinan Yu"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV",
+          "cs.AI"
+        ],
+        "published_at": "2026-06-25T02:18:38Z",
+        "updated_at": "2026-06-25T02:18:38Z",
+        "abs_url": "https://arxiv.org/abs/2606.26535",
+        "pdf_url": "https://arxiv.org/pdf/2606.26535",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:22:17.595559Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26535",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": "ACL",
+        "matched_keywords": [
+          "rag",
+          "alignment",
+          "evaluation",
+          "code",
+          "multimodal",
+          "post-training",
+          "open-source"
+        ],
+        "signal_sources": {
+          "top_conference": "paper_text",
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 13,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 3,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Top conference signal: ACL",
+        "Code or executable artifact signal",
+        "Practitioner keywords: rag, alignment, evaluation, code, multimodal, post-training",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation",
+        "Safety/ethics/governance keywords: alignment"
+      ],
+      "selected_reason": "Top conference signal: ACL; Code or executable artifact signal; Practitioner keywords: rag, alignment, evaluation, code, multimodal, post-training; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation; Safety/ethics/governance keywords: alignment",
+      "matched_keywords": [
+        "rag",
+        "alignment",
+        "evaluation",
+        "code",
+        "multimodal",
+        "post-training",
+        "open-source",
+        "eval",
+        "dataset",
+        "metric"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "high",
+      "selection_tier": "featured",
+      "rank": 1,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as featured"
+    },
+    {
+      "paper": {
+        "id": "2606.26590",
+        "arxiv_id": "2606.26590",
+        "title": "Empirical Software Engineering TerraProbe: A Layered-Oracle Framework for Detecting Deceptive Fixes in LLM-Assisted Terraform",
+        "abstract": "Security misconfigurations in Terraform Infrastructure-as-Code are a growing risk in cloud deployments, and large language models are increasingly used as automated repair agents. Existing evaluations often treat a repair as successful when the targeted static-analysis finding disappears, without checking planning validity, behavioral change, or security intent. This paper presents TerraProbe, a five-layer oracle framework for evaluating LLM-assisted Terraform security repair. We apply TerraProbe to 288 first-pass repairs generated by gemini-2.5-flash-lite, GPT-4o, and Claude 3.5 Sonnet across 68 real-world TerraDS modules and 28 controlled injected-defect modules. The results show that targeted Checkov removal overstates repair success. Although targeted removal reaches 83.3 percent for the primary model, full-scanner cleanliness drops to 10.4 percent, Terraform planning succeeds for 39.6 percent, and plan comparison is reachable for 38.5 percent. Human adjudication further shows that 71.4 percent of plan-compared real-world repairs are deceptive fixes that pass automated checks while leaving the underlying vulnerability in place. This pattern is statistically indistinguishable across the three models, with deceptive-fix rates from 57.1 percent to 71.4 percent and pairwise Fisher exact p-values above 0.10. The paper introduces a four-dimensional taxonomy of deceptive fixes, validated with Cohen kappa of 0.78 and Krippendorff alpha of 0.76. IAM permission analysis confirms that wildcard Resource grants persist in all nine CKV2 AWS 11 deceptive-fix cases. TerraProbe contributes an evaluation methodology, a replication package, and the Multi-Layer Oracle Evaluation framework for distinguishing intent-aligned security repairs from scanner-passing false successes.",
+        "authors": [
+          "Manar Alsaid",
+          "Chimdumebi Nebolisa",
+          "Faris Abbas"
+        ],
+        "primary_category": "cs.LG",
+        "categories": [
+          "cs.LG",
+          "cs.CR"
+        ],
+        "published_at": "2026-06-25T04:21:15Z",
+        "updated_at": "2026-06-25T04:21:15Z",
+        "abs_url": "https://arxiv.org/abs/2606.26590",
+        "pdf_url": "https://arxiv.org/pdf/2606.26590",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:22:17.595054Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26590",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": "ACL",
+        "matched_keywords": [
+          "agent",
+          "deployment",
+          "evaluation",
+          "code"
+        ],
+        "signal_sources": {
+          "top_conference": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 11,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 3,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Top conference signal: ACL",
+        "Practitioner keywords: agent, deployment, evaluation, code",
+        "arXiv category weight: cs.LG",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: agents",
+        "Safety/ethics/governance keywords: security, risk"
+      ],
+      "selected_reason": "Top conference signal: ACL; Practitioner keywords: agent, deployment, evaluation, code; arXiv category weight: cs.LG; No duplicate title in candidate pool; Recent topic repeat penalty: agents; Safety/ethics/governance keywords: security, risk",
+      "matched_keywords": [
+        "agent",
+        "deployment",
+        "evaluation",
+        "code",
+        "agents",
+        "planning"
+      ],
+      "topic": "Agents and Tool Use",
+      "topic_slug": "agents",
+      "confidence_level": "high",
+      "selection_tier": "featured",
+      "rank": 2,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as featured"
+    },
+    {
+      "paper": {
+        "id": "2606.26476",
+        "arxiv_id": "2606.26476",
+        "title": "Retrieval-Warmed Energy-Based Reasoning: A Five-Arm Ablation Methodology for Diffusion-as-Inference on Structured Reasoning Tasks",
+        "abstract": "Warm-started diffusion samplers accelerate iterative inference, but it is rarely clear which part of the pipeline carries the gain. We study \\textbf{retrieval-warmed energy-based reasoning (RW-EBR)} -- an IRED energy-based diffusion model \\cite{du2024ired} augmented with a Modern Hopfield trajectory memory -- and contribute a \\textbf{five-arm ablation methodology} (oracle, best-constant, per-query-random, shuffled, aligned) that separates three confounded effects: class-prior bias shift, stochastic warm-starting, and graph-aligned value reuse. The diagnostic decomposition is adapted from LLM-RAG evaluation \\cite{ru2024ragchecker}. On \\textbf{connectivity-2} (Erdős--Rényi all-pairs reachability), the aligned-vs-shuffled-oracle swing reaches \\textbf{$+35$\\,pp} balanced accuracy on a fixed 1{,}000-graph validation-set diagnostic, with value distribution and retrieval mechanics fixed, only per-graph alignment destroyed, while per-query random initialisation falls below cold -- per-graph alignment, not bias shift or stochasticity, dominates. Yet the \\emph{deployable} cold-prediction pipeline misses the acceptance gate at stored-value quality. The same diagnostic logic, stopped at the key-quality screen, applied to \\textbf{Sudoku} with a task-specific key encoder produces a clean negative at a \\emph{different} component -- key quality, under the current setup. The decomposition names the first blocking component on each task. The setting -- graph reachability refined by an iterative diffusion sampler, with explainability of failure modes as the lens -- places the work within structured and spatio-temporal reasoning.",
+        "authors": [
+          "Libo Sun",
+          "Po-Wei Harn",
+          "Zewei Zhang",
+          "Peixiong He",
+          "Xiao Qin"
+        ],
+        "primary_category": "cs.LG",
+        "categories": [
+          "cs.LG",
+          "cs.AI"
+        ],
+        "published_at": "2026-06-25T00:28:08Z",
+        "updated_at": "2026-06-25T00:28:08Z",
+        "abs_url": "https://arxiv.org/abs/2606.26476",
+        "pdf_url": "https://arxiv.org/pdf/2606.26476",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:22:17.596227Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26476",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": "ACL",
+        "matched_keywords": [
+          "rag",
+          "retrieval",
+          "inference",
+          "alignment",
+          "evaluation",
+          "code",
+          "memory"
+        ],
+        "signal_sources": {
+          "top_conference": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 11,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 3,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Top conference signal: ACL",
+        "Practitioner keywords: rag, retrieval, inference, alignment, evaluation, code",
+        "arXiv category weight: cs.LG",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: rag",
+        "Safety/ethics/governance keywords: alignment"
+      ],
+      "selected_reason": "Top conference signal: ACL; Practitioner keywords: rag, retrieval, inference, alignment, evaluation, code; arXiv category weight: cs.LG; No duplicate title in candidate pool; Recent topic repeat penalty: rag; Safety/ethics/governance keywords: alignment",
+      "matched_keywords": [
+        "rag",
+        "retrieval",
+        "inference",
+        "alignment",
+        "evaluation",
+        "code",
+        "memory"
+      ],
+      "topic": "Retrieval and RAG",
+      "topic_slug": "rag",
+      "confidence_level": "high",
+      "selection_tier": "featured",
+      "rank": 3,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as featured"
+    },
+    {
+      "paper": {
+        "id": "2606.27287",
+        "arxiv_id": "2606.27287",
+        "title": "Prompt Injection in Automated Résumé Screening with Large Language Models: Single and Multi-Injection Settings",
+        "abstract": "Large language models (LLMs) are increasingly used to screen and rank job applicants, creating incentives for candidates to strategically manipulate algorithmic hiring systems. We study prompt injection in automated résumé screening, defined as subtle self-promotional text that introduces no new qualifications but is designed to influence LLM evaluations. Using controlled experiments, we show that prompt injection reliably improves applicant rankings when résumé quality is homogeneous and few candidates inject. However, its effectiveness rapidly diminishes as more candidates inject, collapsing when manipulation becomes widespread. When candidate quality is heterogeneous, prompt injection is less effective on average, but can occasionally allow lower-quality candidates to outrank higher-quality ones, raising fairness concerns. Overall, LLM-based screening is most vulnerable when manipulation is rare and candidate quality differences are small. Code and resources are publicly available at: https://github.com/preetb1199/Prompt_Injection_ACL26",
+        "authors": [
+          "Preet Baxi",
+          "Jiannan Xu",
+          "Jane Yi Jiang",
+          "Stefanus Jasin"
+        ],
+        "primary_category": "cs.AI",
+        "categories": [
+          "cs.AI"
+        ],
+        "published_at": "2026-06-25T17:04:51Z",
+        "updated_at": "2026-06-25T17:04:51Z",
+        "abs_url": "https://arxiv.org/abs/2606.27287",
+        "pdf_url": "https://arxiv.org/pdf/2606.27287",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:21:39.825366Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.27287",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": "ACL",
+        "matched_keywords": [
+          "rag",
+          "evaluation",
+          "code"
+        ],
+        "signal_sources": {
+          "top_conference": "paper_text",
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 10,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 3,
+        "code_available": 2,
+        "practitioner_relevance": 3,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Top conference signal: ACL",
+        "Code or executable artifact signal",
+        "Practitioner keywords: rag, evaluation, code",
+        "arXiv category weight: cs.AI",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: code"
+      ],
+      "selected_reason": "Top conference signal: ACL; Code or executable artifact signal; Practitioner keywords: rag, evaluation, code; arXiv category weight: cs.AI; No duplicate title in candidate pool; Recent topic repeat penalty: code",
+      "matched_keywords": [
+        "rag",
+        "evaluation",
+        "code",
+        "api"
+      ],
+      "topic": "Code Intelligence",
+      "topic_slug": "code",
+      "confidence_level": "high",
+      "selection_tier": "featured",
+      "rank": 4,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as featured"
+    },
+    {
+      "paper": {
+        "id": "2606.26686",
+        "arxiv_id": "2606.26686",
+        "title": "Do Safety Guardrails Need to Reason? LeanGuard: A Fast and Light Approach for Robust Moderation",
+        "abstract": "In order to screen a prompt or a response, the recent guardrail methods generate a chain-of-thought (CoT) before they issue a verdict. This design follows a common belief that step-by-step reasoning improves a decision. However, CoT also makes the guard heavy and slow, because the model must generate many tokens before it decides. This may not match how guardrails are actually deployed. A guardrail sometimes should not be heavy and slow, and it often runs on-device, for example on an embodied robot. In this paper, we pose a question whether a safety guardrail really needs to reason. To answer this question, we train a lightweight bidirectional encoder and a reasoning guard on the same corpus, and we then remove only the reasoning while we keep everything else fixed. With this controlled same-base comparison, we show that the chain does not improve moderation accuracy. We name the resulting guard LeanGuard. A 395M label-only encoder reaches an average F1 of 82.90 $\\pm$ 0.26 over public benchmarks. It matches a reasoning guard that is built on a much larger decoder, while it uses only a single forward pass over an input of at most 512 tokens. This is about a ~100x reduction in inference compute. We further show that this label-only encoder stays robust under training-label noise and retains far more recall at a strict false-positive rate than the reasoning guard, so a heavier reasoning guard is not the more robust choice either. Our finding suggests that the current guardrail benchmarks may not be hard enough to reward reasoning, and that the necessity of CoT for moderation is still not proven. We release all source codes and models including LeanGuard at https://github.com/ndb796/LeanGuard.",
+        "authors": [
+          "Dongbin Na"
+        ],
+        "primary_category": "cs.AI",
+        "categories": [
+          "cs.AI",
+          "cs.CL"
+        ],
+        "published_at": "2026-06-25T07:15:33Z",
+        "updated_at": "2026-06-25T07:15:33Z",
+        "abs_url": "https://arxiv.org/abs/2606.26686",
+        "pdf_url": "https://arxiv.org/pdf/2606.26686",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:22:05.187373Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26686",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "rag",
+          "inference",
+          "safety",
+          "benchmark",
+          "code"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 10,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: rag, inference, safety, benchmark, code",
+        "arXiv category weight: cs.AI",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: reasoning",
+        "Safety/ethics/governance keywords: safety, guardrail"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: rag, inference, safety, benchmark, code; arXiv category weight: cs.AI; No duplicate title in candidate pool; Recent topic repeat penalty: reasoning; Safety/ethics/governance keywords: safety, guardrail",
+      "matched_keywords": [
+        "rag",
+        "inference",
+        "safety",
+        "benchmark",
+        "code",
+        "reasoning",
+        "chain-of-thought"
+      ],
+      "topic": "Reasoning and Planning",
+      "topic_slug": "reasoning",
+      "confidence_level": "high",
+      "selection_tier": "featured",
+      "rank": 11,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as featured"
+    },
+    {
+      "paper": {
+        "id": "2606.26530",
+        "arxiv_id": "2606.26530",
+        "title": "\\textsc{DiARC}: Distinguishing Positive and Negative Samples Helps Improving ARC-like Reasoning Ability of Large Language Models",
+        "abstract": "The Abstraction and Reasoning Corpus (ARC;~\\citealp{chollet2019measure}) contains tasks that require summarizing patterns from limited grid samples and predicting output grids. Recently, many large language model based approaches have attempted to transform it into a text-based reasoning task. However, methods based on open-source models have generally yielded unsatisfactory results, while those relying on closed-source models are too costly. Current efforts mainly focus on data augmentation, constructing ARC-like data for more comprehensive supervised fine-tuning. In this work, we argue that solving ARC-like problems requires not only \\textit{positive} sample supervision but also the ability to improve model reasoning by distinguishing \\textit{negative} samples. To this end, we draw on the idea of preference alignment and propose \\textsc{DiARC}, a method that constructs preference pairs to enable the model to distinguish between them. Specifically, we propose three ways to construct negative samples, including output-level visual transformations, DSL-level rule inversion, and task-specific rule editing. The resulting negative samples provide informative near-miss alternatives while keeping the observed demonstrations unchanged. Experimental results across multiple ARC-like benchmarks show that \\textsc{DiARC} consistently improves performance over baseline models. The code is released at https://github.com/szu-tera/DiARC.",
+        "authors": [
+          "Yuxuan Yang",
+          "Feiyang Li",
+          "Yile Wang"
+        ],
+        "primary_category": "cs.CL",
+        "categories": [
+          "cs.CL",
+          "cs.AI"
+        ],
+        "published_at": "2026-06-25T02:10:29Z",
+        "updated_at": "2026-06-25T02:10:29Z",
+        "abs_url": "https://arxiv.org/abs/2606.26530",
+        "pdf_url": "https://arxiv.org/pdf/2606.26530",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:22:17.595611Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26530",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "alignment",
+          "benchmark",
+          "code",
+          "fine-tuning",
+          "open-source"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 10,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: alignment, benchmark, code, fine-tuning, open-source",
+        "arXiv category weight: cs.CL",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: training",
+        "Safety/ethics/governance keywords: alignment"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: alignment, benchmark, code, fine-tuning, open-source; arXiv category weight: cs.CL; No duplicate title in candidate pool; Recent topic repeat penalty: training; Safety/ethics/governance keywords: alignment",
+      "matched_keywords": [
+        "alignment",
+        "benchmark",
+        "code",
+        "fine-tuning",
+        "open-source",
+        "preference"
+      ],
+      "topic": "Training and Post-training",
+      "topic_slug": "training",
+      "confidence_level": "high",
+      "selection_tier": "featured",
+      "rank": 13,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as featured"
+    }
+  ],
+  "mentions": [
+    {
+      "paper": {
+        "id": "2606.27128",
+        "arxiv_id": "2606.27128",
+        "title": "FlameVQA: A Physically-Grounded UAV Wildfire VQA Benchmark with Radiometric Thermal Supervision",
+        "abstract": "Wildfire monitoring from UAVs requires reliable reasoning over complex aerial scenes, where smoke, scale variation, and occlusions often limit RGB-only interpretation. We introduce FlameVQA, a multiple-choice visual question answering benchmark for UAV-based wildfire intelligence built on FLAME 3, leveraging paired RGB imagery and radiometric thermal TIFFs for temperature-grounded, safety-critical reasoning. FlameVQA includes 34 multiple-choice questions per image spanning six operational capability groups, covering tasks such as detection, localization, distribution/coverage estimation, cross-modal reasoning, and flight planning. To ensure label reliability, we combine MLLM-assisted annotation with deterministic thermal rules and cross-question consistency checks, followed by human auditing. We also evaluate representative MLLMs on FlameVQA to provide baselines for future work. Results show strong performance when explicit cross-modal cues are available, but notable failures on presence detection under heavy smoke and on coverage estimation. These findings suggest that current MLLMs require domain-specific adaptation to better support disaster and wildfire monitoring. The dataset and benchmark code are open-source at github.com/mobiiin/WildFire_VQA",
+        "authors": [
+          "Mobin Habibpour",
+          "John Spodnik",
+          "Niloufar Alipour Talemi",
+          "Fatemeh Afghah"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV",
+          "cs.RO"
+        ],
+        "published_at": "2026-06-25T15:06:59Z",
+        "updated_at": "2026-06-25T15:06:59Z",
+        "abs_url": "https://arxiv.org/abs/2606.27128",
+        "pdf_url": "https://arxiv.org/pdf/2606.27128",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:21:39.826413Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.27128",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "rag",
+          "safety",
+          "benchmark",
+          "code",
+          "open-source"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 10,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: rag, safety, benchmark, code, open-source",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation",
+        "Safety/ethics/governance keywords: safety"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: rag, safety, benchmark, code, open-source; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation; Safety/ethics/governance keywords: safety",
+      "matched_keywords": [
+        "rag",
+        "safety",
+        "benchmark",
+        "code",
+        "open-source",
+        "eval",
+        "dataset",
+        "metric"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "high",
+      "selection_tier": "mention",
+      "rank": 5,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.26984",
+        "arxiv_id": "2606.26984",
+        "title": "Unison: Benchmarking Unified Multimodal Models via Synergistic Understanding and Generation",
+        "abstract": "Unified multimodal models capable of both understanding and generation have achieved remarkable strides. However, despite their unified designs, existing evaluations typically assess understanding and generation capabilities in isolation, overlooking the synergy between comprehension and generation. To bridge this gap, we introduce Unison, a comprehensive benchmark comprising 2,169 high-quality unified task samples, designed to evaluate joint understanding and generation in unified multimodal models. Unison offers three key strengths: 1) Comprehensive Dimensions: Unison encompasses internal consistency, understanding-guided generation, generation-guided understanding, and mutual enhancement to enable holistic evaluation. 2) Diagnostic Evaluation: it provides both unified and decoupled tracks for understanding and generation, allowing fine-grained attribution of failure modes and quantitative analysis of the gains from unified modeling. 3) Human Alignment: we also introduce Unison-Judge, an evaluation model well aligned with human judgments to ensure reliable assessment. Based on systematic evaluations of state-of-the-art models on Unison, we uncover critical limitations in current unified multimodal systems and highlight promising directions for future research. Codes, Unison and Unison-Judge are publicly available at https://github.com/FudanCVL/Unison.",
+        "authors": [
+          "Jinyu Liu",
+          "Xincheng Shuai",
+          "Henghui Ding",
+          "Yu-Gang Jiang"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV"
+        ],
+        "published_at": "2026-06-25T12:58:54Z",
+        "updated_at": "2026-06-25T12:58:54Z",
+        "abs_url": "https://arxiv.org/abs/2606.26984",
+        "pdf_url": "https://arxiv.org/pdf/2606.26984",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:21:52.726397Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26984",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "alignment",
+          "evaluation",
+          "benchmark",
+          "code",
+          "multimodal"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 10,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: alignment, evaluation, benchmark, code, multimodal",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation",
+        "Safety/ethics/governance keywords: alignment"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: alignment, evaluation, benchmark, code, multimodal; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation; Safety/ethics/governance keywords: alignment",
+      "matched_keywords": [
+        "alignment",
+        "evaluation",
+        "benchmark",
+        "code",
+        "multimodal",
+        "eval"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "high",
+      "selection_tier": "mention",
+      "rank": 6,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.26973",
+        "arxiv_id": "2606.26973",
+        "title": "Geometric Gradient Rectification for Safe Open-Set Semi-Supervised Learning",
+        "abstract": "Open-set semi-supervised learning aims to leverage unlabeled data that may contain out-of-distribution outliers while maintaining performance on in-distribution classes. Existing methods mainly follow two paradigms: filtering suspicious samples or incorporating unlabeled objectives with soft weighting. We argue that both face a common trade-off: aggressive filtering can discard informative but hard ID samples, whereas utilization can introduce auxiliary gradients that conflict with supervised learning when pseudo labels are wrong. We therefore shift the focus from sample selection to gradient-level control. We propose \\textit{Geometric Gradient Rectification} (GGR), a plug-in framework that uses the supervised gradient as an anchor and projects conflicting auxiliary gradients onto an admissible region in gradient space. This makes the applied auxiliary update first-order non-opposing within the rectified coordinate block while preserving orthogonal components that may still carry useful representation signals. We further extend GGR with subspace-aware rectification to stabilize the anchor under noisy mini-batch gradients. Experiments on CIFAR and ImageNet benchmarks show that GGR improves representative OSSL baselines in most settings and yields gains in both closed-set generalization and open-set robustness. Code will be available at https://github.com/JiaheChen2002/GGR.",
+        "authors": [
+          "Jiahe Chen",
+          "Qian Shao",
+          "Qiyuan Chen",
+          "Jiaying He",
+          "Jintai Chen",
+          "Jian Wu",
+          "Hongxia Xu"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV",
+          "cs.LG"
+        ],
+        "published_at": "2026-06-25T12:45:42Z",
+        "updated_at": "2026-06-25T12:45:42Z",
+        "abs_url": "https://arxiv.org/abs/2606.26973",
+        "pdf_url": "https://arxiv.org/pdf/2606.26973",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:21:52.726539Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26973",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "rag",
+          "serving",
+          "benchmark",
+          "code"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 10,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: rag, serving, benchmark, code",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation",
+        "Safety/ethics/governance keywords: robustness"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: rag, serving, benchmark, code; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation; Safety/ethics/governance keywords: robustness",
+      "matched_keywords": [
+        "rag",
+        "serving",
+        "benchmark",
+        "code",
+        "metric"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "high",
+      "selection_tier": "mention",
+      "rank": 7,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.26859",
+        "arxiv_id": "2606.26859",
+        "title": "AgentX: Towards Agent-Driven Self-Iteration of Industrial Recommender Systems",
+        "abstract": "Recommendation algorithm iteration is moving from an artisanal, engineer-bound process toward an industrialized research loop, but this transition remains blocked by a structural execution bottleneck: the idea-to-launch cycle still depends on human engineers to generate hypotheses, modify production code, launch A/B experiments, and attribute online results. Innovation therefore scales linearly with headcount rather than compounding with evidence, compute, and accumulated experimental knowledge. We present AgentX, a production-deployed multi-agent system that fundamentally restructures this production function. AgentX operates as a self-evolving development engine: it autonomously generates, implements, evaluates, and learns from recommendation experiments at a scale and pace that no manual workflow can sustain. The system orchestrates four tightly coupled stages in a closed loop. A Brainstorm Agent synthesizes evidence from historical experiments, system architecture, data analysis, and external research into ranked, executable proposals. A Developing Agent translates each proposal into production-ready code through repository-grounded generation and multi-dimensional reliability verification. An Evaluation Agent conducts safe online rollout with guardrail-vetoed A/B judgment, converting both successes and failures into structured knowledge assets. A Harness Evolution layer (SGPO) then distills execution trajectories into semantic-gradient updates that continuously sharpen the agents themselves -- making the system not merely automated, but self-improving.",
+        "authors": [
+          "Changxin Lao",
+          "Fei Pan",
+          "Guozhuang Ma",
+          "Han Li",
+          "Huihuang Lin",
+          "Jijun Shi",
+          "Kangzhi Zhao",
+          "Kun Gai",
+          "Mo Zhou",
+          "Qinqin Zhou",
+          "Quan Chen",
+          "Ruochen Yang",
+          "Shifu Bie",
+          "Shuang Yang",
+          "Shuo Yang",
+          "Wenhao Li",
+          "Wentao Xie",
+          "Xiao Lv",
+          "Xuming Wang",
+          "Yijun Wang",
+          "Yiming Chen",
+          "Yusheng Huang",
+          "Zhongyuan Wang",
+          "Zibo Zhao",
+          "Zijie Zhuang",
+          "Baoning Xia",
+          "Chao Liu",
+          "Chaoyi Ma",
+          "Chubo He",
+          "Dawei Cong",
+          "Feng Jiang",
+          "Gang Wang",
+          "Guilin Xia",
+          "Hanwen Xu",
+          "Jiahong Xie",
+          "Jiahui Qiao",
+          "Jian Liang",
+          "Jiangfan Yue",
+          "Jing Wang",
+          "Jinghan Yang",
+          "Jinghui Jia",
+          "Kan Qin",
+          "Lei Wang",
+          "Ming Li",
+          "Peilin Song",
+          "Pengbo Xu",
+          "Qiang Luo",
+          "Ruiming Tang",
+          "Shiyang Liu",
+          "Shuxian Jin",
+          "Tao Wang",
+          "Tao Zhang",
+          "Xiang Gao",
+          "Xianghan Li",
+          "Yingsong Luo",
+          "Yiwen Ning",
+          "Yongcheng Liu",
+          "Yuan Guo",
+          "Zhaojie Liu",
+          "Zhenkai Cui"
+        ],
+        "primary_category": "cs.AI",
+        "categories": [
+          "cs.AI",
+          "cs.CL",
+          "cs.IR"
+        ],
+        "published_at": "2026-06-25T10:42:28Z",
+        "updated_at": "2026-06-25T10:42:28Z",
+        "abs_url": "https://arxiv.org/abs/2606.26859",
+        "pdf_url": "https://arxiv.org/pdf/2606.26859",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:22:05.185880Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26859",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "agent",
+          "workflow",
+          "evaluation",
+          "code"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 10,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: agent, workflow, evaluation, code",
+        "arXiv category weight: cs.AI",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: agents",
+        "Safety/ethics/governance keywords: guardrail"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: agent, workflow, evaluation, code; arXiv category weight: cs.AI; No duplicate title in candidate pool; Recent topic repeat penalty: agents; Safety/ethics/governance keywords: guardrail",
+      "matched_keywords": [
+        "agent",
+        "workflow",
+        "evaluation",
+        "code",
+        "agents"
+      ],
+      "topic": "Agents and Tool Use",
+      "topic_slug": "agents",
+      "confidence_level": "high",
+      "selection_tier": "mention",
+      "rank": 8,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.26857",
+        "arxiv_id": "2606.26857",
+        "title": "LCAi: Life Cycle Assessment with big data fusion and retrieval-augmented generation-assisted interpretation",
+        "abstract": "The interpretation phase of life cycle assessment often lacks structured mechanisms for translating quantified improvement opportunities addressing environmental hotspots into actionable strategic pathways under technological, social, and policy uncertainty. To overcome this limitation, this study introduces a perspective-conditioned retrieval-augmented generation framework for LCA interpretation, where a multi-perspective retrieval and controlled synthesis is incorporated in the artificial intelligence (AI)-assisted LCA. To operationalise large language models in LCA interpretation, a perspective fusion RAG architecture was developed, covering academic, industry, public discourse, and European union (EU) funding datasets. Our approach comprises three steps: (1) a scenario anchor defining system boundaries and decarbonization targets, (2) a set of perspective-specific micro-queries with constrained retrieval, and (3) a neutral synthesis step integrating only ledger-stored outputs without further retrieval. The framework is demonstrated through a hydrogen-enabled diesel reduction use case in an Italian apple production facility using GPT-5 nano as the reasoning model. Overall, the structured retrieval and constrained synthesis are designed to mitigate the risk of hallucination while preserving cross-domain diversity. The approach presented can support more disciplined translation of impact results into strategic pathways and opens up new avenues for the use of advanced AI tools in LCA studies, particularly those focused on technologies that could be deployed at scale. This proof-of-concept demonstrates how AI-assisted, evidence-grounded interpretation can support implementation-oriented decision-making beyond conventional LCA studies.",
+        "authors": [
+          "Georgios Tsironis",
+          "Juan D. Medrano-Garcia",
+          "Gonzalo Guillen-Gosalbez"
+        ],
+        "primary_category": "cs.AI",
+        "categories": [
+          "cs.AI"
+        ],
+        "published_at": "2026-06-25T10:41:48Z",
+        "updated_at": "2026-06-25T10:41:48Z",
+        "abs_url": "https://arxiv.org/abs/2606.26857",
+        "pdf_url": "https://arxiv.org/pdf/2606.26857",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:22:05.185918Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26857",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": true,
+        "institutions": [
+          "Apple"
+        ],
+        "top_conference": null,
+        "matched_keywords": [
+          "rag",
+          "retrieval",
+          "serving"
+        ],
+        "signal_sources": {
+          "institution_background": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 10,
+      "score_breakdown": {
+        "institution_background": 3,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 3,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Top institution signal: Apple",
+        "Practitioner keywords: rag, retrieval, serving",
+        "arXiv category weight: cs.AI",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: agents",
+        "Safety/ethics/governance keywords: risk"
+      ],
+      "selected_reason": "Top institution signal: Apple; Practitioner keywords: rag, retrieval, serving; arXiv category weight: cs.AI; No duplicate title in candidate pool; Recent topic repeat penalty: agents; Safety/ethics/governance keywords: risk",
+      "matched_keywords": [
+        "rag",
+        "retrieval",
+        "serving",
+        "tool",
+        "tools"
+      ],
+      "topic": "Agents and Tool Use",
+      "topic_slug": "agents",
+      "confidence_level": "high",
+      "selection_tier": "mention",
+      "rank": 9,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.26794",
+        "arxiv_id": "2606.26794",
+        "title": "ReasonCLIP-58M: Visually Grounded Commonsense Reasoning Supervision for CLIP",
+        "abstract": "CLIP and its variants are widely adopted visual backbones in multimodal systems, but their pretraining remains dominated by descriptive image-text alignment. As downstream applications increasingly demand visually grounded commonsense inference and compositional reasoning, it remains unclear whether CLIP-style encoders can support such reasoning without architectural changes. To address this, we present ReasonCLIP-58M, a continual pretraining framework that integrates large-scale reasoning supervision into CLIP-style models through our two-stage strategy, which progressively integrates reasoning signals while preserving descriptive alignment, followed by category-structured reasoning supervision. To support this framework, we construct two complementary datasets and a benchmark: ReasonLite-42M, with open-form, visually verifiable reasoning captions; ReasonPro-16M, with category-specific reasoning supervision; and RCLIP-Bench for diagnostic evaluation of visually grounded reasoning. We train a family of ReasonCLIP that improves visually grounded commonsense and compositional reasoning while also enhancing zero-shot retrieval performance. As a drop-in visual encoder for multimodal large language models such as LLaVA-NeXT, ReasonCLIP delivers consistent gains without additional inference cost, demonstrating that structured reasoning supervision enhances the expressive capacity of CLIP-style visual representations. All datasets, models, and training code are available at https://github.com/RISys-Lab/ReasonCLIP.",
+        "authors": [
+          "Sicheng Zhang",
+          "Muzammal Naseer",
+          "Binzhu Xie",
+          "Naufal Suryanto",
+          "Shi Qiu",
+          "Jamal Bentahar",
+          "Naveed Akhtar",
+          "Mubarak Shah"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV",
+          "cs.AI"
+        ],
+        "published_at": "2026-06-25T09:27:54Z",
+        "updated_at": "2026-06-25T09:27:54Z",
+        "abs_url": "https://arxiv.org/abs/2606.26794",
+        "pdf_url": "https://arxiv.org/pdf/2606.26794",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:22:05.186426Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26794",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "retrieval",
+          "inference",
+          "serving",
+          "alignment",
+          "evaluation",
+          "benchmark",
+          "code",
+          "multimodal"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 10,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: retrieval, inference, serving, alignment, evaluation, benchmark",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation",
+        "Safety/ethics/governance keywords: alignment"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: retrieval, inference, serving, alignment, evaluation, benchmark; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation; Safety/ethics/governance keywords: alignment",
+      "matched_keywords": [
+        "retrieval",
+        "inference",
+        "serving",
+        "alignment",
+        "evaluation",
+        "benchmark",
+        "code",
+        "multimodal",
+        "eval",
+        "dataset"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "high",
+      "selection_tier": "mention",
+      "rank": 10,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.26566",
+        "arxiv_id": "2606.26566",
+        "title": "Adversarial Diffusion Across Modalities: A Fusion Survey of Attacks, Defenses, and Evaluation for Text, Vision, and Vision-Language Models",
+        "abstract": "Adversarial evaluation of AI systems has matured along four largely disconnected tracks: diffusion-based attacks on text and large language models (LLMs), diffusion-based attacks on image classifiers, jailbreak pipelines against vision-language models, and diffusion-based input purification defenses. Each has developed its own vocabulary, threat models, and benchmarks, with denoising diffusion models emerging as a shared generative mechanism whose recipes are now actively ported between communities. This survey performs an information-fusion exercise at the meta-research level: we integrate these four tracks into a single conceptual framework with a unified taxonomy, evaluation criteria, and research agenda, focusing on the LLM-side slice. We catalog fifty published papers across four scope areas (text/LLM, image classifier, vision-language model, defense), plus four diffusion-LLM-as-victim entries and ten non-diffusion baselines against which any new attack must be compared. We propose a six-class taxonomy of diffusion roles in adversarial pipelines, augmented by a threat-model axis recording attacker knowledge, query budget, and target accessibility, and apply a five-dimension framework (attack success rate, transferability, query budget, perplexity, defense-evasion) uniformly across modalities. The review adopts a dual attacker-defender perspective: alongside the attack catalog we cover four diffusion-based defenses that form the natural evaluation backdrop for new attacks. Our critical analysis identifies five recurring weaknesses of the current LLM-side literature, and we close with a research agenda of open questions and concrete experimental designs. The companion catalog and spreadsheet are released with the paper. We are explicit that this is a narrative review with quality assessment, not a PRISMA-compliant systematic review, and discuss the implications for replication.",
+        "authors": [
+          "Abrar Alotaibi",
+          "Moataz Ahmed"
+        ],
+        "primary_category": "cs.CR",
+        "categories": [
+          "cs.CR",
+          "cs.CL"
+        ],
+        "published_at": "2026-06-25T03:32:12Z",
+        "updated_at": "2026-06-25T03:32:12Z",
+        "abs_url": "https://arxiv.org/abs/2606.26566",
+        "pdf_url": "https://arxiv.org/pdf/2606.26566",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:22:17.595239Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26566",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": true,
+        "institutions": [
+          "Meta"
+        ],
+        "top_conference": null,
+        "matched_keywords": [
+          "evaluation",
+          "benchmark",
+          "vision-language"
+        ],
+        "signal_sources": {
+          "institution_background": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 10,
+      "score_breakdown": {
+        "institution_background": 3,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 3,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Top institution signal: Meta",
+        "Practitioner keywords: evaluation, benchmark, vision-language",
+        "arXiv category weight: cs.CR",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation",
+        "Safety/ethics/governance keywords: jailbreak"
+      ],
+      "selected_reason": "Top institution signal: Meta; Practitioner keywords: evaluation, benchmark, vision-language; arXiv category weight: cs.CR; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation; Safety/ethics/governance keywords: jailbreak",
+      "matched_keywords": [
+        "evaluation",
+        "benchmark",
+        "vision-language",
+        "eval"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "high",
+      "selection_tier": "mention",
+      "rank": 12,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.27317",
+        "arxiv_id": "2606.27317",
+        "title": "OctoSense: Self-Supervised Learning for Multimodal Robot Perception",
+        "abstract": "We present OctoSense, an open-source sensor platform with stereo RGB and event cameras, LiDAR, a thermal camera, an inertial measurement unit, RTK-corrected global positioning system, and proprioception (CAN bus data from a car, and joint angles for a quadruped robot). The eponymous OctoSense dataset contains 59 hours of time-synchronized driving data across different types of environments at different times of the day, including situations with highly degraded sensors. We demonstrate multi-modal self-supervised learning using such real-world robotics data, where sensors have different representations, frequencies, latencies and noise. Our approach, a \"late-fusion\" masked autoencoder, (i) uses modality-specific tokenizers to account for different spatiotemporal characteristics of these sensors, and (ii) caches modality-specific tokens at inference time to process new measurements as they come. This architecture (i) is fast (6.68 ms and 112 ms on NVIDIA 5090 and Orin NX respectively, to compute the representation), (ii) performs better than existing image-only foundation models on tasks such as estimation of optical flow, depth, semantic segmentation, and ego-motion (translation, rotation, and steering angle), and (iii) predicts robustly at nighttime or in situations where sensory data is degraded. See our project page for links to the dataset, code, and supplementary videos: https://abisulco.com/octosense/.",
+        "authors": [
+          "Anthony Bisulco",
+          "Jeremy Wang",
+          "Kostas Daniilidis",
+          "Randall Balestriero",
+          "Pratik Chaudhari"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV",
+          "cs.RO"
+        ],
+        "published_at": "2026-06-25T17:30:49Z",
+        "updated_at": "2026-06-25T17:30:49Z",
+        "abs_url": "https://arxiv.org/abs/2606.27317",
+        "pdf_url": "https://arxiv.org/pdf/2606.27317",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:21:39.825028Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.27317",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": true,
+        "institutions": [
+          "NVIDIA"
+        ],
+        "top_conference": null,
+        "matched_keywords": [
+          "inference",
+          "code",
+          "multimodal",
+          "robotics",
+          "open-source"
+        ],
+        "signal_sources": {
+          "institution_background": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 9,
+      "score_breakdown": {
+        "institution_background": 3,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Top institution signal: NVIDIA",
+        "Practitioner keywords: inference, code, multimodal, robotics, open-source",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: video-generation"
+      ],
+      "selected_reason": "Top institution signal: NVIDIA; Practitioner keywords: inference, code, multimodal, robotics, open-source; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: video-generation",
+      "matched_keywords": [
+        "inference",
+        "code",
+        "multimodal",
+        "robotics",
+        "open-source",
+        "video",
+        "temporal",
+        "motion"
+      ],
+      "topic": "Video Generation",
+      "topic_slug": "video-generation",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 14,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.27180",
+        "arxiv_id": "2606.27180",
+        "title": "Automating Potential-based Reward Shaping with Vision Language Model Guidance",
+        "abstract": "Sparse rewards are inherently challenging for reinforcement learning agents as they lack intermediate feedback to guide exploration and to correctly attribute the sparse success rewards to relevant parts of the trajectory. Naive reward shaping can induce reward hacking, yielding policies that exploit auxiliary signals instead of solving the intended task. Potential-based reward shaping (PBRS) guarantees preservation of the optimal policy set, but requires the definition of a heuristic potential function over the state space. In this work, we introduce the VLM-guided PBRS framework VLM-PBRS that learns the potential function directly from vision language model (VLM) feedback. We query a lightweight VLM to obtain preferences over image pairs and train a model of the potential function using these preferences. As this approach is based on potential-based reward shaping, it preserves the original optimal policies, and removes the need for expert-designed reward shaping terms. Because large VLMs are prohibitively expensive to invoke repeatedly during policy learning, we employ smaller, more computationally efficient VLMs. Although the resulting preference labels are less accurate, empirical evidence shows that the preference labels can still be used to accelerate learning. We validate our method empirically in the Meta-World and Franka Kitchen environments and highlight the connection between VLM preference label accuracy and sample efficiency improvements. Our contributions are threefold: (1) the first application of VLM preference-based learning to synthesize a potential function for PBRS, (2) a principled, low-cost solution that leverages small VLMs, and (3) extensive empirical demonstration of improved sample efficiency and robustness to reward hacking.",
+        "authors": [
+          "Henrik Müller",
+          "Daniel Kudenko"
+        ],
+        "primary_category": "cs.LG",
+        "categories": [
+          "cs.LG",
+          "cs.AI",
+          "cs.RO"
+        ],
+        "published_at": "2026-06-25T15:45:57Z",
+        "updated_at": "2026-06-25T15:45:57Z",
+        "abs_url": "https://arxiv.org/abs/2606.27180",
+        "pdf_url": "https://arxiv.org/pdf/2606.27180",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:21:39.826168Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.27180",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": true,
+        "institutions": [
+          "Meta"
+        ],
+        "top_conference": null,
+        "matched_keywords": [
+          "agent",
+          "rag"
+        ],
+        "signal_sources": {
+          "institution_background": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 9,
+      "score_breakdown": {
+        "institution_background": 3,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 2,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Top institution signal: Meta",
+        "Practitioner keywords: agent, rag",
+        "arXiv category weight: cs.LG",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: agents",
+        "Safety/ethics/governance keywords: robustness"
+      ],
+      "selected_reason": "Top institution signal: Meta; Practitioner keywords: agent, rag; arXiv category weight: cs.LG; No duplicate title in candidate pool; Recent topic repeat penalty: agents; Safety/ethics/governance keywords: robustness",
+      "matched_keywords": [
+        "agent",
+        "rag",
+        "agents",
+        "trajectory"
+      ],
+      "topic": "Agents and Tool Use",
+      "topic_slug": "agents",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 15,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.26861",
+        "arxiv_id": "2606.26861",
+        "title": "Cascaded Multi-Granularity Pruning for On-Device LLM Inference in Industrial IoT",
+        "abstract": "Deploying large language models (LLMs) on Industrial Internet of Things (IIoT) edge devices demands extreme compression, yet existing structured pruning methods collapse at high compression ratios due to one-shot importance estimation, and their cross-architecture behavior remains unpredictable. This article presents a cascaded multi-granularity pruning framework that removes layers, attention heads, and feed-forward channels in coarse-to-fine order, with lightweight low-rank recovery between stages to re-estimate component importance. An information-theoretic analysis motivates this ordering, and the Structural Independence Assumption (SIA) is formalized as a checkable condition predicting whether per-component pruning criteria are reliable for a given architecture: Multi-Head Attention (MHA)+GELU designs satisfy the SIA, whereas Grouped Query Attention (GQA)+SwiGLU designs violate it. On bearing fault diagnosis spanning 88M to 6.25B-parameter models, the framework extends achievable compression to 13.8 times on MHA+GELU architectures with 83.82% accuracy (+3.70 percentage points (pp) over the strongest baseline), while exposing a ~74pp accuracy collapse on GQA+SwiGLU architectures that violate the SIA. Deployed on an industrial slewing bearing fault diagnosis platform with NVIDIA DGX Spark, compressed models reduce inference latency by up to 67.2% and peak memory by 62.5%, demonstrating viability for IIoT edge inference.",
+        "authors": [
+          "Jinghan Wang",
+          "Yanjun Chen",
+          "Wei Zhang",
+          "Xiaotong Huang",
+          "Tianchen Liu",
+          "Gaoliang Peng"
+        ],
+        "primary_category": "cs.CL",
+        "categories": [
+          "cs.CL"
+        ],
+        "published_at": "2026-06-25T10:44:48Z",
+        "updated_at": "2026-06-25T10:44:48Z",
+        "abs_url": "https://arxiv.org/abs/2606.26861",
+        "pdf_url": "https://arxiv.org/pdf/2606.26861",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:22:05.185801Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26861",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": true,
+        "institutions": [
+          "NVIDIA"
+        ],
+        "top_conference": null,
+        "matched_keywords": [
+          "inference",
+          "latency",
+          "compression",
+          "memory"
+        ],
+        "signal_sources": {
+          "institution_background": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 9,
+      "score_breakdown": {
+        "institution_background": 3,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Top institution signal: NVIDIA",
+        "Practitioner keywords: inference, latency, compression, memory",
+        "arXiv category weight: cs.CL",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: systems"
+      ],
+      "selected_reason": "Top institution signal: NVIDIA; Practitioner keywords: inference, latency, compression, memory; arXiv category weight: cs.CL; No duplicate title in candidate pool; Recent topic repeat penalty: systems",
+      "matched_keywords": [
+        "inference",
+        "latency",
+        "compression",
+        "memory"
+      ],
+      "topic": "Systems and Deployment",
+      "topic_slug": "systems",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 16,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.26836",
+        "arxiv_id": "2606.26836",
+        "title": "The Capability Frontier: Benchmarks Miss 82% of Model Performance",
+        "abstract": "Existing benchmarks typically report accuracy for a single model on a single run. This systematically understates real-world LLM capabilities, particularly under heterogeneous data distributions: (i) different models get different questions correct according to their specializations, and (ii) given a budget, multiple generations can be sampled and selectively retained. To quantify this gap, we introduce the Capability Frontier: a Pareto frontier over a set of models that characterizes the best achievable performance at each cost level under optimal selection across models and generations (i.e., via an oracle). Our construction corrects for two opposing biases: underestimation from single-model evaluation and overestimation from taking maxima over noisy samples. We study 21 LLMs across 16 widely used benchmarks spanning coding, reasoning, medicine, factuality, instruction following, and agentic tasks, comparing Capability Frontier performance at matched cost to each benchmark's top-performing model. Correcting for single-model evaluation yields a 54% error rate reduction; additionally correcting for single runs yields an 82% improvement, with SOTA accuracy matched at 85% cost reduction. Complementing these empirical results, we use controlled probabilistic simulations to show that higher query topic entropy produces a near-monotonic increase in the performance gap between oracle routing and the best single model. Our findings suggest collective LLM capabilities are substantially underestimated, with implications for evaluation and deployment in data-heterogeneous, multi-domain settings.",
+        "authors": [
+          "Bradley Fowler",
+          "Ryan Smith",
+          "Daniel Thi Graviet",
+          "William Myers",
+          "Joshua Greaves",
+          "Narmeen Fatimah Oozeer",
+          "Antía García",
+          "Philip Quirke",
+          "Amirali Abdullah",
+          "Fazl Barez",
+          "Shriyash Kaustubh Upadhyay"
+        ],
+        "primary_category": "cs.AI",
+        "categories": [
+          "cs.AI"
+        ],
+        "published_at": "2026-06-25T10:20:47Z",
+        "updated_at": "2026-06-25T10:20:47Z",
+        "abs_url": "https://arxiv.org/abs/2606.26836",
+        "pdf_url": "https://arxiv.org/pdf/2606.26836",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:22:05.186100Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26836",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": "ACL",
+        "matched_keywords": [
+          "agent",
+          "deployment",
+          "evaluation",
+          "benchmark"
+        ],
+        "signal_sources": {
+          "top_conference": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 9,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 3,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Top conference signal: ACL",
+        "Practitioner keywords: agent, deployment, evaluation, benchmark",
+        "arXiv category weight: cs.AI",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation"
+      ],
+      "selected_reason": "Top conference signal: ACL; Practitioner keywords: agent, deployment, evaluation, benchmark; arXiv category weight: cs.AI; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation",
+      "matched_keywords": [
+        "agent",
+        "deployment",
+        "evaluation",
+        "benchmark",
+        "eval"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 17,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.26790",
+        "arxiv_id": "2606.26790",
+        "title": "OPID: On-Policy Skill Distillation for Agentic Reinforcement Learning",
+        "abstract": "Outcome-based reinforcement learning provides a stable optimization backbone for language agents, but its sparse trajectory-level rewards provide little guidance on which intermediate decisions should be reinforced or suppressed. On-policy self-distillation offers dense token-level supervision, yet existing skill-conditioned variants often rely on external skill memories or retrieved privileged context, which are costly to maintain and can be mismatched with the state distribution induced by the current policy in multi-turn interaction. We propose \\textbf{OPID} (\\textbf{O}n-\\textbf{P}olicy Sk\\textbf{i}ll \\textbf{D}istillation), a framework that extracts skill supervision directly from completed on-policy trajectories. OPID represents trajectory hindsight as hierarchical skills: episode-level skills capture global workflows or failure-avoidance rules, while step-level skills capture local decision knowledge at critical timesteps. A critical-first routing mechanism uses step-level skills when critical decisions are identified and falls back to episode-level skills as default guidance otherwise. The selected skill is injected into the interaction history, allowing the old policy to re-score the same sampled response under both original and skill-augmented contexts. The resulting log-probability shift yields a token-level self-distillation advantage, which is combined with the outcome advantage for policy optimization. OPID thus preserves RL as the primary training objective while introducing dense, distribution-matched hindsight supervision. Experiments on ALFWorld, WebShop and Search-based QA demonstrate that OPID generally improves agent performance, sample efficiency, and robustness over outcome-only RL and existing skill-distillation baselines. Our code is available at https://github.com/jinyangwu/OPID/tree/main.",
+        "authors": [
+          "Shuo Yang",
+          "Jinyang Wu",
+          "Zhengxi Lu",
+          "Yuhao Shen",
+          "Fan Zhang",
+          "Lang Feng",
+          "Shuai Zhang",
+          "Haoran Luo",
+          "Zheng Lian",
+          "Zhengqi Wen",
+          "Jianhua Tao"
+        ],
+        "primary_category": "cs.CL",
+        "categories": [
+          "cs.CL"
+        ],
+        "published_at": "2026-06-25T09:24:09Z",
+        "updated_at": "2026-06-25T09:24:09Z",
+        "abs_url": "https://arxiv.org/abs/2606.26790",
+        "pdf_url": "https://arxiv.org/pdf/2606.26790",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:22:05.186473Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26790",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "agent",
+          "workflow",
+          "code"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 9,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 3,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: agent, workflow, code",
+        "arXiv category weight: cs.CL",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: agents",
+        "Safety/ethics/governance keywords: robustness"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: agent, workflow, code; arXiv category weight: cs.CL; No duplicate title in candidate pool; Recent topic repeat penalty: agents; Safety/ethics/governance keywords: robustness",
+      "matched_keywords": [
+        "agent",
+        "workflow",
+        "code",
+        "agents",
+        "trajectory"
+      ],
+      "topic": "Agents and Tool Use",
+      "topic_slug": "agents",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 18,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.26716",
+        "arxiv_id": "2606.26716",
+        "title": "Dual-Prior Guided Null-Space Learning with Mixture-of-Splines for Arbitrary Medical Slice Super-Resolution",
+        "abstract": "Arbitrary slice super-resolution reconstructs isotropic volumes from anisotropic clinical acquisitions by synthesizing intermediate slices at arbitrary scales. However, treating this ill-posed inverse problem as unconstrained residual-based regression risks hallucinating anatomically implausible structures or altering the originally observed data. To address both concerns, this paper presents the Dual-Prior Null-space Learning (DP-NSL) framework, which reformulates the task as a constrained recovery process guided by two complementary priors. A Measurement-Consistent Projection (MCP) enforces a Deterministic Observation Prior: the reconstruction undergoes an exact orthogonal projection that reproduces every acquired slice with zero error, confining all learned details to the unobservable null space. Within this null space, a Mixture-of-Splines (MoS) module imposes a Geometric Continuity Prior by dynamically mixing B-spline experts of different analytic orders, allowing each anatomical region to be modeled with a content-aware level of continuity. To promote spatial coherence, a Local Spatial Consistency Decoder (LSCD) further injects local inductive bias. Experiments on three CT and one MRI benchmark show that DP-NSL outperforms existing approaches while strictly preserving measurement consistency. Code is available at https://github.com/DeepMed-Lab-ECNU/Medical-Image-Reconstruction.",
+        "authors": [
+          "Haofei Song",
+          "Siyuan Xu",
+          "Xintian Mao",
+          "Shaojie Guo",
+          "Qingli Li",
+          "Yan Wang"
+        ],
+        "primary_category": "eess.IV",
+        "categories": [
+          "eess.IV",
+          "cs.CV"
+        ],
+        "published_at": "2026-06-25T07:53:36Z",
+        "updated_at": "2026-06-25T07:53:36Z",
+        "abs_url": "https://arxiv.org/abs/2606.26716",
+        "pdf_url": "https://arxiv.org/pdf/2606.26716",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:22:05.187073Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26716",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "serving",
+          "benchmark",
+          "code"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 9,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 3,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: serving, benchmark, code",
+        "arXiv category weight: eess.IV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation",
+        "Safety/ethics/governance keywords: risk"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: serving, benchmark, code; arXiv category weight: eess.IV; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation; Safety/ethics/governance keywords: risk",
+      "matched_keywords": [
+        "serving",
+        "benchmark",
+        "code",
+        "metric"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 19,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.26712",
+        "arxiv_id": "2606.26712",
+        "title": "MLFFM-SegDiff: A Multi-Level Feature Fusion Diffusion Model for Skin Lesion Segmentation",
+        "abstract": "Skin lesion segmentation is a key task in computer-aided dermatological diagnosis, where accuracy directly impacts downstream analysis and disease classification. However, dermoscopic images are challenging due to blurred boundaries, low contrast, large shape variations, and artifacts such as hair and shadows. Recently, diffusion models have shown strong performance in medical image segmentation thanks to their progressive denoising and distribution modeling capabilities. Nevertheless, existing diffusion-based methods still suffer from limited cross-level feature interaction and insufficient boundary detail recovery. To address these issues, we propose MLFFM-SegDiff, a multi-level feature fusion diffusion model for skin lesion segmentation. Built on a diffusion framework, the method introduces a dual-path U-Net encoder, a Multi-Level Feature Fusion Module (MLFFM), and a boundary-sensitive loss function. The dual-path encoder enhances interaction between noisy mask features and dermoscopic image features. MLFFM improves skip connections via attention, scale alignment, and adaptive cross-level fusion. These designs enable the decoder to jointly leverage shallow boundary cues and deep semantic representations, improving mask reconstruction quality. Experiments on ISIC2018, PH2, and HAM10000 demonstrate that MLFFM-SegDiff outperforms representative methods including DermoSegDiff, U-Net, and SwinUNETR across Accuracy, F1-score, Jaccard index, Recall, and Dice. In particular, it achieves an average Jaccard index of 0.8546 and Dice coefficient of 0.9207. These results validate the effectiveness of the proposed multi-level feature fusion strategy for improving lesion segmentation performance. The code will be released at https://github.com/Qacket/MLFFM-SegDiff.git after publication.",
+        "authors": [
+          "Jingjun Gu",
+          "Chaojie Shen",
+          "Yifeng Cao",
+          "Wei Zhang",
+          "Yiliu Li",
+          "Aobo Fan"
+        ],
+        "primary_category": "eess.IV",
+        "categories": [
+          "eess.IV",
+          "cs.AI",
+          "cs.CV"
+        ],
+        "published_at": "2026-06-25T07:45:28Z",
+        "updated_at": "2026-06-25T07:45:28Z",
+        "abs_url": "https://arxiv.org/abs/2606.26712",
+        "pdf_url": "https://arxiv.org/pdf/2606.26712",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:22:05.187137Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.26712",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "rag",
+          "alignment",
+          "code"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 9,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 3,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: rag, alignment, code",
+        "arXiv category weight: eess.IV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: rag",
+        "Safety/ethics/governance keywords: alignment"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: rag, alignment, code; arXiv category weight: eess.IV; No duplicate title in candidate pool; Recent topic repeat penalty: rag; Safety/ethics/governance keywords: alignment",
+      "matched_keywords": [
+        "rag",
+        "alignment",
+        "code",
+        "index"
+      ],
+      "topic": "Retrieval and RAG",
+      "topic_slug": "rag",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 20,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.27361",
+        "arxiv_id": "2606.27361",
+        "title": "Autoregressive Boltzmann Generators",
+        "abstract": "Efficient sampling of molecular systems at thermodynamic equilibrium is a hallmark challenge in statistical physics. This challenge has driven the development of Boltzmann Generators (BGs), which allow rapid generation of uncorrelated equilibrium samples by combining a generative model with exact likelihoods and an importance sampling correction. However, modern BGs predominantly rely on normalizing flows (NFs), which either suffer from limited expressivity due to strict invertibility constraints (discrete time) or computationally expensive likelihoods (continuous time). In this paper, we propose Autoregressive Boltzmann Generators (ArBG) -- a novel autoregressive modelling framework -- that overcomes these limitations by departing from the flow-based BG paradigm. ArBG circumvents the topological constraints of flows and enables sequential inference-time interventions, while offering enhanced scalability by leveraging architectures effective in Large Language Models. We empirically demonstrate that ArBG leads to significant improvements over flow-based models across all benchmarks, but particularly in larger peptide systems such as the 10-residue Chignolin. Furthermore, we introduce Robin, a 132 million parameter transferable model trained with the ArBG framework which improves over the previous state-of-the-art, reducing the zero-shot energy error, E-W$_2$, on 8-residue systems by over 60$\\%$. The code can be found at the following link: https://github.com/danyalrehman/autobg.",
+        "authors": [
+          "Danyal Rehman",
+          "Charlie B. Tan",
+          "Yoshua Bengio",
+          "Avishek Joey Bose",
+          "Alexander Tong"
+        ],
+        "primary_category": "cs.LG",
+        "categories": [
+          "cs.LG",
+          "cs.AI"
+        ],
+        "published_at": "2026-06-25T17:58:21Z",
+        "updated_at": "2026-06-25T17:58:21Z",
+        "abs_url": "https://arxiv.org/abs/2606.27361",
+        "pdf_url": "https://arxiv.org/pdf/2606.27361",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:21:39.824626Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.27361",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "rag",
+          "inference",
+          "benchmark",
+          "code"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: rag, inference, benchmark, code",
+        "arXiv category weight: cs.LG",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: code"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: rag, inference, benchmark, code; arXiv category weight: cs.LG; No duplicate title in candidate pool; Recent topic repeat penalty: code",
+      "matched_keywords": [
+        "rag",
+        "inference",
+        "benchmark",
+        "code",
+        "api"
+      ],
+      "topic": "Code Intelligence",
+      "topic_slug": "code",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 21,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.27330",
+        "arxiv_id": "2606.27330",
+        "title": "Empowering GUI Agents via Autonomous Experience Exploration and Hindsight Experience Utilization for Task Planning",
+        "abstract": "Multimodal web agents can assist humans in operating repetitive GUI tasks, where effective task planning is essential for decomposing complex tasks into executable actions. While small open source MLLMs are cost efficient and privacy preserving compared with commercial large models, they suffer from weak planning and limited cross website generalization. To address these limitations, we introduce the planning experience exploration and utilization (PEEU) method, which autonomously explores environments to discover experiences and utilizes hindsight experience to synthesize strictly aligned, high level training data. To quantitatively analyze the generalization behaviors driving this performance, we propose the task decomposition hierarchical analysis framework (TDHAF) to systematically study compositional generalization across three task granularities: low, middle and high levels. Our analysis reveals that mastering low level atomic skills does not guarantee high level planning competence, while high level task training yields stronger OOD generalization. Experiments on real world benchmarks demonstrate PEEU's superior effectiveness: our 7B model achieves 30.6% accuracy, outperforming the much larger Qwen2.5-VL-32B model. These demonstrate constructing hindsight high level tasks and leveraging experiences is crucial for OOD planning abilities of small MLLMs.",
+        "authors": [
+          "Tianyi Men",
+          "Zhuoran Jin",
+          "Pengfei Cao",
+          "Yubo Chen",
+          "Kang Liu",
+          "Jun Zhao"
+        ],
+        "primary_category": "cs.CL",
+        "categories": [
+          "cs.CL",
+          "cs.AI",
+          "cs.CV",
+          "cs.LG"
+        ],
+        "published_at": "2026-06-25T17:44:48Z",
+        "updated_at": "2026-06-25T17:44:48Z",
+        "abs_url": "https://arxiv.org/abs/2606.27330",
+        "pdf_url": "https://arxiv.org/pdf/2606.27330",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:21:39.824927Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.27330",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "agent",
+          "rag",
+          "serving",
+          "benchmark",
+          "multimodal"
+        ],
+        "signal_sources": {},
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Practitioner keywords: agent, rag, serving, benchmark, multimodal",
+        "arXiv category weight: cs.CL",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: agents",
+        "Safety/ethics/governance keywords: privacy"
+      ],
+      "selected_reason": "Practitioner keywords: agent, rag, serving, benchmark, multimodal; arXiv category weight: cs.CL; No duplicate title in candidate pool; Recent topic repeat penalty: agents; Safety/ethics/governance keywords: privacy",
+      "matched_keywords": [
+        "agent",
+        "rag",
+        "serving",
+        "benchmark",
+        "multimodal",
+        "agents",
+        "planning"
+      ],
+      "topic": "Agents and Tool Use",
+      "topic_slug": "agents",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 22,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.27307",
+        "arxiv_id": "2606.27307",
+        "title": "See & Sniff: Learning Visuo-Olfactory Representations",
+        "abstract": "While modern multimodal models integrate vision with language, audio, or touch, olfaction remains largely unexplored due to the lack of paired visuo-olfactory data. We introduce SmellNet-V, a scalable visuo-olfactory dataset built on the insight that odor identity is largely invariant to visual transformations within a semantic category. This allows us to synthetically pair smell-only samples with semantically aligned in-the-wild web images, converting a unimodal olfactory dataset into a cross-modal benchmark without costly co-collection. Building on this dataset, we propose See & Sniff, a self-supervised framework that learns joint visuo-olfactory representations via dense local alignment and naturally produces smell saliency maps for spatial grounding of odor sources. We further introduce pixel-level smell localization task and a benchmark for evaluation. Our method surpasses smell-only baselines by 7% in smell classification from smell alone and generalizes to cross-modal retrieval and smell localization, establishing visuo-olfactory learning as a new direction in multimodal perception.",
+        "authors": [
+          "Seongyu Kim",
+          "Seungwoo Lee",
+          "Hyeonggon Ryu",
+          "Joon Son Chung",
+          "Arda Senocak"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV"
+        ],
+        "published_at": "2026-06-25T17:26:47Z",
+        "updated_at": "2026-06-25T17:26:47Z",
+        "abs_url": "https://arxiv.org/abs/2606.27307",
+        "pdf_url": "https://arxiv.org/pdf/2606.27307",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:21:39.825127Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.27307",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "retrieval",
+          "alignment",
+          "evaluation",
+          "benchmark",
+          "multimodal"
+        ],
+        "signal_sources": {},
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Practitioner keywords: retrieval, alignment, evaluation, benchmark, multimodal",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation",
+        "Safety/ethics/governance keywords: alignment"
+      ],
+      "selected_reason": "Practitioner keywords: retrieval, alignment, evaluation, benchmark, multimodal; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation; Safety/ethics/governance keywords: alignment",
+      "matched_keywords": [
+        "retrieval",
+        "alignment",
+        "evaluation",
+        "benchmark",
+        "multimodal",
+        "eval",
+        "dataset"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 23,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.27275",
+        "arxiv_id": "2606.27275",
+        "title": "How Surprising Is Historical Italian to Language Models? Tokenization Tax, Comprehension Tax, and a Simple Mitigation",
+        "abstract": "Large language models (LLMs) are increasingly critical to digital library workflows, yet their ability to process historical language remains poorly understood. Historical difficulty is typically treated as a monolithic barrier, conflating orthographic variation, linguistic distance, and pretraining exposure. In this paper, we propose a diagnostic framework that decomposes this difficulty into four distinct dimensions: tokenization cost, predictive uncertainty (surprisal), semantic robustness, and context sensitivity. We evaluate this framework on three datasets spanning three centuries: (1) a newly curated corpus of 17th-century Italian texts (1610-1689) digitized from original page images; (2) canonical 19th-century Italian \"I Promessi Sposi\" serving as a high-exposure control; and (3) 18th-century Russian civil print books as a contrastive orthographic stress test. Our results reveal a distinct dissociation between encoding cost and comprehension. While Russian and early modern Italian incur comparable tokenization penalties (25-30% inflation), their predictive difficulty diverges sharply. 17th-century Italian is on average 2.4 times more surprising than its modern equivalent - with academic prose reaching 3.2 times - whereas Russian shows only a modest increase. But predictive uncertainty does not imply representational degradation: embedding similarity remains robust (> 0.85) across all datasets, confirming that models can represent historical meaning even when generation is unstable. Finally, we demonstrate that a minimal temporal context prompt reduces historical surprisal by approximately 60%, offering a simple, model-agnostic mitigation. These findings suggest that while historical text imposes a consistent encoding tax, digital libraries can safely deploy LLMs for semantic retrieval tasks, provided that generative applications are carefully adapted.",
+        "authors": [
+          "Maria Levchenko"
+        ],
+        "primary_category": "cs.CL",
+        "categories": [
+          "cs.CL",
+          "cs.DL"
+        ],
+        "published_at": "2026-06-25T16:52:21Z",
+        "updated_at": "2026-06-25T16:52:21Z",
+        "abs_url": "https://arxiv.org/abs/2606.27275",
+        "pdf_url": "https://arxiv.org/pdf/2606.27275",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:21:39.825501Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.27275",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "workflow",
+          "rag",
+          "retrieval",
+          "serving"
+        ],
+        "signal_sources": {},
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Practitioner keywords: workflow, rag, retrieval, serving",
+        "arXiv category weight: cs.CL",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: rag",
+        "Safety/ethics/governance keywords: robustness"
+      ],
+      "selected_reason": "Practitioner keywords: workflow, rag, retrieval, serving; arXiv category weight: cs.CL; No duplicate title in candidate pool; Recent topic repeat penalty: rag; Safety/ethics/governance keywords: robustness",
+      "matched_keywords": [
+        "workflow",
+        "rag",
+        "retrieval",
+        "serving",
+        "corpus"
+      ],
+      "topic": "Retrieval and RAG",
+      "topic_slug": "rag",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 24,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.27223",
+        "arxiv_id": "2606.27223",
+        "title": "SatSplatDiff: Geometry-preserving generative refinement for high-fidelity satellite Gaussian Splatting",
+        "abstract": "Gaussian Splatting has been recently explored for satellite 3D reconstruction, demonstrating flexibility and efficiency in representing radiometrically diverse satellite scenes. However, the limited top viewpoint of satellite imagery results in insufficient supervision on building facades, leaving surface holes and degraded visual fidelity. Generative refinement, which leverages pretrained generative priors to iteratively refine and update the rendered images used as supervision targets, has recently been investigated to improve the visual fidelity of Gaussian-rendered images. However, since these models refine each view independently, the resulting images can generate hallucinations and break photo-consistency, leading to geometric degradation. To address these limitations, we propose SatSplatDiff, which aims to minimize geometric degradation prevalent in generative refinement. Building on photogrammetric DSM initialization and 2DGS-based shadow casting established in our prior work SatSplat, we first introduce monocular depth supervision and multi-scale geometric refinement to establish a geometrically accurate and well-regularized surface representation. We then apply shadow-guided generative refinement, where geometrically calculated shadow maps guide the Gaussians to maintain consistency with the underlying geometry, improving visual fidelity while reducing geometric degradation. Extensive evaluations on the IARPA2016 and DFC2019 datasets demonstrate state-of-the-art performance, reducing geometric MAE by up to 18% and improving visual fidelity (FID-CLIP) by 28-45% over existing baselines. Our method delivers up to 5x resolution enhancement with minimal hallucination and sensor-consistent appearance, demonstrating seamless cross-tile consistency and strong scalability for large-scale reconstruction. Source code is available at https://github.com/GDAOSU/SatSplatDiff",
+        "authors": [
+          "Jiyong Kim",
+          "Shuang Song",
+          "Ronjgun Qin"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV"
+        ],
+        "published_at": "2026-06-25T16:12:36Z",
+        "updated_at": "2026-06-25T16:12:36Z",
+        "abs_url": "https://arxiv.org/abs/2606.27223",
+        "pdf_url": "https://arxiv.org/pdf/2606.27223",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:21:39.825899Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.27223",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "rag",
+          "serving",
+          "evaluation",
+          "code"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: rag, serving, evaluation, code",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: rag, serving, evaluation, code; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation",
+      "matched_keywords": [
+        "rag",
+        "serving",
+        "evaluation",
+        "code",
+        "eval",
+        "dataset",
+        "metric"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 25,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2606.27210",
+        "arxiv_id": "2606.27210",
+        "title": "Paved with True Intents: Intent-Aware Training Improves LLM Safety Classification Across Training Regimes",
+        "abstract": "We argue that safety classifiers should model user intent as an explicit signal between the prompt and the final label. To study this, we introduce AIMS, a human-annotated dataset of 1,724 difficult safety prompts, each paired with an intent description and harm label. We use AIMS to evaluate intent-aware training across supervised fine-tuning, preference learning, reasoning distillation, and reinforcement learning. Despite its size, AIMS enables competitive safety classifiers across training regimes: DPO from model-generated intent errors improves over SFT, and intent-conditioned distillation outperforms reasoning-only distillation in most teacher-student pairs. Most notably, directly rewarding intent faithfulness with GRPO yields the strongest average performance across five external safety benchmarks, while our intent-aware models form the inference latency-F1 Pareto frontier. These results show that faithful intent modeling is a compact, high-quality supervision signal for more robust safety classifiers.",
+        "authors": [
+          "Jeremias Ferrao",
+          "Niclas Müller-Hof",
+          "Iustin Sîrbu",
+          "Traian Rebedea",
+          "Yftah Ziser"
+        ],
+        "primary_category": "cs.CL",
+        "categories": [
+          "cs.CL"
+        ],
+        "published_at": "2026-06-25T16:03:57Z",
+        "updated_at": "2026-06-25T16:03:57Z",
+        "abs_url": "https://arxiv.org/abs/2606.27210",
+        "pdf_url": "https://arxiv.org/pdf/2606.27210",
+        "source": "arxiv",
+        "fetched_at": "2026-06-26T22:21:39.825997Z"
+      },
+      "signal": {
+        "arxiv_id": "2606.27210",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "rag",
+          "inference",
+          "latency",
+          "safety",
+          "benchmark",
+          "fine-tuning"
+        ],
+        "signal_sources": {},
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Practitioner keywords: rag, inference, latency, safety, benchmark, fine-tuning",
+        "arXiv category weight: cs.CL",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: training",
+        "Safety/ethics/governance keywords: safety"
+      ],
+      "selected_reason": "Practitioner keywords: rag, inference, latency, safety, benchmark, fine-tuning; arXiv category weight: cs.CL; No duplicate title in candidate pool; Recent topic repeat penalty: training; Safety/ethics/governance keywords: safety",
+      "matched_keywords": [
+        "rag",
+        "inference",
+        "latency",
+        "safety",
+        "benchmark",
+        "fine-tuning",
+        "training",
+        "sft",
+        "preference",
+        "distillation"
+      ],
+      "topic": "Training and Post-training",
+      "topic_slug": "training",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 26,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    }
+  ]
+}

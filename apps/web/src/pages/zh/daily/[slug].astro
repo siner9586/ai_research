@@ -10,47 +10,57 @@ export function getStaticPaths() {
 const { doc } = Astro.props;
 const pageTitle = displayBriefTitle(doc.meta.title);
 const isSources = doc.meta.page_type === 'sources';
-const selectedCount = (doc.meta.featured_count || 0) + (doc.meta.mentions_count || 0);
 const sourceDate = doc.meta.actual_date || doc.meta.target_date || doc.meta.date;
+const isFallback = Boolean(doc.meta.actual_date && doc.meta.target_date && doc.meta.actual_date !== doc.meta.target_date);
 const body = doc.meta.page_type === 'brief'
   ? doc.body.replace(/\n\*\*日期\*\*:\s*\d{4}-\d{2}-\d{2}\n\n/, '\n')
   : doc.body;
+const displayBody = body.replace(/^\s*#\s+.*\n+/, '');
 const featuredTitles = !isSources ? getFeaturedPaperTitleItems(doc, 'zh', 6) : [];
-const articleHtml = markdownToHtml(body);
-const articleHtmlWithFeaturedTitles = !isSources && featuredTitles.length > 0
-  ? articleHtml.replace('</h1>', `</h1>\n${renderFeaturedPaperTitlesHtml(featuredTitles, 'zh')}`)
-  : articleHtml;
+const articleHtml = markdownToHtml(displayBody);
+const featuredDigestHtml = !isSources && featuredTitles.length > 0
+  ? renderFeaturedPaperTitlesHtml(featuredTitles, 'zh')
+  : '';
 ---
 <BaseLayout lang="zh" title={pageTitle} description={doc.meta.summary}>
-  <article class="prose">
-    <div class="article-meta issue-meta-line">
-      <span>{doc.meta.date}</span>
-      <span>{isSources ? '来源页' : '每日简报'}</span>
-      <span>{doc.meta.candidate_count || 0} 篇候选</span>
-      <span>{doc.meta.featured_count || 0} 篇重点</span>
-      <span>{doc.meta.mentions_count || 0} 篇补充</span>
-      {isSources && doc.meta.brief_page && <a class="paper-meta-link" href={doc.meta.brief_page}>返回简报</a>}
-      {!isSources && doc.meta.sources_page && <a class="paper-meta-link" href={doc.meta.sources_page}>来源页</a>}
+  <article class:list={['brief-article', isSources && 'source-article']}>
+    <header class="brief-hero">
+      <span class="date-badge">{doc.meta.date}</span>
+      <h1>{pageTitle}</h1>
+      {doc.meta.summary && <p class="brief-summary">{doc.meta.summary}</p>}
+      <div class="brief-actions">
+        {isSources && doc.meta.brief_page && <a class="button" href={doc.meta.brief_page}>返回简报</a>}
+        {!isSources && doc.meta.sources_page && <a class="button secondary" href={doc.meta.sources_page}>查看来源页</a>}
+        <a class="button secondary" href={`/en/daily/${doc.slug}/`}>English</a>
+      </div>
+    </header>
+
+    <div class="brief-meta-bar" aria-label="本期元信息">
+      <span>发布 <strong>{doc.meta.date}</strong></span>
+      <span>目标源日 <strong>{doc.meta.target_date || '-'}</strong></span>
+      <span>实际源日 <strong>{doc.meta.actual_date || sourceDate}</strong></span>
+      <span>候选 <strong>{doc.meta.candidate_count || 0}</strong></span>
+      <span>重点 <strong>{doc.meta.featured_count || 0}</strong></span>
+      <span>关注 <strong>{doc.meta.mentions_count || 0}</strong></span>
+      {isFallback && <span class="fallback-badge">源日回退</span>}
     </div>
-    {!isSources && (
-      <p class="candidate-note">
-        本期从 <strong>{sourceDate}</strong> 论文源抓取并去重 <strong>{doc.meta.candidate_count || 0}</strong> 篇候选论文，筛选 <strong>{doc.meta.featured_count || 0}</strong> 篇重点论文与 <strong>{doc.meta.mentions_count || 0}</strong> 篇补充关注。
-      </p>
+
+    {isSources ? (
+      <section class="source-info-card">
+        <h2>生成记录</h2>
+        <p>本页保留本期入选论文、候选规模与源日期信息，用于追溯简报来源。页面仅改变展示方式，不改变入选论文、排序和数量。</p>
+      </section>
+    ) : (
+      <Fragment>
+        <p class="source-info-card">
+          本期从 <strong>{sourceDate}</strong> 论文源抓取并去重 <strong>{doc.meta.candidate_count || 0}</strong> 篇候选论文，筛选 <strong>{doc.meta.featured_count || 0}</strong> 篇重点论文与 <strong>{doc.meta.mentions_count || 0}</strong> 篇补充关注。
+        </p>
+        {featuredDigestHtml && <Fragment set:html={featuredDigestHtml} />}
+      </Fragment>
     )}
-    <Fragment set:html={articleHtmlWithFeaturedTitles} />
+
+    <div class="prose">
+      <Fragment set:html={articleHtml} />
+    </div>
   </article>
 </BaseLayout>
-
-<style>
-  .issue-meta-line { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
-  .candidate-note { margin: 14px 0 22px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-soft); color: var(--muted); font-size: 0.94rem; }
-  .candidate-note strong { color: var(--text); }
-  :global(.featured-paper-digest) { margin: 12px 0 24px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-soft); }
-  :global(.featured-paper-digest-kicker) { margin: 0 0 8px; color: var(--muted); font-size: 13px; font-weight: 800; letter-spacing: 0.02em; }
-  :global(.featured-paper-digest-list) { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
-  :global(.featured-paper-digest-list li) { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 8px; align-items: start; color: var(--text); font-size: clamp(13px, 1.25vw, 15px); line-height: 1.48; }
-  :global(.featured-paper-index) { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; background: var(--surface); color: var(--muted); font-size: 12px; font-weight: 800; }
-  :global(.featured-paper-title-text) { min-width: 0; }
-  :global(.featured-paper-link) { display: inline; margin-left: 0; color: var(--accent); text-decoration: none; font-weight: 400; line-height: 1; }
-  :global(.featured-paper-link:hover) { text-decoration: underline; background: transparent; }
-</style>

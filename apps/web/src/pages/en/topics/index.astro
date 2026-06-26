@@ -5,8 +5,16 @@ const topics = loadTopics();
 const counts = topicCounts('en');
 ---
 <BaseLayout lang="en" title="Topics">
-  <h1>Topics</h1>
-  <p class="muted">Track selected papers by technical area. Topics are configuration-driven and easy to revise.</p>
+  <section class="topic-hero">
+    <div>
+      <h1 class="page-title">Topics</h1>
+      <p class="page-subtitle">Browse generated briefs through existing topics/tags. Counts come from published briefs without adding classification logic.</p>
+    </div>
+    <aside class="info-card">
+      <h2>Topic Index</h2>
+      <p>Quick paths into agents, RAG, evaluation, multimodal models, systems, and other recurring research signals.</p>
+    </aside>
+  </section>
   <section class="topic-grid">
     {topics.map((topic) => (
       <a class="topic-row" href={`/en/topics/${topic.slug}/`}>

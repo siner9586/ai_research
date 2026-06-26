@@ -115,32 +115,238 @@ export function markdownToHtml(markdown: string) {
   const lines = markdown.split('\n');
   const out: string[] = [];
   let inList = false;
-  const closeList = () => { if (inList) { out.push('</ul>'); inList = false; } };
+  let listClass = '';
+  let inFeatured = false;
+  let inMentions = false;
+  let inMentionsList = false;
+  let openMentionCard = false;
+  let openFeaturedCard = false;
+  let openSection: string | null = null;
+  const closeList = () => {
+    if (inList) {
+      out.push('</ul>');
+      inList = false;
+      listClass = '';
+    }
+  };
+  const openList = (className = '') => {
+    if (!inList || listClass !== className) {
+      closeList();
+      out.push(className ? `<ul class="${className}">` : '<ul>');
+      inList = true;
+      listClass = className;
+    }
+  };
+  const closeFeaturedCard = () => {
+    if (openFeaturedCard) {
+      closeList();
+      out.push('</section>');
+      openFeaturedCard = false;
+    }
+  };
+  const closeMentionCard = () => {
+    if (openMentionCard) {
+      out.push('</article>');
+      openMentionCard = false;
+    }
+  };
+  const closeMentionsList = () => {
+    if (inMentionsList) {
+      closeMentionCard();
+      out.push('</div>');
+      inMentionsList = false;
+    }
+  };
+  const closeSection = () => {
+    if (openSection) {
+      closeList();
+      closeFeaturedCard();
+      closeMentionsList();
+      out.push(`</${openSection}>`);
+      openSection = null;
+    }
+  };
 
-  for (const rawLine of lines) {
+  for (let index = 0; index < lines.length; index += 1) {
+    const rawLine = lines[index];
     const line = normalizeDisplayLine(rawLine);
     if (!line.trim()) { closeList(); continue; }
-    if (line.startsWith('<p class="paper-meta-line">')) { closeList(); out.push(line); continue; }
-    if (line.startsWith('|')) { closeList(); out.push(`<pre class="table-line">${escapeHtml(line)}</pre>`); continue; }
+    if (line.startsWith('|')) {
+      closeList();
+      closeFeaturedCard();
+      const tableLines: string[] = [];
+      while (index < lines.length && normalizeDisplayLine(lines[index]).startsWith('|')) {
+        tableLines.push(normalizeDisplayLine(lines[index]));
+        index += 1;
+      }
+      index -= 1;
+      out.push(markdownTableToHtml(tableLines));
+      continue;
+    }
     const heading = line.match(/^(#{1,3})\s+(.*)$/);
     if (heading) {
       closeList();
       const level = heading[1].length;
-      const h1Attrs = level === 1 ? ' class="daily-brief-title" style="font-size: clamp(23px, 3.2vw, 30px); line-height: 1.2; letter-spacing: -0.02em;"' : '';
-      out.push(`<h${level}${h1Attrs}>${inline(heading[2])}</h${level}>`);
+      const text = heading[2].trim();
+      if (level <= 2) {
+        closeFeaturedCard();
+        closeSection();
+      }
+      if (level === 1) {
+        out.push(`<h1 class="daily-brief-title">${inline(text)}</h1>`);
+        continue;
+      }
+      if (level === 2) {
+        if (isDirectionHeading(text)) {
+          inFeatured = false;
+          inMentions = false;
+          out.push('<section class="direction-card">');
+          openSection = 'section';
+          out.push(`<h2>${inline(text)}</h2>`);
+          continue;
+        }
+        if (isFeaturedHeading(text)) {
+          inFeatured = true;
+          inMentions = false;
+          out.push(`<h2 class="featured-section-heading">${inline(text)}</h2>`);
+          continue;
+        }
+        if (isMentionsHeading(text)) {
+          inFeatured = false;
+          inMentions = true;
+          out.push('<section class="mentions-section">');
+          openSection = 'section';
+          out.push(`<h2>${inline(text)}</h2>`);
+          continue;
+        }
+        if (isBoundaryHeading(text)) {
+          inFeatured = false;
+          inMentions = false;
+          out.push('<section class="boundary-card">');
+          openSection = 'section';
+          out.push(`<h2>${inline(text)}</h2>`);
+          continue;
+        }
+        inFeatured = false;
+        inMentions = false;
+        out.push(`<h2>${inline(text)}</h2>`);
+        continue;
+      }
+      if (level === 3 && inFeatured) {
+        closeFeaturedCard();
+        const paperHeading = text.match(/^(\d+)[.．]\s*(.*)$/);
+        const paperIndex = paperHeading?.[1] || '';
+        const paperTitle = paperHeading?.[2] || text;
+        out.push('<section class="featured-paper-card">');
+        out.push(`<h3 data-index="${escapeHtml(paperIndex)}">${inline(paperTitle)}</h3>`);
+        openFeaturedCard = true;
+        continue;
+      }
+      out.push(`<h${level}>${inline(text)}</h${level}>`);
+      continue;
+    }
+    if (line.startsWith('<p class="paper-meta-line">')) {
+      closeList();
+      out.push(line);
       continue;
     }
     const item = line.match(/^-\s+(.*)$/) || line.match(/^\s+-\s+(.*)$/);
     if (item) {
-      if (!inList) { out.push('<ul>'); inList = true; }
+      if (inMentions) {
+        closeList();
+        if (!inMentionsList) {
+          out.push('<div class="mentions-list">');
+          inMentionsList = true;
+        }
+        closeMentionCard();
+        out.push(`<article class="mention-card"><p class="mention-title">${inline(item[1])}</p>`);
+        openMentionCard = true;
+        continue;
+      }
+      openList('');
       out.push(`<li>${inline(item[1])}</li>`);
       continue;
     }
-    closeList();
-    out.push(`<p>${inline(line)}</p>`);
+    if (!inMentions) closeList();
+    out.push(paragraphToHtml(line));
   }
   closeList();
+  closeFeaturedCard();
+  closeMentionsList();
+  closeSection();
   return out.join('\n');
+}
+
+function paragraphToHtml(line: string) {
+  const zhTitle = line.match(/^中文标题[:：]\s*(.*)$/);
+  if (zhTitle) return `<p class="paper-title-zh"><span class="field-label">中文标题</span><strong>${inline(zhTitle[1])}</strong></p>`;
+  const enTitle = line.match(/^English title[:：]\s*(.*)$/i);
+  if (enTitle) return `<p class="paper-title-en"><span class="field-label">English title</span><strong>${inline(enTitle[1])}</strong></p>`;
+
+  const zhSignal = line.match(/^信号显示[:：]\s*([\s\S]*?)(?:关键词[:：]\s*([\s\S]*?))?(?:代码\/数据可用性需查看原文确认。?)?$/);
+  if (zhSignal) {
+    const signal = zhSignal[1].trim().replace(/[。；;]\s*$/, '');
+    const keywords = (zhSignal[2] || '').replace(/[。；;]\s*$/, '').trim();
+    return [
+      `<p class="paper-signal"><span class="field-label">信号显示</span>${inline(signal)}</p>`,
+      keywords ? `<p class="paper-keywords"><span class="field-label">关键词</span>${renderKeywordChips(keywords)}</p>` : '',
+      '<p class="paper-availability"><span class="field-label">代码/数据</span>需查看原文确认</p>',
+    ].filter(Boolean).join('\n');
+  }
+
+  const enSignal = line.match(/^(Core idea|Core signal)[:：]\s*([\s\S]*?)(?:Keywords[:：]\s*([\s\S]*?))?(?:Code\/data availability should be checked in the source paper\.?)?$/i);
+  if (enSignal) {
+    const signal = enSignal[2].trim().replace(/[.;]\s*$/, '');
+    const keywords = (enSignal[3] || '').replace(/[.;]\s*$/, '').trim();
+    return [
+      `<p class="paper-signal"><span class="field-label">Signal</span>${inline(signal)}</p>`,
+      keywords ? `<p class="paper-keywords"><span class="field-label">Keywords</span>${renderKeywordChips(keywords)}</p>` : '',
+      '<p class="paper-availability"><span class="field-label">Code/Data</span>Check the source paper</p>',
+    ].filter(Boolean).join('\n');
+  }
+
+  const zhReason = line.match(/^关注理由[:：]\s*(.*)$/);
+  if (zhReason) return `<p class="mention-reason"><span class="field-label">关注理由</span>${inline(zhReason[1])}</p>`;
+
+  return `<p>${inline(line)}</p>`;
+}
+
+function renderKeywordChips(value: string) {
+  return value
+    .split(/[,，、/]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((item) => `<span class="keyword-chip">${escapeHtml(item)}</span>`)
+    .join('');
+}
+
+function markdownTableToHtml(lines: string[]) {
+  const rows = lines
+    .map((line) => line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((cell) => cell.trim()))
+    .filter((cells) => !cells.every((cell) => /^:?-{3,}:?$/.test(cell)));
+  if (!rows.length) return '';
+  const [head, ...body] = rows;
+  const headHtml = head.map((cell) => `<th>${inline(cell)}</th>`).join('');
+  const bodyHtml = body
+    .map((row) => `<tr>${row.map((cell) => `<td>${inline(cell)}</td>`).join('')}</tr>`)
+    .join('');
+  return `<div class="source-table-wrap"><table class="source-table"><thead><tr>${headHtml}</tr></thead><tbody>${bodyHtml}</tbody></table></div>`;
+}
+
+function isDirectionHeading(text: string) {
+  return /今天最值得跟进的方向|What is worth tracking today/i.test(text);
+}
+
+function isFeaturedHeading(text: string) {
+  return /重点论文|Featured papers/i.test(text);
+}
+
+function isMentionsHeading(text: string) {
+  return /其他值得关注|Other papers worth tracking/i.test(text);
+}
+
+function isBoundaryHeading(text: string) {
+  return /阅读边界|Reading boundaries/i.test(text);
 }
 
 function parseFrontmatter(raw: string) {

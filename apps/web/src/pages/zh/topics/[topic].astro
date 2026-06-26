@@ -10,13 +10,30 @@ const { topic } = Astro.props;
 const briefs = loadBriefs('zh').filter((doc) => (doc.meta.tags || []).includes(topic.slug));
 ---
 <BaseLayout lang="zh" title={topic.zh}>
-  <h1>{topic.zh}</h1>
-  <section class="article-list">
+  <section class="topic-hero">
+    <div>
+      <p class="section-kicker">标签</p>
+      <h1 class="page-title">{topic.zh}</h1>
+      <p class="page-subtitle">{briefs.length} 期相关简报，按发布日期倒序展示。</p>
+    </div>
+    <aside class="info-card">
+      <h2>追踪范围</h2>
+      <p>结果来自简报 frontmatter 的已有 tags 字段，不改变候选池或论文排序。</p>
+    </aside>
+  </section>
+  <section class="archive-grid">
     {briefs.length === 0 && <p class="muted">暂无相关简报。</p>}
     {briefs.map((doc) => (
       <article class="article-card">
+        <p class="section-kicker">{doc.meta.date}</p>
         <h2><a href={doc.url}>{displayBriefTitle(doc.meta.title)}</a></h2>
-        <div class="article-meta"><span>{doc.meta.date}</span></div>
+        {doc.meta.summary && <p>{doc.meta.summary}</p>}
+        <div class="article-meta">
+          <span>{doc.meta.candidate_count || 0} 候选</span>
+          <span>{doc.meta.featured_count || 0} 重点</span>
+          <span>源日 {doc.meta.actual_date || doc.meta.target_date || '-'}</span>
+          <a href={doc.url}>阅读</a>
+        </div>
       </article>
     ))}
   </section>

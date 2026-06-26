@@ -1,30 +1,54 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { displayBriefTitle, loadBriefs } from '../../utils/content';
+
 const briefs = loadBriefs('en');
+const latest = briefs[0];
+const groups = new Map<string, typeof briefs>();
+for (const doc of briefs) {
+  const month = String(doc.meta.date || '').slice(0, 7) || 'undated';
+  if (!groups.has(month)) groups.set(month, []);
+  groups.get(month)?.push(doc);
+}
 ---
 <BaseLayout lang="en" title="Archive">
-  <h1>Archive</h1>
-  <section class="article-list archive-list">
-    {briefs.map((doc) => (
-      <article class="article-card archive-card">
-        <h2><a href={doc.url}>{displayBriefTitle(doc.meta.title)}</a></h2>
-        <div class="issue-meta-row archive-meta-row">
-          <span>{doc.meta.date}</span>
-          <span>{doc.meta.candidate_count || 0} candidates</span>
-          <span>{doc.meta.featured_count || 0} featured</span>
-          <span>{doc.meta.mentions_count || 0} also tracked</span>
-          {doc.meta.sources_page && <a class="issue-source-link" href={doc.meta.sources_page}>Source page</a>}
+  <section class="archive-hero">
+    <div>
+      <h1 class="page-title">Archive</h1>
+      <p class="page-subtitle">Browse historical briefs by publication date. This page presents existing generated content without changing order or paper selection.</p>
+    </div>
+    {latest && (
+      <aside class="archive-highlight">
+        <p class="section-kicker">Latest issue</p>
+        <h2><a href={latest.url}>{displayBriefTitle(latest.meta.title)}</a></h2>
+        <div class="article-meta">
+          <span>{latest.meta.date}</span>
+          <span>{latest.meta.candidate_count || 0} candidates</span>
+          <a href={latest.url}>Read</a>
         </div>
-      </article>
-    ))}
+      </aside>
+    )}
   </section>
-</BaseLayout>
 
-<style>
-  .archive-list { gap: 14px; }
-  .archive-card h2 { margin-bottom: 12px; overflow-wrap: anywhere; }
-  .archive-meta-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--muted); font-size: 14px; }
-  .archive-meta-row span { border: 1px solid var(--line); border-radius: 8px; background: var(--bg-soft); padding: 4px 10px; }
-  .issue-source-link { font-weight: 700; text-decoration: none; }
-</style>
+  {[...groups.entries()].map(([month, docs]) => (
+    <section class="month-group">
+      <h2 class="month-title">{month}</h2>
+      <div class="archive-grid">
+        {docs.map((doc) => (
+          <article class="article-card">
+            <p class="section-kicker">{doc.meta.date}</p>
+            <h2><a href={doc.url}>{displayBriefTitle(doc.meta.title)}</a></h2>
+            {doc.meta.summary && <p>{doc.meta.summary}</p>}
+            <div class="archive-meta-row">
+              <span>{doc.meta.candidate_count || 0} candidates</span>
+              <span>{doc.meta.featured_count || 0} featured</span>
+              <span>{doc.meta.mentions_count || 0} tracked</span>
+              <span>Source {doc.meta.actual_date || doc.meta.target_date || '-'}</span>
+              {doc.meta.sources_page && <a class="issue-source-link" href={doc.meta.sources_page}>Source page</a>}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  ))}
+</BaseLayout>

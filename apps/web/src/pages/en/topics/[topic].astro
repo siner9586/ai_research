@@ -10,13 +10,30 @@ const { topic } = Astro.props;
 const briefs = loadBriefs('en').filter((doc) => (doc.meta.tags || []).includes(topic.slug));
 ---
 <BaseLayout lang="en" title={topic.en}>
-  <h1>{topic.en}</h1>
-  <section class="article-list">
+  <section class="topic-hero">
+    <div>
+      <p class="section-kicker">Topic</p>
+      <h1 class="page-title">{topic.en}</h1>
+      <p class="page-subtitle">{briefs.length} related briefs, shown in publication order.</p>
+    </div>
+    <aside class="info-card">
+      <h2>Scope</h2>
+      <p>Results come from the existing frontmatter tags field and do not change candidate pools or paper ordering.</p>
+    </aside>
+  </section>
+  <section class="archive-grid">
     {briefs.length === 0 && <p class="muted">No related briefs yet.</p>}
     {briefs.map((doc) => (
       <article class="article-card">
+        <p class="section-kicker">{doc.meta.date}</p>
         <h2><a href={doc.url}>{displayBriefTitle(doc.meta.title)}</a></h2>
-        <div class="article-meta"><span>{doc.meta.date}</span></div>
+        {doc.meta.summary && <p>{doc.meta.summary}</p>}
+        <div class="article-meta">
+          <span>{doc.meta.candidate_count || 0} candidates</span>
+          <span>{doc.meta.featured_count || 0} featured</span>
+          <span>Source {doc.meta.actual_date || doc.meta.target_date || '-'}</span>
+          <a href={doc.url}>Read</a>
+        </div>
       </article>
     ))}
   </section>

@@ -1,15 +1,18 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { displayBriefTitle, loadBriefs, loadSite } from '../../utils/content';
+import { displayBriefTitle, loadBriefs, loadSite, loadTopics, topicCounts } from '../../utils/content';
 import { getFeaturedPaperTitleItems } from '../../utils/featuredTitles';
 
 const lang = 'en';
 const site = loadSite()[lang];
 const briefs = loadBriefs(lang);
 const latest = briefs[0];
-const recent = briefs.slice(0, 7);
-const latestTopics = latest?.meta.tags?.slice(0, 6) || [];
+const recent = briefs.slice(1, 7);
+const latestTopics = latest?.meta.tags?.slice(0, 7) || [];
 const latestFeaturedTitles = getFeaturedPaperTitleItems(latest, 'en', 6);
+const counts = topicCounts(lang);
+const topics = loadTopics().filter((topic) => counts[topic.slug] > 0).slice(0, 9);
+const isFallback = latest && latest.meta.actual_date && latest.meta.target_date && latest.meta.actual_date !== latest.meta.target_date;
 const topicNames: Record<string, string> = {
   agents: 'Agents',
   reasoning: 'Reasoning',
@@ -19,7 +22,7 @@ const topicNames: Record<string, string> = {
   code: 'Code AI',
   'vision-generation': 'Image generation',
   'video-generation': 'Video generation',
-  safety: 'Model governance',
+  safety: 'Safety',
   'speech-audio': 'Speech/audio',
   robotics: 'Robotics',
   interpretability: 'Interpretability',
@@ -29,23 +32,57 @@ const topicNames: Record<string, string> = {
 };
 ---
 <BaseLayout lang={lang} title={site.name} description={site.tagline}>
-  <section class="home-hero compact-home">
+  <section class="home-hero">
     <div class="hero-copy">
-      <h1>Find the AI papers worth tracking before the pile becomes unreadable.</h1>
-      <p class="hero-subtitle">A compact daily brief built from arXiv collection, rule-based ranking, and scheduled GitHub Actions automation.</p>
+      <p class="eyebrow">AI Research Brief</p>
+      <h1>AI Research Brief</h1>
+      <p class="hero-subtitle">Source-first daily briefs for AI papers worth tracking.</p>
+      <p class="hero-note">Daily updates · Bilingual notes · Traceable sources</p>
       <div class="action-row">
         <a class="button" href={latest?.url || '/en/archive/'}>Read latest brief</a>
-        <a class="button secondary" href="/en/search/">Search papers</a>
+        <a class="button secondary" href="/en/archive/">Archive</a>
         <a class="button secondary" href="/zh/">中文</a>
       </div>
     </div>
+
+    <aside class="hero-panel" aria-label="Latest issue metrics">
+      <p class="hero-panel-title">Latest issue</p>
+      <div class="metrics">
+        <div class="metric">
+          <span>Published</span>
+          <strong>{latest?.meta.date || '-'}</strong>
+        </div>
+        <div class="metric">
+          <span>Actual source</span>
+          <strong>{latest?.meta.actual_date || latest?.meta.target_date || '-'}</strong>
+        </div>
+        <div class="metric">
+          <span>Candidates</span>
+          <strong>{latest?.meta.candidate_count || 0}</strong>
+        </div>
+        <div class="metric">
+          <span>Featured / tracked</span>
+          <strong>{latest ? `${latest.meta.featured_count || 0}/${latest.meta.mentions_count || 0}` : '-'}</strong>
+        </div>
+      </div>
+      {isFallback && <p class="fallback-badge">Source date fallback</p>}
+    </aside>
   </section>
 
-  {latest && (
-    <section class="latest-panel with-topics latest-stack">
-      <div class="latest-main">
-        <p class="section-kicker">Latest issue · {latest.meta.date} · {latest.meta.candidate_count || 0} candidates</p>
+  {latest ? (
+    <section class="latest-panel">
+      <div>
+        <p class="section-kicker">Latest issue · {latest.meta.date}</p>
         <h2><a href={latest.url}>{displayBriefTitle(latest.meta.title)}</a></h2>
+        {latest.meta.summary && <p class="latest-summary">{latest.meta.summary}</p>}
+        <div class="issue-meta-row">
+          <span>Target {latest.meta.target_date || '-'}</span>
+          <span>Actual {latest.meta.actual_date || '-'}</span>
+          <span>{latest.meta.candidate_count || 0} candidates</span>
+          <span>{latest.meta.featured_count || 0} featured</span>
+          <span>{latest.meta.mentions_count || 0} tracked</span>
+          {isFallback && <span class="fallback-badge">Source date fallback</span>}
+        </div>
         {latestFeaturedTitles.length > 0 && (
           <div class="featured-paper-strip" aria-label="Featured">
             <p class="featured-paper-kicker">Featured</p>
@@ -53,70 +90,73 @@ const topicNames: Record<string, string> = {
               {latestFeaturedTitles.map((item, index: number) => (
                 <li>
                   <span class="featured-paper-number">{index + 1}</span>
-                  <span class="featured-paper-title-text">{item.title}{item.url && <a class="featured-paper-link" href={item.url} aria-label={`Open source paper: ${item.title}`} target="_blank" rel="noopener noreferrer">🔗</a>}</span>
+                  <span class="featured-paper-title-text">{item.title}{item.url && <a class="featured-paper-link" href={item.url} aria-label={`Open source paper: ${item.title}`} target="_blank" rel="noopener noreferrer">↗</a>}</span>
                 </li>
               ))}
             </ol>
           </div>
         )}
-        <div class="issue-meta-row">
-          <span>{latest.meta.featured_count || 0} featured</span>
-          <span>{latest.meta.mentions_count || 0} additional</span>
-          {latest.meta.sources_page && <a class="issue-source-link" href={latest.meta.sources_page}>Source page</a>}
+        <div class="action-row">
+          <a class="button" href={latest.url}>English brief</a>
+          <a class="button secondary" href={`/zh/daily/${latest.slug}/`}>中文简报</a>
+          {latest.meta.sources_page && <a class="button secondary" href={latest.meta.sources_page}>Source page</a>}
         </div>
       </div>
-      <aside class="topic-chips issue-keyword-row" aria-label="Issue topics">
-        {latestTopics.map((topic: string) => <span>{topicNames[topic] || topic}</span>)}
+      <aside class="latest-side">
+        <div class="topic-chips" aria-label="Issue topics">
+          {latestTopics.map((topic: string) => <a href={`/en/topics/${topic}/`}>{topicNames[topic] || topic}</a>)}
+        </div>
       </aside>
     </section>
+  ) : (
+    <p class="muted">No generated content yet.</p>
   )}
 
-  <section class="quick-nav">
-    <a href="/en/archive/">Full archive</a>
-    <a href="/en/topics/">Topic index</a>
-    <a href="/en/feed.xml">RSS feed</a>
-    <a href="/en/privacy/">Privacy</a>
+  <section>
+    <div class="section-head">
+      <div>
+        <h2>Recent Issues</h2>
+        <p>Publication order follows the generated brief order.</p>
+      </div>
+      <a href="/en/archive/">Full archive</a>
+    </div>
+    <div class="recent-grid">
+      {recent.map((doc) => (
+        <article class="article-card">
+          <p class="section-kicker">{doc.meta.date}</p>
+          <h2><a href={doc.url}>{displayBriefTitle(doc.meta.title)}</a></h2>
+          {doc.meta.summary && <p>{doc.meta.summary}</p>}
+          <div class="article-meta">
+            <span>{doc.meta.candidate_count || 0} candidates</span>
+            <span>Source {doc.meta.actual_date || doc.meta.target_date || '-'}</span>
+            <a href={doc.url}>Read</a>
+            <a href={`/zh/daily/${doc.slug}/`}>ZH</a>
+          </div>
+        </article>
+      ))}
+    </div>
   </section>
 
-  <section class="article-list refined-list">
-    <div class="section-head clean">
-      <h2>Recent updates</h2>
-      <a href="/en/archive/">View all</a>
+  <section>
+    <div class="section-head">
+      <div>
+        <h2>Topics</h2>
+        <p>Built from existing tags/topics only.</p>
+      </div>
+      <a href="/en/topics/">View all</a>
     </div>
-    {briefs.length === 0 && <p>No generated content yet.</p>}
-    {recent.map((doc) => (
-      <article class="article-card elevated-card">
-        <p class="section-kicker">{doc.meta.date}</p>
-        <h2><a href={doc.url}>{displayBriefTitle(doc.meta.title)}</a></h2>
-      </article>
-    ))}
+    <div class="topic-grid">
+      {topics.map((topic) => (
+        <a class="topic-row" href={`/en/topics/${topic.slug}/`}>
+          <strong>{topic.en}</strong>
+          <p>{counts[topic.slug]} related briefs</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="info-card">
+    <h2>Reading Boundary</h2>
+    <p>This project generates briefs from public arXiv metadata and public signals for research tracking and discovery. Original papers remain the source of record.</p>
   </section>
 </BaseLayout>
-
-<style>
-  .home-hero h1 { font-size: clamp(20px, 3vw, 32px); line-height: 1.14; letter-spacing: -0.035em; }
-  .hero-subtitle { font-size: clamp(14px, 1.35vw, 16px); line-height: 1.58; max-width: 760px; }
-  .action-row .button { font-size: 14px; padding: 9px 13px; border-radius: 999px; }
-  .latest-stack { grid-template-columns: minmax(0, 1fr); align-items: flex-start; gap: 14px; }
-  .latest-main { min-width: 0; }
-  .latest-panel h2 { margin-bottom: 12px; font-size: clamp(19px, 2.8vw, 27px); line-height: 1.24; overflow-wrap: anywhere; }
-  .featured-paper-strip { margin: 12px 0 14px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-soft); }
-  .featured-paper-kicker { margin: 0 0 8px; color: var(--muted); font-size: 13px; font-weight: 800; letter-spacing: 0.02em; }
-  .featured-paper-title-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
-  .featured-paper-title-list li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 8px; align-items: start; color: var(--text); font-size: clamp(13px, 1.35vw, 15px); line-height: 1.45; }
-  .featured-paper-number { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; background: var(--surface); color: var(--muted); font-size: 12px; font-weight: 800; }
-  .featured-paper-title-text { min-width: 0; }
-  .featured-paper-link { display: inline; margin-left: 0; color: var(--accent); text-decoration: none; font-weight: 400; line-height: 1; }
-  .featured-paper-link:hover { text-decoration: underline; background: transparent; }
-  .issue-meta-row, .issue-keyword-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-start; }
-  .issue-meta-row { color: var(--muted); font-size: 14px; }
-  .issue-keyword-row { font-size: 15px; }
-  .issue-source-link { font-weight: 700; text-decoration: none; }
-  .quick-nav a, .section-head h2, .section-head a, .article-card .section-kicker, .article-card h2, .article-list p { font-size: calc(1em - 1px); }
-  @media (max-width: 820px) {
-    .home-hero h1 { font-size: clamp(20px, 6vw, 29px); line-height: 1.16; }
-    .hero-subtitle { font-size: 14px; }
-    .action-row .button { font-size: 13px; padding: 8px 11px; }
-    .featured-paper-title-list li { grid-template-columns: 22px minmax(0, 1fr); font-size: 13px; }
-  }
-</style>

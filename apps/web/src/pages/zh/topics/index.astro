@@ -5,8 +5,16 @@ const topics = loadTopics();
 const counts = topicCounts('zh');
 ---
 <BaseLayout lang="zh" title="专题">
-  <h1>专题</h1>
-  <p class="muted">按技术方向追踪每日入选论文。专题数量来自配置文件，便于持续调整。</p>
+  <section class="topic-hero">
+    <div>
+      <h1 class="page-title">标签</h1>
+      <p class="page-subtitle">按已有 topics/tags 回看每日入选论文方向。数量来自已生成简报，不新增分类逻辑。</p>
+    </div>
+    <aside class="info-card">
+      <h2>主题索引</h2>
+      <p>用于快速定位 Agent、RAG、评测、多模态、系统部署等研究线索。</p>
+    </aside>
+  </section>
   <section class="topic-grid">
     {topics.map((topic) => (
       <a class="topic-row" href={`/zh/topics/${topic.slug}/`}>

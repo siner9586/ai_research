@@ -48,9 +48,38 @@ a:hover {
 }
 
 .site-header {
-  border-bottom-color: rgba(221, 230, 238, 0.78);
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 10px 30px rgba(23, 32, 51, 0.035);
+  border-bottom-color: rgba(181, 205, 216, 0.58);
+  background:
+    linear-gradient(135deg, rgba(248, 251, 252, 0.96) 0%, rgba(237, 247, 245, 0.94) 44%, rgba(238, 244, 248, 0.96) 100%);
+  box-shadow: 0 12px 34px rgba(23, 32, 51, 0.055);
+  isolation: isolate;
+}
+
+.site-header::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: -1;
+  height: 3px;
+  content: "";
+  background: linear-gradient(90deg, rgba(58, 99, 134, 0.78), rgba(46, 133, 123, 0.72), rgba(175, 141, 74, 0.48));
+}
+
+.site-header::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  z-index: -1;
+  height: 1px;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgba(46, 133, 123, 0.22), transparent);
+}
+
+.nav {
+  position: relative;
+  z-index: 1;
 }
 
 .brand {
@@ -81,8 +110,9 @@ a:hover {
 .nav-links a:hover,
 .nav-wechat-trigger:hover,
 .nav-wechat-trigger:focus-visible {
-  background: var(--color-primary-soft);
+  background: rgba(255, 255, 255, 0.68);
   color: var(--color-primary-strong);
+  box-shadow: inset 0 0 0 1px rgba(58, 99, 134, 0.08);
 }
 
 .wechat-popover {
@@ -326,6 +356,11 @@ a:hover {
 }
 
 @media (max-width: 820px) {
+  .site-header {
+    background:
+      linear-gradient(135deg, rgba(248, 251, 252, 0.98) 0%, rgba(237, 247, 245, 0.96) 50%, rgba(238, 244, 248, 0.98) 100%);
+  }
+
   .nav-wechat {
     position: static;
   }
@@ -359,7 +394,8 @@ a:hover {
   }
 
   .site-header {
-    background: rgba(255, 255, 255, 0.94);
+    background:
+      linear-gradient(145deg, rgba(250, 252, 252, 0.98) 0%, rgba(238, 248, 246, 0.98) 58%, rgba(239, 245, 248, 0.98) 100%);
   }
 
   .nav-links {

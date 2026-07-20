@@ -1,0 +1,2642 @@
+{
+  "featured": [
+    {
+      "paper": {
+        "id": "2607.15589",
+        "arxiv_id": "2607.15589",
+        "title": "MemoGuard: An Adaptive Runtime for Guarding Against Memory Traps in Communication-Limited Robot Navigation",
+        "abstract": "Communication-limited robots in mission-critical scenarios such as disaster inspection and search-and-rescue must make reliable onboard decisions without access to remote operators or high-capacity reasoning services. Episodic memory reuse is an attractive low-cost fallback, but retrieval similarity does not guarantee execution validity, i.e., a retrieved action may match the current context yet be unsafe due to changed topology, insufficient battery margin, or unreliable prior outcomes. We call such high-similarity but execution-invalid episodes memory traps. This creates a safety-efficiency design space where similarity only reuse minimizes fallback cost but can be unsafe, while always invoking local reasoning improves safety at high computational and energy cost. This paper presents MemoGuard, a lightweight adaptive runtime that validates episodic memories against topology, resource, and outcome contracts before reuse, invoking fallback only when validation fails. In a graph-based corridor-inspection simulator, MemoGuard reduces battery safety violations by 76.6% over similarity-only top-1 reuse while reducing fallback calls by 21.4% over always reasoning. On an NVIDIA Jetson AGX Xavier with local llama3.2:3b fallback reasoning, this corresponds to 3.67 s and 36.97 J of avoided fallback-reasoning overhead per trial. We open-source MemoGuard at https://github.com/hetheiin/memoguard.",
+        "authors": [
+          "Rajat Bhattacharjya",
+          "Hyeonjong Ju",
+          "Sing-Yao Wu",
+          "Eli Bozorgzadeh",
+          "Nikil Dutt"
+        ],
+        "primary_category": "cs.RO",
+        "categories": [
+          "cs.RO",
+          "cs.AI",
+          "cs.NI",
+          "eess.SY"
+        ],
+        "published_at": "2026-07-17T03:21:30Z",
+        "updated_at": "2026-07-17T03:21:30Z",
+        "abs_url": "https://arxiv.org/abs/2607.15589",
+        "pdf_url": "https://arxiv.org/pdf/2607.15589",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:15.632395Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15589",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": true,
+        "institutions": [
+          "NVIDIA"
+        ],
+        "top_conference": null,
+        "matched_keywords": [
+          "retrieval",
+          "safety",
+          "open-source",
+          "memory"
+        ],
+        "signal_sources": {
+          "institution_background": "paper_text",
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 14,
+      "score_breakdown": {
+        "institution_background": 3,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": 0,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Top institution signal: NVIDIA",
+        "Code or executable artifact signal",
+        "Practitioner keywords: retrieval, safety, open-source, memory",
+        "arXiv category weight: cs.RO",
+        "No duplicate title in candidate pool",
+        "Safety/ethics/governance keywords: safety"
+      ],
+      "selected_reason": "Top institution signal: NVIDIA; Code or executable artifact signal; Practitioner keywords: retrieval, safety, open-source, memory; arXiv category weight: cs.RO; No duplicate title in candidate pool; Safety/ethics/governance keywords: safety",
+      "matched_keywords": [
+        "retrieval",
+        "safety",
+        "open-source",
+        "memory",
+        "reasoning",
+        "search"
+      ],
+      "topic": "Reasoning and Planning",
+      "topic_slug": "reasoning",
+      "confidence_level": "high",
+      "selection_tier": "featured",
+      "rank": 1,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as featured"
+    },
+    {
+      "paper": {
+        "id": "2607.16156",
+        "arxiv_id": "2607.16156",
+        "title": "PRISA: Proactive Infrastructure LiDAR Framework for Intersection Safety Assessment",
+        "abstract": "Urban intersections are among the most hazardous locations in road networks, posing significant risks to vehicles and vulnerable road users (VRUs) such as pedestrians and cyclists. The complexity of multi-agent interactions demands continuous, real-time monitoring systems capable of anticipating conflicts before they escalate into crashes. We present PRISA, a modular infrastructure LiDAR framework leveraging privacy-preserving, low-light-robust roadside sensors for long-term traffic observation and real-time risk detection at the edge. The framework comprises two core components: a sensing and perception layer and a plug-and-play risk assessment module. The latter automatically curates site-specific training data from accumulated perception outputs to train a trajectory prediction model without manual annotation. It then deploys the trained model for continuous motion forecasting and dual surrogate safety evaluation, using Time-to-Collision (TTC) for longitudinal conflicts and Predicted Post-Encroachment Time (PPET) for crossing and VRU-involved interactions. PRISA is evaluated on the public R-LiViT dataset and deployed on an NVIDIA Jetson AGX Thor at a live signalized intersection in Chattanooga, Tennessee. PPET-based assessment operates at 194~ms end-to-end latency over a 2.4-second predictive horizon, with TTC-based detection and perception remaining within real-time constraints, demonstrating practical feasibility for proactive multi-agent intersection safety monitoring.",
+        "authors": [
+          "Tam Bang",
+          "Hussam Abubakr",
+          "Emiliano de la Garza Villarreal",
+          "Truc Phuong Nguyen",
+          "Austin Harris",
+          "Toru Hirano",
+          "Mina Sartipi",
+          "Yunfei Xu",
+          "Hoang H. Nguyen"
+        ],
+        "primary_category": "cs.LG",
+        "categories": [
+          "cs.LG",
+          "eess.SY"
+        ],
+        "published_at": "2026-07-17T17:35:23Z",
+        "updated_at": "2026-07-17T17:35:23Z",
+        "abs_url": "https://arxiv.org/abs/2607.16156",
+        "pdf_url": "https://arxiv.org/pdf/2607.16156",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:09:50.733441Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.16156",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": true,
+        "institutions": [
+          "NVIDIA"
+        ],
+        "top_conference": null,
+        "matched_keywords": [
+          "agent",
+          "rag",
+          "serving",
+          "latency",
+          "safety",
+          "evaluation"
+        ],
+        "signal_sources": {
+          "institution_background": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 11,
+      "score_breakdown": {
+        "institution_background": 3,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Top institution signal: NVIDIA",
+        "Practitioner keywords: agent, rag, serving, latency, safety, evaluation",
+        "arXiv category weight: cs.LG",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation",
+        "Safety/ethics/governance keywords: safety, privacy, risk"
+      ],
+      "selected_reason": "Top institution signal: NVIDIA; Practitioner keywords: agent, rag, serving, latency, safety, evaluation; arXiv category weight: cs.LG; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation; Safety/ethics/governance keywords: safety, privacy, risk",
+      "matched_keywords": [
+        "agent",
+        "rag",
+        "serving",
+        "latency",
+        "safety",
+        "evaluation",
+        "eval",
+        "dataset"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "high",
+      "selection_tier": "featured",
+      "rank": 2,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as featured"
+    },
+    {
+      "paper": {
+        "id": "2607.16038",
+        "arxiv_id": "2607.16038",
+        "title": "SciForge: An AI-Native, Multimodal Workbench for Scientific Discovery",
+        "abstract": "Scientific work increasingly spans heterogeneous artifacts -- papers, code, datasets, scientific file formats, model outputs, figures, manuscripts, and team decisions -- yet general-purpose AI assistants rarely preserve these objects as a coherent, auditable research state. We present SciForge, a multimodal research-native AI workbench that reserves the graphical interface for human judgment while search, parsing, model routing, workflow execution, plotting, writing, and presentation generation run as modular agent-accessible services. SciForge is built around five pillars: (i) \\emph{goal-scoped scientific decision governance} for \\textbf{goal-oriented} research, with review gates and shared review surfaces; (ii) \\emph{translate-then-reason} for \\textbf{multimodal} input, routing scientific objects through domain translators before the agent reasons; (iii) \\emph{evidence governance} for \\textbf{auditable} traceability, linking claims to provenance chains and audit findings; (iv) \\emph{collaborative team science} for \\textbf{collaborative} research, enabling multi-role decision governance, with shared team workspaces planned for future releases; and (v) \\emph{real-world application scenarios} for \\textbf{practical} impact, demonstrated through eight end-to-end user cases, with flagship demonstrations including multi-day agentic research sprints for gene discovery, AI-guided de novo protein design, molecular optimization, and genome-to-BGC discovery. The system combines a thin interaction layer, contextual research capability patterns, an Agent Runtime and Workflow Engine, an Evidence-DAG audit sidecar and a Scientific Model Router. SciForge currently runs as a desktop application, with mobile supervision support; future releases will deepen team collaboration. The system is open-source and available at https://github.com/AGI4Sci/SciForge",
+        "authors": [
+          "SciForge Team",
+          "Zhangyang Gao",
+          "Minghao Fang",
+          "Yifei Liu",
+          "Hanhui Yang",
+          "Xinyu Gu",
+          "Shixiang Tang",
+          "Siqi Sun",
+          "Lei Bai",
+          "Cheng Tan",
+          "Mengdi Liu",
+          "Hao Wu",
+          "Shuizhou Chen"
+        ],
+        "primary_category": "cs.AI",
+        "categories": [
+          "cs.AI"
+        ],
+        "published_at": "2026-07-17T15:13:03Z",
+        "updated_at": "2026-07-17T15:13:03Z",
+        "abs_url": "https://arxiv.org/abs/2607.16038",
+        "pdf_url": "https://arxiv.org/pdf/2607.16038",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:09:50.734403Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.16038",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "agent",
+          "workflow",
+          "code",
+          "multimodal",
+          "open-source"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 10,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: agent, workflow, code, multimodal, open-source",
+        "arXiv category weight: cs.AI",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: agents",
+        "Safety/ethics/governance keywords: governance"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: agent, workflow, code, multimodal, open-source; arXiv category weight: cs.AI; No duplicate title in candidate pool; Recent topic repeat penalty: agents; Safety/ethics/governance keywords: governance",
+      "matched_keywords": [
+        "agent",
+        "workflow",
+        "code",
+        "multimodal",
+        "open-source"
+      ],
+      "topic": "Agents and Tool Use",
+      "topic_slug": "agents",
+      "confidence_level": "high",
+      "selection_tier": "featured",
+      "rank": 3,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as featured"
+    },
+    {
+      "paper": {
+        "id": "2607.15781",
+        "arxiv_id": "2607.15781",
+        "title": "AgentFAIR: A Multi-Agent Collaborative Framework for FAIRness Evaluation of Geospatial Datasets",
+        "abstract": "Geospatial datasets support applications from urban planning to climate modeling, yet consistent assessment of FAIR compliance is difficult. Existing evaluators use different rubrics and evidence sources and may fail on JavaScript-rendered pages or repository-specific identifiers. For 50 datasets from 10 repositories, the standard deviation of normalized scores across available tools averages 15.0 percentage points and reaches 30.3 for one dataset. Because these outputs are not equivalent measurements, we use them to characterize disagreement and failure modes, not comparative accuracy. We present AgentFAIR, a multi-agent framework combining structured metadata extraction with 13 sub-principle-specific LLM evaluators. Each produces a 0-3 maturity score, cited evidence, and recommendations; a critic checks evidence and consistency and can request targeted re-evaluation. Mean Findability, Accessibility, Interoperability, and Reusability scores are 79.7%, 70.4%, 45.3%, and 72.0%. Rank correlations with four baseline tools range from 0.31 to 0.61; the FAIR-enough comparison is not statistically significant. On a 10-dataset repeated-run subset, sub-principle agreement averages 89% (standard deviation: 3 percentage points), versus 71% without the critic. A preliminary 15-dataset expert study yields Fleiss' kappa of 0.71 and 82% alignment with expert consensus. API cost is approximately USD 0.054 per dataset. These results support auditability and feasibility, while the limited benchmark, incomplete ablations, and single-model-family validation constrain claims about accuracy and generalization.",
+        "authors": [
+          "Ming Chen",
+          "Pranav Pai"
+        ],
+        "primary_category": "cs.AI",
+        "categories": [
+          "cs.AI",
+          "cs.ET",
+          "cs.MA"
+        ],
+        "published_at": "2026-07-17T09:32:54Z",
+        "updated_at": "2026-07-17T09:32:54Z",
+        "abs_url": "https://arxiv.org/abs/2607.15781",
+        "pdf_url": "https://arxiv.org/pdf/2607.15781",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:03.208865Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15781",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "agent",
+          "rag",
+          "alignment",
+          "evaluation",
+          "benchmark"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 10,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: agent, rag, alignment, evaluation, benchmark",
+        "arXiv category weight: cs.AI",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: agents",
+        "Safety/ethics/governance keywords: alignment"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: agent, rag, alignment, evaluation, benchmark; arXiv category weight: cs.AI; No duplicate title in candidate pool; Recent topic repeat penalty: agents; Safety/ethics/governance keywords: alignment",
+      "matched_keywords": [
+        "agent",
+        "rag",
+        "alignment",
+        "evaluation",
+        "benchmark",
+        "tool",
+        "tools",
+        "planning"
+      ],
+      "topic": "Agents and Tool Use",
+      "topic_slug": "agents",
+      "confidence_level": "high",
+      "selection_tier": "featured",
+      "rank": 4,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as featured"
+    },
+    {
+      "paper": {
+        "id": "2607.15699",
+        "arxiv_id": "2607.15699",
+        "title": "GoStop: Reinforcement Learning for Adaptive Temporal Aggregation in Event-Based Feature Tracking",
+        "abstract": "Feature tracking plays a fundamental role in understanding scene motion and supports various downstream tasks. Event cameras, with their high temporal resolution and asynchronous sensing, enable low-latency and motion-robust perception, making them well-suited for feature tracking under fast and non-linear motion. However, existing event-based feature tracking methods rely on fixed heuristic rules based on hand-tuning for event accumulation. Such strategies fail to adapt to diverse motion dynamics, leading to degraded performance under abrupt motion changes or low-motion scenarios. In this paper, we model event accumulation as a sequential decision-making problem and introduce reinforcement learning (RL) framework to adaptively control the accumulation process for online event-based feature tracking. Our approach trains a RL agent that decides whether to continue accumulating events or to perform tracking inference based on motion cues. The proposed adaptive temporal agent enables dynamic adaptation to varying motion patterns without relying on hand-crafted rules. Furthermore, we introduce a Dynamic Event-based Tracking (DEFT) dataset with dynamic motion distributions to evaluate the robustness of the feature tracking. Extensive experiments demonstrate that integrating our plug-and-play framework to existing feature tracking methods consistently outperforms heuristic-based approaches, improving robustness under dynamic motion while offering a better balance between tracking accuracy and efficiency. Our project codes and datasets are available at https://github.com/kmax2001/GoSTOP",
+        "authors": [
+          "Youngho Kim",
+          "Hoonhee Cho",
+          "Jae-Young Kang",
+          "Kuk-Jin Yoon"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV"
+        ],
+        "published_at": "2026-07-17T07:18:07Z",
+        "updated_at": "2026-07-17T07:18:07Z",
+        "abs_url": "https://arxiv.org/abs/2607.15699",
+        "pdf_url": "https://arxiv.org/pdf/2607.15699",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:03.209632Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15699",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "agent",
+          "inference",
+          "latency",
+          "code"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 10,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: agent, inference, latency, code",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: video-generation",
+        "Safety/ethics/governance keywords: robustness"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: agent, inference, latency, code; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: video-generation; Safety/ethics/governance keywords: robustness",
+      "matched_keywords": [
+        "agent",
+        "inference",
+        "latency",
+        "code",
+        "temporal",
+        "motion",
+        "frame"
+      ],
+      "topic": "Video Generation",
+      "topic_slug": "video-generation",
+      "confidence_level": "high",
+      "selection_tier": "featured",
+      "rank": 5,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as featured"
+    },
+    {
+      "paper": {
+        "id": "2607.16031",
+        "arxiv_id": "2607.16031",
+        "title": "Revisiting data-driven dynamic security assessment with a tabular foundation model",
+        "abstract": "Data-driven pre-fault dynamic security assessment (DSA) rapidly evaluates the dynamic risk of credible contingencies on a power system using machine learning. Existing approaches face two limitations. First, they require a large labelled database for training, with a separate model trained, tuned, and maintained for each contingency in a potentially long list of credible contingencies. Second, the trained models generalize poorly to unseen contingencies. This work addresses the limitations by using a tabular foundation model (TFM) that assesses stability through in-context learning, requiring no retraining or hyperparameter optimization. A single TFM can assess many contingencies at once, removing the need for one model per classifier. We also characterize when the use of electrical distance coordinates (EDC) as continuous features enables generalization of TFM to unseen contingencies and when they do not, demonstrating how a few labelled samples can reliably improve generalization. Through comprehensive case studies on the IEEE 68-bus system, we show that a single TFM attains an average Macro F1 score of about 90% with only 120 labelled samples per contingency, roughly two orders of magnitude fewer than conventionally assumed, without any model retraining or hyperparameter tuning. For new/unseen contingencies, we show that using just 10 labelled samples of the new contingency with EDC encoding matches the best achievable transfer learning oracle model, which requires fully labelled data and is not deployable in practice. Overall, this initial study paves the way towards developing and deploying foundation models for power system operations, with possible applications across multiple operational tasks.",
+        "authors": [
+          "Olayiwola Arowolo",
+          "Maosheng Yang",
+          "Jochen Cremer"
+        ],
+        "primary_category": "cs.LG",
+        "categories": [
+          "cs.LG",
+          "cs.AI"
+        ],
+        "published_at": "2026-07-17T15:06:11Z",
+        "updated_at": "2026-07-17T15:06:11Z",
+        "abs_url": "https://arxiv.org/abs/2607.16031",
+        "pdf_url": "https://arxiv.org/pdf/2607.16031",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:09:50.734424Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.16031",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": "ACL",
+        "matched_keywords": [
+          "rag",
+          "database"
+        ],
+        "signal_sources": {
+          "top_conference": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 9,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 3,
+        "code_available": 0,
+        "practitioner_relevance": 2,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Top conference signal: ACL",
+        "Practitioner keywords: rag, database",
+        "arXiv category weight: cs.LG",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: training",
+        "Safety/ethics/governance keywords: security, risk"
+      ],
+      "selected_reason": "Top conference signal: ACL; Practitioner keywords: rag, database; arXiv category weight: cs.LG; No duplicate title in candidate pool; Recent topic repeat penalty: training; Safety/ethics/governance keywords: security, risk",
+      "matched_keywords": [
+        "rag",
+        "database",
+        "training",
+        "rl"
+      ],
+      "topic": "Training and Post-training",
+      "topic_slug": "training",
+      "confidence_level": "medium",
+      "selection_tier": "featured",
+      "rank": 6,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as featured"
+    }
+  ],
+  "mentions": [
+    {
+      "paper": {
+        "id": "2607.15889",
+        "arxiv_id": "2607.15889",
+        "title": "Hardware-triggered Time Synchronization of Roadside Multi-lidar, Multi-camera Measurement System for Accurate Data Alignment",
+        "abstract": "Accurate temporal alignment of heterogeneous sensors is necessary for reliable environment perception in roadside multi-lidar, multi-camera systems, particularly in dense urban traffic. For this purpose, an open-source, simple, modular, and configurable hardware-triggered time-synchronization circuit is presented in this work to perform temporal alignment or accurate time synchronization between a lidar and multiple cameras. In the designed circuit, a lidar synchronization pulse is used as a reference input, and independently programmable, time-delayed trigger pulses are generated for each camera, allowing flexible adaptation to varying sensor setups and mounting geometries. A series of experiments is conducted on a roadside-mounted perception system comprised of lidar and three cameras, in which the trigger delay is systematically varied, and its impact on spatial-temporal alignment is evaluated. For different classes of road users, the overlap between lidar point cloud measurements and camera measurements is quantified to identify delay configurations that maximize cross-sensor consistency. The proposed circuit is shown to achieve robust and repeatable synchronization while remaining straightforward to deploy, reconfigure, and extend due to its simple and open-source design. Following validation on a three-camera roadside system, the circuit is extended to a vehicle platform with seven cameras and a lidar, providing a low-cost, extensible solution for multi-sensor synchronization across infrastructure and vehicle setups. All hardware circuit design files and source codes are available at https://github.com/shiva-THI/hardware-trigger-time-sync-lidar-cameras.",
+        "authors": [
+          "Shiva Agrawal",
+          "Savankumar Bhanderi",
+          "Zhiran Yan",
+          "Gordon Elger"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV"
+        ],
+        "published_at": "2026-07-17T12:04:18Z",
+        "updated_at": "2026-07-17T12:04:18Z",
+        "abs_url": "https://arxiv.org/abs/2607.15889",
+        "pdf_url": "https://arxiv.org/pdf/2607.15889",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:03.208233Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15889",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "alignment",
+          "code",
+          "open-source"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 9,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 3,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: alignment, code, open-source",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: code",
+        "Safety/ethics/governance keywords: alignment"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: alignment, code, open-source; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: code; Safety/ethics/governance keywords: alignment",
+      "matched_keywords": [
+        "alignment",
+        "code",
+        "open-source",
+        "program"
+      ],
+      "topic": "Code Intelligence",
+      "topic_slug": "code",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 7,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.15880",
+        "arxiv_id": "2607.15880",
+        "title": "Dynamics-Aware Meta-Imitation for Generalization to Unseen Robotic Manipulation",
+        "abstract": "Imitation Learning aims to learn skills from extensive observations and demonstrations for robots, so it suffers from data scarcity and environment generalization. The existing methods predominantly focus on imitation from in-domain tasks and consequently struggle with generalization to unseen tasks. To bridge this generalization gap, we propose the \\textbf{D}ynamics-\\textbf{A}ware \\textbf{M}eta-\\textbf{I}mitation (DAMI) framework. By integrating meta-learning to construct a shared skill space, DAMI equips agents for rapid adaptation to novel tasks. We introduce the Visual-Motor Trajectory (VMT) module to capture complex spatio-temporal dynamics within the task latent space. Furthermore, we propose the Unpaired Unified Task (U2T) block to fuse unstructured multimodal observations. To coordinate these representations, we integrate a Task-Conditioned Feature Modulation (TCFM) mechanism customized for modulating low-level 3D features. By capturing intrinsic dynamics from a random complete reference demonstration, our framework learns the underlying task logic rather than memorizing static cues, ensuring effective generalization. Extensive experiments in both simulation and real-world settings demonstrate that our approach outperforms state-of-the-art baselines regarding direct inference on seen tasks and adaptation to unseen tasks via few-shot fine-tuning.",
+        "authors": [
+          "Zhenduo Shang",
+          "Xiyao Liu",
+          "Bohan Li",
+          "Xudong Wang",
+          "Teng Ren",
+          "Lianqing Liu",
+          "Zhi Han"
+        ],
+        "primary_category": "cs.RO",
+        "categories": [
+          "cs.RO",
+          "cs.LG"
+        ],
+        "published_at": "2026-07-17T11:50:03Z",
+        "updated_at": "2026-07-17T11:50:03Z",
+        "abs_url": "https://arxiv.org/abs/2607.15880",
+        "pdf_url": "https://arxiv.org/pdf/2607.15880",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:03.208320Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15880",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": true,
+        "institutions": [
+          "Meta"
+        ],
+        "top_conference": null,
+        "matched_keywords": [
+          "agent",
+          "inference",
+          "multimodal",
+          "fine-tuning"
+        ],
+        "signal_sources": {
+          "institution_background": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 9,
+      "score_breakdown": {
+        "institution_background": 3,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Top institution signal: Meta",
+        "Practitioner keywords: agent, inference, multimodal, fine-tuning",
+        "arXiv category weight: cs.RO",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: agents"
+      ],
+      "selected_reason": "Top institution signal: Meta; Practitioner keywords: agent, inference, multimodal, fine-tuning; arXiv category weight: cs.RO; No duplicate title in candidate pool; Recent topic repeat penalty: agents",
+      "matched_keywords": [
+        "agent",
+        "inference",
+        "multimodal",
+        "fine-tuning",
+        "agents",
+        "trajectory"
+      ],
+      "topic": "Agents and Tool Use",
+      "topic_slug": "agents",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 8,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.15851",
+        "arxiv_id": "2607.15851",
+        "title": "Von Mises-Fisher Mixture Model with Dynamic Shrinkage for Realistic Test-Time Transduction",
+        "abstract": "A range of methods aim to enhance the performance of vision-language models (VLMs) at test time. Among them, transduction has emerged as a promising paradigm due to its strong compatibility and efficiency. However, realistic evaluations often involve highly imbalanced class distributions, which cause performance degradation or even collapse. In this work, we systematically revisit transduction from the perspective of penalized likelihood estimation (PLE), showing that PLE with a KL-divergence anchor term naturally yields an adaptive shrinkage behavior between prior anchors and empirical estimates. From this viewpoint, the brittleness of transductive methods can be attributed to the absence of anchoring mechanism and static modeling of the shrinkage strength. Therefore, we propose Mixture of Von Mises-Fisher Models with Dynamic Shrinkage (MOON). MOON is built upon a mixture of von Mises-Fisher distributions to model feature representations on the unit hypersphere. To handle imbalance, MOON dynamically adjusts the shrinkage strength using zero-shot priors at both instance and class levels. Thus, it suppresses unreliable assignments and prevents harmful updates from outlier classes, thereby mitigating negative transfer. MOON is model-agnostic, training-free, and requires no task-specific hyperparameter tuning. Extensive experiments further validate the advantage of MOON in both performance and efficiency. Our code is available at https://github.com/walawalagoose/MOON",
+        "authors": [
+          "Jiazhen Huang",
+          "Zhiming Liu",
+          "Changhu Wang",
+          "Wei Ju",
+          "Ziyue Qiao",
+          "Xiao Luo"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV",
+          "cs.LG"
+        ],
+        "published_at": "2026-07-17T11:08:08Z",
+        "updated_at": "2026-07-17T11:08:08Z",
+        "abs_url": "https://arxiv.org/abs/2607.15851",
+        "pdf_url": "https://arxiv.org/pdf/2607.15851",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:03.208517Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15851",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "evaluation",
+          "code",
+          "vision-language"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 9,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 3,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: evaluation, code, vision-language",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation",
+        "Safety/ethics/governance keywords: harmful"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: evaluation, code, vision-language; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation; Safety/ethics/governance keywords: harmful",
+      "matched_keywords": [
+        "evaluation",
+        "code",
+        "vision-language",
+        "eval",
+        "test"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 9,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.15779",
+        "arxiv_id": "2607.15779",
+        "title": "Multimodal Ambivalence and Hesitancy Recognition via Cross-Attention and Gated Fusion",
+        "abstract": "We present a multimodal framework for Ambivalence/Hesitancy (A/H) recognition in video, developed for the ABAW11 challenge at ECCV 2026. The proposed approach fuses textual, acoustic, and visual modalities extracted from the BAH dataset using three pretrained encoders: F2LLM-v2-0.6B for transcripts (1024-d), WavLM-Large for audio (1024-d), and VideoMAE V2 for facial video (768-d). We first establish comprehensive unimodal baselines using classical classifiers (MLP, Random Forest, GBDT), each optimized via Optuna, and obtain a best unimodal Macro F1 of \\textbf{0.6659} on the test set using text features alone -- substantially outperforming the zero-shot Video-LLaVA baseline (Macro F1: 0.2827). Building on these baselines, we propose a multimodal fusion architecture that combines bidirectional cross-attention across all three modalities with a Gated Multimodal Unit (GMU), with both architectural and optimization hyperparameters selected through a 50-trial Optuna search. This model achieves a Macro F1 of \\textbf{0.7394} on the validation set, a relative improvement of 11.0\\% over the best unimodal baseline, confirming that explicit cross-modal interaction captures complementary cues that no single modality provides in isolation. Final predictions on the official, unlabeled private test set are generated using this model and submitted according to the challenge protocol. Code is publicly available at https://github.com/yassineouzar/IUSD_AH/",
+        "authors": [
+          "Oussama Berhili",
+          "Yassine Ouzar",
+          "Larbi Boubchir"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV"
+        ],
+        "published_at": "2026-07-17T09:23:36Z",
+        "updated_at": "2026-07-17T09:23:36Z",
+        "abs_url": "https://arxiv.org/abs/2607.15779",
+        "pdf_url": "https://arxiv.org/pdf/2607.15779",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:03.208917Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15779",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": "ECCV",
+        "matched_keywords": [
+          "code",
+          "multimodal"
+        ],
+        "signal_sources": {
+          "top_conference": "paper_text",
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 9,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 3,
+        "code_available": 2,
+        "practitioner_relevance": 2,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Top conference signal: ECCV",
+        "Code or executable artifact signal",
+        "Practitioner keywords: code, multimodal",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: multimodal"
+      ],
+      "selected_reason": "Top conference signal: ECCV; Code or executable artifact signal; Practitioner keywords: code, multimodal; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: multimodal",
+      "matched_keywords": [
+        "code",
+        "multimodal",
+        "vlm"
+      ],
+      "topic": "Multimodal Models",
+      "topic_slug": "multimodal",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 10,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.15619",
+        "arxiv_id": "2607.15619",
+        "title": "StructGen: Disambiguating Multi-Reference Image Generation via Structured Context Modeling",
+        "abstract": "Multi-reference image generation aims to synthesize images by integrating attributes from multiple reference images under textual instructions. As the number of references increases, the task necessitates complex semantic comprehension, such as correctly associating attributes with the intended subjects and planing out coherent spatial arrangement between subjects and their environments. Existing approaches, which rely solely on natural language instruction, often fail to capture these complex intentions precisely, leading to semantic misalignment and inconsistent generation. We identify two key factors behind these limitations: natural language instructions are often verbose and ambiguous, and high-quality multi-reference data is scarce. To address these issues, we propose StructGen, which employs a structured, dictionary-like format to encode multiple reference images, thereby enabling explicit and unambiguous specification of generation intentions. To support this design, we construct a structured dataset based on high-quality real images and develop a corresponding training framework, along with a dedicated benchmark for challenging multi-reference scenarios. Extensive experiments on both public benchmarks and our proposed benchmark demonstrate that StructGen consistently outperforms existing methods on both semantic alignment and detailed reference-generation consistency, especially under complex instructions with multiple references. The code is available at \\href{https://jianingpeng0382.github.io/StructGen/}{https://jianingpeng0382.github.io/StructGen/}.",
+        "authors": [
+          "Jianing Peng",
+          "Mengyu Wang",
+          "Henghui Ding",
+          "Zixiang Li",
+          "Ting Liu",
+          "Xiaochao Qu",
+          "Luoqi Liu",
+          "Yao Zhao",
+          "Yunchao Wei"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV"
+        ],
+        "published_at": "2026-07-17T04:35:36Z",
+        "updated_at": "2026-07-17T04:35:36Z",
+        "abs_url": "https://arxiv.org/abs/2607.15619",
+        "pdf_url": "https://arxiv.org/pdf/2607.15619",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:15.632076Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15619",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "alignment",
+          "benchmark",
+          "code"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 9,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 3,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: alignment, benchmark, code",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation",
+        "Safety/ethics/governance keywords: alignment"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: alignment, benchmark, code; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation; Safety/ethics/governance keywords: alignment",
+      "matched_keywords": [
+        "alignment",
+        "benchmark",
+        "code",
+        "dataset"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 11,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.15516",
+        "arxiv_id": "2607.15516",
+        "title": "Cache-Aware Prompt Compression:A Two-Tier Cost Model for LLM API Caching",
+        "abstract": "Production LLM deployments combine two cost-reduction primitives: prompt caching (a discounted rate for re-used token prefixes) and prompt compression (fewer tokens sent). The compression literature has standardized on query-aware methods that produce a different compressed prefix per query, mechanically invalidating the prefix-strict cache on every call. We characterize this cost empirically on Anthropic's Sonnet 4.6 API and find caching is far from the rho=1.0 ideal the literature assumes: Sonnet's cache has a two-tier architecture with a sharp threshold near 3,500 tokens, below which the hit rate plateaus at rho~0.83 across 30-call sessions. Our cost model predicts, and experiments confirm, that under realistic rho, query-aware compression beats naive caching at high compression ratios (r>=6). We propose Cache-Aware Prompt Compression (CAPC), pairing query-agnostic compression with explicit cache_control plus a tier-preserving ratio bound that prevents over-compression from pushing the cached prefix into the hot tier. CAPC is the cheapest strategy in 16/16 configurations on LongBench-v2, with mean savings of 49% over cache-only, 64% over query-aware compression, and 90% over vanilla, at quality within 0.05 of the uncompressed baseline. We validate CAPC on three production workloads: an enterprise tool-using assistant with a 94k-token schema prefix (51.7% cost reduction at r=3); a graphify knowledge-graph RAG pipeline across two codebases (9.3x vs cache-all on FastAPI, 2.4x on httpx); and the public tau-bench retail benchmark (50 tasks), where CAPC is the cheapest of four strategies with reward exactly equal to vanilla (both 36/50, p=1.00) while query-aware compression is the most expensive at +40.1% over vanilla -- the first production confirmation of the crossover model's negative-ROI prediction on a public benchmark.",
+        "authors": [
+          "Yan Song"
+        ],
+        "primary_category": "cs.LG",
+        "categories": [
+          "cs.LG",
+          "cs.AI"
+        ],
+        "published_at": "2026-07-17T00:03:47Z",
+        "updated_at": "2026-07-17T00:03:47Z",
+        "abs_url": "https://arxiv.org/abs/2607.15516",
+        "pdf_url": "https://arxiv.org/pdf/2607.15516",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:15.633114Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15516",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": true,
+        "institutions": [
+          "Anthropic"
+        ],
+        "top_conference": null,
+        "matched_keywords": [
+          "rag",
+          "serving",
+          "deployment",
+          "compression",
+          "benchmark",
+          "code"
+        ],
+        "signal_sources": {
+          "institution_background": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 9,
+      "score_breakdown": {
+        "institution_background": 3,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Top institution signal: Anthropic",
+        "Practitioner keywords: rag, serving, deployment, compression, benchmark, code",
+        "arXiv category weight: cs.LG",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: systems"
+      ],
+      "selected_reason": "Top institution signal: Anthropic; Practitioner keywords: rag, serving, deployment, compression, benchmark, code; arXiv category weight: cs.LG; No duplicate title in candidate pool; Recent topic repeat penalty: systems",
+      "matched_keywords": [
+        "rag",
+        "serving",
+        "deployment",
+        "compression",
+        "benchmark",
+        "code",
+        "cache"
+      ],
+      "topic": "Systems and Deployment",
+      "topic_slug": "systems",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 12,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.16189",
+        "arxiv_id": "2607.16189",
+        "title": "Searching Videos as Trees: Self-Correcting Agents for Grounded Long Video QA",
+        "abstract": "Grounded long-video question answering (Grounded LVQA) requires answering a question about a long video while localizing the short evidence interval that supports the answer. Recent agentic methods frame this task as multi-turn exploration with a single crop_video(start, end) action, which supports coarse-to-fine narrowing but provides no primitive for fine-to-coarse backtracking. As a result, these agents typically converge prematurely and cannot recover from an early mistake. We propose VideoTreeSearch (VTS), a framework that casts grounded LVQA as iterative self-correcting search over an adaptive temporal tree. VTS constructs a non-uniform tree from visual scene boundaries so that each node corresponds to a semantically coherent segment, and trains an agent to navigate the tree through four discrete operations: zoom_in, zoom_out, shift, and answer. These operations expose backtracking and recovery as explicit, learnable primitives rather than implicit behaviors. To train this navigation, we introduce a trajectory synthesis pipeline that produces multi-step paths through the tree, including deliberate detours into incorrect branches followed by recovery. We use these trajectories for supervised fine-tuning, followed by reinforcement learning with grounding and answer-accuracy rewards. On three Grounded LVQA benchmarks (CG-Bench, Haystack-LVBench, Haystack-Ego4D), VTS outperforms the strongest prior agentic methods by +12.5 mIoU on CG-Bench and +7.4 T-F1 on Haystack-Ego4D. The learned policy also transfers to general long-video QA, surpassing all prior agentic baselines on Video-MME, MLVU, and LVBench by up to +7.1 accuracy points. Ablations confirm that self-correcting hierarchical search is the central mechanism behind these gains: removing either adaptive descent or explicit backtracking substantially degrades performance. Code is available at https://github.com/CeeZh/VTS.",
+        "authors": [
+          "Ce Zhang",
+          "Ziyang Wang",
+          "Yulu Pan",
+          "Oluwatumininu Oguntola",
+          "Pranav Wagh",
+          "Qiyu Wu",
+          "Hiromi Wakaki",
+          "Mohit Bansal",
+          "Gedas Bertasius"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV"
+        ],
+        "published_at": "2026-07-17T17:59:27Z",
+        "updated_at": "2026-07-17T17:59:27Z",
+        "abs_url": "https://arxiv.org/abs/2607.16189",
+        "pdf_url": "https://arxiv.org/pdf/2607.16189",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:09:50.733187Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.16189",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "agent",
+          "benchmark",
+          "code",
+          "fine-tuning"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: agent, benchmark, code, fine-tuning",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: agents"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: agent, benchmark, code, fine-tuning; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: agents",
+      "matched_keywords": [
+        "agent",
+        "benchmark",
+        "code",
+        "fine-tuning",
+        "agents",
+        "trajectory"
+      ],
+      "topic": "Agents and Tool Use",
+      "topic_slug": "agents",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 13,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.16154",
+        "arxiv_id": "2607.16154",
+        "title": "CLIFE: Camera-LiDAR Fusion Framework for Edge-Deployable Roadside VRU Perception",
+        "abstract": "Reliable roadside perception of vulnerable road users (VRUs) remains challenging under occlusions, variable lighting, and diverse weather conditions, particularly under strict edge-computing and latency constraints. Existing multi-sensor fusion systems rely on cloud or server-grade infrastructure, creating a deployment gap at real-world intersections. We present CLIFE, an edge-native camera-LiDAR fusion framework that integrates targetless online calibration and lightweight late-fusion tracking entirely on a single embedded device, without cloud offloading. CLIFE adaptively refines camera-LiDAR alignment on demand and performs multi-sensor fusion and track association with O(N log N) per-frame cost. We deploy CLIFE across 12 signalized intersections in Chattanooga and conduct an in-depth evaluation at a representative intersection using synchronized camera-LiDAR data that spans diverse daytime, nighttime, and weather conditions. Our experiments demonstrate that the fusion architecture substantially enhances the perceptual range and robustness of the individual sensors under varied environmental and traffic conditions. The late-fusion core operates at 53.2 FPS on the Jetson AGX Thor, ensuring high throughput for real-time intersection-scale applications. By centering perception at the edge, CLIFE provides a deployable foundation for downstream safety applications, while reducing bandwidth and calibration overhead for agencies operating multi-intersection corridors.",
+        "authors": [
+          "Tam Bang",
+          "Hoang H. Nguyen",
+          "Lei Cheng",
+          "Lihao Guo",
+          "Siyang Cao",
+          "Hussam Abubakr",
+          "Tianya Zhang",
+          "Austin Harris",
+          "Mina Sartipi"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV",
+          "eess.SY"
+        ],
+        "published_at": "2026-07-17T17:35:00Z",
+        "updated_at": "2026-07-17T17:35:00Z",
+        "abs_url": "https://arxiv.org/abs/2607.16154",
+        "pdf_url": "https://arxiv.org/pdf/2607.16154",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:09:50.733463Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.16154",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "deployment",
+          "latency",
+          "alignment",
+          "safety",
+          "evaluation"
+        ],
+        "signal_sources": {},
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Practitioner keywords: deployment, latency, alignment, safety, evaluation",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: systems",
+        "Safety/ethics/governance keywords: safety, alignment, robustness"
+      ],
+      "selected_reason": "Practitioner keywords: deployment, latency, alignment, safety, evaluation; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: systems; Safety/ethics/governance keywords: safety, alignment, robustness",
+      "matched_keywords": [
+        "deployment",
+        "latency",
+        "alignment",
+        "safety",
+        "evaluation",
+        "throughput"
+      ],
+      "topic": "Systems and Deployment",
+      "topic_slug": "systems",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 14,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.16127",
+        "arxiv_id": "2607.16127",
+        "title": "CADAQUES: A Cost-Aware Dual Architecture for Query-Efficient Autonomous Discovery",
+        "abstract": "Autonomous discovery systems couple a resource that answers queries (a simulator, instrument, or analytic model) to an algorithm that selects what to query next. Most software frameworks for this loop inherit the control structure of numerical optimization: campaigns run for a fixed number of iterations, query costs are absent from the programming interface, and decision-making is treated as free. In practice, queries may differ in cost by orders of magnitude, and planners built on large language models or expensive surrogates consume resources of their own. Here we present CADAQUES, an open-source Python framework built on one architectural principle: cost is a first-class primitive of the discovery loop. CADAQUES separates the loop into two structural protocols, an Oracle that answers queries and a Driver that proposes them, and charges both evaluations and decisions against a common vector-valued budget spanning wall time, CPU hours, monetary cost, and language model tokens. An append-only ledger records, for each transaction, the cost declared before execution and the cost settled afterwards, making their discrepancy an observable property of the campaign. We evaluate the architecture by locating the critical temperature of the two-dimensional Ising model from noisy finite-size estimates against the exact thermodynamic-limit reference. In this noisy setting, strategies that concentrate around the best observed result can be misled by noise-induced peaks, whereas a schedule that explores with cheap low-fidelity queries and refines with higher-fidelity ones yields lower and less variable errors than high fidelity throughout, at the studied budget scale. Metering adds tens of microseconds per iteration, three orders of magnitude below the cheapest oracle query. The framework is MIT-licensed and archived at Zenodo (doi:10.5281/zenodo.21293589).",
+        "authors": [
+          "Jorge Bravo-Abad"
+        ],
+        "primary_category": "physics.comp-ph",
+        "categories": [
+          "physics.comp-ph",
+          "cs.SE"
+        ],
+        "published_at": "2026-07-17T17:04:20Z",
+        "updated_at": "2026-07-17T17:04:20Z",
+        "abs_url": "https://arxiv.org/abs/2607.16127",
+        "pdf_url": "https://arxiv.org/pdf/2607.16127",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:09:50.733618Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.16127",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": true,
+        "institutions": [
+          "MIT"
+        ],
+        "top_conference": "ACL",
+        "matched_keywords": [
+          "evaluation",
+          "open-source"
+        ],
+        "signal_sources": {
+          "institution_background": "paper_text",
+          "top_conference": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 3,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 3,
+        "code_available": 0,
+        "practitioner_relevance": 2,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 0,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Top institution signal: MIT",
+        "Top conference signal: ACL",
+        "Practitioner keywords: evaluation, open-source",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: code"
+      ],
+      "selected_reason": "Top institution signal: MIT; Top conference signal: ACL; Practitioner keywords: evaluation, open-source; No duplicate title in candidate pool; Recent topic repeat penalty: code",
+      "matched_keywords": [
+        "evaluation",
+        "open-source",
+        "program",
+        "software",
+        "execution"
+      ],
+      "topic": "Code Intelligence",
+      "topic_slug": "code",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 15,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.16066",
+        "arxiv_id": "2607.16066",
+        "title": "LLM-Powered Agentic AI for 5G/6G Networks: A Tutorial and Survey on Architectures, Protocols, and Standardization",
+        "abstract": "Agentic Artificial Intelligence (AI), enabled by Large Language Models, marks a shift from rule-based automation toward autonomous, goal-driven control of Next-Generation Networks (NGNs). Existing surveys treat the two domains in isolation, leaving protocol integration, evaluation, and standardization alignment underexplored. To address this gap, a two-part tutorial-and-survey is presented. Part I formalises the control, management, and AI-native planes of 5G and 6G. It then covers the foundations of agentic systems: reasoning, planning, tool use, multi-agent coordination, and evaluation. Part II maps agentic capabilities onto 5G/6G control surfaces, standardization, and major 6G initiatives. Finally, it identifies open challenges shaping autonomous telecommunications.",
+        "authors": [
+          "Mazene Ameur",
+          "Abdelkader Mekrache",
+          "Bouziane Brik",
+          "Adlen Ksentini"
+        ],
+        "primary_category": "cs.NI",
+        "categories": [
+          "cs.NI",
+          "cs.AI"
+        ],
+        "published_at": "2026-07-17T15:47:23Z",
+        "updated_at": "2026-07-17T15:47:23Z",
+        "abs_url": "https://arxiv.org/abs/2607.16066",
+        "pdf_url": "https://arxiv.org/pdf/2607.16066",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:09:50.734159Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.16066",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "agent",
+          "tool use",
+          "alignment",
+          "evaluation"
+        ],
+        "signal_sources": {},
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Practitioner keywords: agent, tool use, alignment, evaluation",
+        "arXiv category weight: cs.NI",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: agents",
+        "Safety/ethics/governance keywords: alignment"
+      ],
+      "selected_reason": "Practitioner keywords: agent, tool use, alignment, evaluation; arXiv category weight: cs.NI; No duplicate title in candidate pool; Recent topic repeat penalty: agents; Safety/ethics/governance keywords: alignment",
+      "matched_keywords": [
+        "agent",
+        "tool use",
+        "alignment",
+        "evaluation",
+        "tool",
+        "planning"
+      ],
+      "topic": "Agents and Tool Use",
+      "topic_slug": "agents",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 16,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.16012",
+        "arxiv_id": "2607.16012",
+        "title": "DPNeXt: A Lightweight Multi-Scale Feature Fusion Framework for Efficient ViT-Based Multi-Task Dense Prediction",
+        "abstract": "Multi-Task Learning (MTL) in robotics perception systems supports comprehensive 3D spatial scene understanding by integrating semantic segmentation and depth estimation. While Vision Foundation Models (VFMs) are increasingly adopted as robust feature encoders, existing decoding strategies present a critical bottleneck. To address this, we propose DPNeXt, a streamlined multi-scale feature fusion decoder and efficient alternative to the standard Dense Prediction Transformer (DPT). DPNeXt uses dual depthwise separable inverted bottlenecks to improve frozen VFM utilization through fusion-centric decoding and independent task modularization. To further mitigate negative inductive transfer between tasks, we introduce the Multi-Task Boundary Guidance (MTBG) strategy. Unlike prior boundary-aware methods that add fusion modules or gating, MTBG applies symmetric boundary-focused supervision to encourage geometric consistency without extra annotation or inference cost. Experiments on Cityscapes show that DPNeXt-S outperforms prior state-of-the-art (SOTA) MTL models, while DPNeXt-B further improves the overall performance and achieves the best results among the compared methods. On NYUv2, DPNeXt-B also achieves the best semantic segmentation and depth estimation results among the compared methods while requiring substantially fewer trainable parameters than prior large-scale MTL models. Compared with the standard DPT, DPNeXt-S reduces trainable parameters by 78.6% and achieves the fastest inference speed among the compared models on resource-constrained laptop hardware. The source code, model checkpoints, and a demo video will be made available at https://github.com/kangjehun/DPNeXt.",
+        "authors": [
+          "Jehun Kang",
+          "Jungha Wang",
+          "Youngjun Hwang",
+          "David Hyunchul Shim"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV",
+          "cs.AI",
+          "cs.RO"
+        ],
+        "published_at": "2026-07-17T14:46:39Z",
+        "updated_at": "2026-07-17T14:46:39Z",
+        "abs_url": "https://arxiv.org/abs/2607.16012",
+        "pdf_url": "https://arxiv.org/pdf/2607.16012",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:09:50.734608Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.16012",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "rag",
+          "inference",
+          "code",
+          "robotics"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: rag, inference, code, robotics",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: code"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: rag, inference, code, robotics; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: code",
+      "matched_keywords": [
+        "rag",
+        "inference",
+        "code",
+        "robotics",
+        "coding"
+      ],
+      "topic": "Code Intelligence",
+      "topic_slug": "code",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 17,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.15942",
+        "arxiv_id": "2607.15942",
+        "title": "More with Less: a Large Scale Remote Sensing VLM with a Simple Recipe",
+        "abstract": "Remote sensing vision-language models are increasingly expected to support open-ended reasoning over Earth Observation data and a variety of tasks. Most recent progress in this area has been driven by remote-sensing-specific architectural designs, often introducing new encoders, alignment modules, or task-specific fusion mechanisms. In this work, we challenge the necessity of such architectural specialization. We show that a generally capable vision-language model can achieve competitive or state-of-the-art performance at challenging remote sensing benchmarks, provided that it is trained at sufficient scale across diverse data and tasks. Our model uses a single language policy that can either answer directly in text or invoke a localization tool for segmentation and grounding. To train this heterogeneous behaviour, we employ a multi-task reinforcement learning framework with adaptive task rewards covering multiple-choice VQA, free-form VQA, captioning, detection, and segmentation across a large variety of input types. Our approach achieves competitive results across a broad set of benchmarks, including high-resolution, multi-temporal, multi-modal and multi-view tasks. Further, as training data scales, our experiments show consistent improvements across most tasks both in and out of distribution, which correlate with per-task data diversity. These findings suggest that, for remote sensing VLMs, data scale is more important than architectural novelty.",
+        "authors": [
+          "Stefan Maria Ailuro",
+          "Mario Markov",
+          "Mohammad Mahdi",
+          "Luc Van Gool",
+          "Danda Pani Paudel"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV",
+          "cs.LG"
+        ],
+        "published_at": "2026-07-17T13:25:44Z",
+        "updated_at": "2026-07-17T13:25:44Z",
+        "abs_url": "https://arxiv.org/abs/2607.15942",
+        "pdf_url": "https://arxiv.org/pdf/2607.15942",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:09:50.735084Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15942",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "alignment",
+          "benchmark",
+          "code",
+          "vision-language"
+        ],
+        "signal_sources": {},
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Practitioner keywords: alignment, benchmark, code, vision-language",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: multimodal",
+        "Safety/ethics/governance keywords: alignment"
+      ],
+      "selected_reason": "Practitioner keywords: alignment, benchmark, code, vision-language; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: multimodal; Safety/ethics/governance keywords: alignment",
+      "matched_keywords": [
+        "alignment",
+        "benchmark",
+        "code",
+        "vision-language",
+        "vlm"
+      ],
+      "topic": "Multimodal Models",
+      "topic_slug": "multimodal",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 18,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.15928",
+        "arxiv_id": "2607.15928",
+        "title": "Knowledge-Guided Cross-Modal Fusion for Adult-to-Pediatric ECG Transfer via Label-Conditioned Contrastive Alignment",
+        "abstract": "Adult and pediatric electrocardiogram (ECG) interpretation relies on age-sensitive criteria, and models pretrained mainly on adult ECGs often transfer poorly to pediatric populations when pediatric labels are scarce. Existing multimodal ECG--text methods typically align waveforms and text at the global sample level, entangling evidence from co-occurring diagnoses and limiting transfer under this gap. We propose Pediatric-Adult ECG Alignment via Cross-modal Enhancement (PEACE), a knowledge-guided framework pretrained on the largely adult MIMIC-IV ECG corpus. PEACE describes each diagnosis along rhythm, morphology, and ST--T axes and, per recording, composes only positive-label descriptors into three axis tokens and a fused embedding. A label query network (LQN) uses diagnostic labels as queries to cross-attend over ECG tokens and axis tokens, while label set aware bidirectional contrastive learning (LSBC) aligns pooled ECG features with the fused embedding when recordings share diagnoses. Curriculum adaptive fusion (CAF) gates alignment strength according to smoothed classification loss and training progress, limiting disruption during early optimization. The knowledge branch is used only for training supervision; inference uses ECG signals alone. On ZZU-pECG, PEACE reaches macro average AUCs of 59.39%, 81.74%, and 91.56% under zero-shot, 50-shot, and full fine-tuning, with the clearest gains over foundation and knowledge-pretraining baselines under limited supervision; versus domain adaptation initializations, zero-shot improves substantially while 50-shot AUC is comparable to DANN. After fine-tuning on PTB-XL, PEACE reaches 96.90% macro average AUC over nine harmonized labels. Ablations confirm that label-conditioned knowledge alignment, rather than global text fusion, is the key driver of pediatric transfer gains.",
+        "authors": [
+          "Xinran Liu",
+          "Yuwen Li",
+          "Hongxiang Gao",
+          "Heyang Xu",
+          "Jianqing Li",
+          "Zongmin Wang",
+          "Chengyu Liu"
+        ],
+        "primary_category": "cs.LG",
+        "categories": [
+          "cs.LG"
+        ],
+        "published_at": "2026-07-17T13:11:12Z",
+        "updated_at": "2026-07-17T13:11:12Z",
+        "abs_url": "https://arxiv.org/abs/2607.15928",
+        "pdf_url": "https://arxiv.org/pdf/2607.15928",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:09:50.735224Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15928",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "rag",
+          "inference",
+          "alignment",
+          "multimodal",
+          "fine-tuning"
+        ],
+        "signal_sources": {},
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Practitioner keywords: rag, inference, alignment, multimodal, fine-tuning",
+        "arXiv category weight: cs.LG",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: training",
+        "Safety/ethics/governance keywords: alignment"
+      ],
+      "selected_reason": "Practitioner keywords: rag, inference, alignment, multimodal, fine-tuning; arXiv category weight: cs.LG; No duplicate title in candidate pool; Recent topic repeat penalty: training; Safety/ethics/governance keywords: alignment",
+      "matched_keywords": [
+        "rag",
+        "inference",
+        "alignment",
+        "multimodal",
+        "fine-tuning",
+        "training",
+        "rl"
+      ],
+      "topic": "Training and Post-training",
+      "topic_slug": "training",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 19,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.15901",
+        "arxiv_id": "2607.15901",
+        "title": "DSWorld: A Data Science World Model for Efficient Autonomous Agents",
+        "abstract": "Despite strong capabilities in data understanding and decision-making, autonomous data science agents still heavily rely on trial-and-error workflows that involve expensive computation. This bottleneck motivates models that can anticipate the effects of data science operations before real execution. In this paper, we introduce the concept of Data Science World Model, which model the data science execution environment by predicting environment state transitions conditioned on current workflow states and candidate operations. We further propose DSWorld, a practical framework that combines structured state construction, cost-aware routing, lightweight real execution, and an LLM-based simulator for expensive operations. To support training, we construct an 8K-scale transition trajectory dataset and introduce Reflective World Model Optimization, an error-aware reinforcement learning strategy for improving transition prediction. Experiments show that DSWorld accelerates RL-based agent training by approximately $14\\times$ and search-based inference by approximately $3$-$6\\times$ while maintaining competitive performance, and outperforms the strongest LLM baseline by 35.6% on transition prediction tasks. The code is available at https://anonymous.4open.science/r/DSWorld.",
+        "authors": [
+          "Zherui Yang",
+          "Fan Liu",
+          "Hao Liu"
+        ],
+        "primary_category": "cs.AI",
+        "categories": [
+          "cs.AI"
+        ],
+        "published_at": "2026-07-17T12:14:55Z",
+        "updated_at": "2026-07-17T12:14:55Z",
+        "abs_url": "https://arxiv.org/abs/2607.15901",
+        "pdf_url": "https://arxiv.org/pdf/2607.15901",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:03.208143Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15901",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "agent",
+          "workflow",
+          "inference",
+          "code"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: agent, workflow, inference, code",
+        "arXiv category weight: cs.AI",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: agents"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: agent, workflow, inference, code; arXiv category weight: cs.AI; No duplicate title in candidate pool; Recent topic repeat penalty: agents",
+      "matched_keywords": [
+        "agent",
+        "workflow",
+        "inference",
+        "code",
+        "agents",
+        "trajectory"
+      ],
+      "topic": "Agents and Tool Use",
+      "topic_slug": "agents",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 20,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.15899",
+        "arxiv_id": "2607.15899",
+        "title": "ContinuityBench: A Benchmark and Systems Study of Stateful Failover in Multi-Provider LLM Routing",
+        "abstract": "In production large language model (LLM) deployments, high API availability guarantees do not equate to conversational continuity. When a primary provider experiences an outage or strict rate-limiting, naive stateless failover mechanisms successfully maintain uptime but silently discard conversation history, severely disrupting the user experience. To rigorously quantify and resolve this failure mode, we introduce two novel metrics: Continuity Preservation Rate (CPR) and Continuity Latency Overhead (CLO). We propose a stateful, multi-provider proxy architecture utilizing a History-Forwarding strategy to seamlessly reconstruct conversational state across heterogeneous LLM endpoints during failover events. Furthermore, we release continuity-bench, https://github.com/Vishal-sys-code/continuity-bench, an open evaluation harness designed to stress-test context preservation under high-concurrency provider failure conditions. Our empirical evaluation ($N=750$ failover events) demonstrates that our stateful proxy achieves a 99.20\\% CPR [95\\% CI: 98.27\\%, 99.63\\%], cleanly transferring deep conversational context to fallback providers, compared to a near-0\\% preservation rate for standard stateless architectures. Finally, we characterize failover latency distributions, identifying the critical necessity of asynchronous exponential backoff with jitter to prevent cascading retry storms against strict-limit fallback APIs. Our results provide a principled foundation for building robust, state-preserving multi-model inference systems.",
+        "authors": [
+          "Vishal Pandey",
+          "Gopal Singh"
+        ],
+        "primary_category": "cs.LG",
+        "categories": [
+          "cs.LG"
+        ],
+        "published_at": "2026-07-17T12:12:38Z",
+        "updated_at": "2026-07-17T12:12:38Z",
+        "abs_url": "https://arxiv.org/abs/2607.15899",
+        "pdf_url": "https://arxiv.org/pdf/2607.15899",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:03.208159Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15899",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "inference",
+          "serving",
+          "deployment",
+          "latency",
+          "evaluation",
+          "benchmark",
+          "code"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: inference, serving, deployment, latency, evaluation, benchmark",
+        "arXiv category weight: cs.LG",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: inference, serving, deployment, latency, evaluation, benchmark; arXiv category weight: cs.LG; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation",
+      "matched_keywords": [
+        "inference",
+        "serving",
+        "deployment",
+        "latency",
+        "evaluation",
+        "benchmark",
+        "code",
+        "eval",
+        "metric",
+        "test"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 21,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.15865",
+        "arxiv_id": "2607.15865",
+        "title": "An MLIR-Based Compilation Method for Large Language Models",
+        "abstract": "Large Language Models (LLMs) have become the dominant workload on modern AI accelerators, yet deploying them on specialized hardware still faces two core challenges: how to import a trained model into a compiler-friendly intermediate representation, and how to efficiently schedule the autoregressive inference loop under limited on-chip memory. This paper presents an MLIR (Multi-Level Intermediate Representation) based compilation method for large language models, illustrated using two dialects of operators, TopOp and TpuOp. TopOp serves as a high-level graph dialect that is independent of both the source framework and the target chip, and is responsible for expressing model semantics; TpuOp serves as the target hardware dialect, carrying chip-related decisions such as quantization, layer groups, and memory layout. A model is first represented as TopOp, then lowered layer by layer to TpuOp, and finally a deployable binary is generated. In addition, each Transformer layer is split into three stages for static compilation: prefill, prefill_kv (prefill with historical key-value cache), and decode, so as to accommodate the different computational characteristics of prompt-parallel processing and per-token generation. The method has been implemented in the TPU-MLIR compiler{https://github.com/sophgo/tpu-mlir} and the LLM-TPU deployment project\\footnote{https://github.com/sophgo/LLM-TPU}, supporting a variety of generative models including the Qwen, Llama, InternVL, and MiniCPM-V series, as well as multiple quantization and deployment forms such as GPTQ, AWQ, and AutoRound.",
+        "authors": [
+          "Pengchao Hu",
+          "Zhibin Xin",
+          "Yifan Chen",
+          "Yangyang Zhou",
+          "Liang Wang"
+        ],
+        "primary_category": "cs.CL",
+        "categories": [
+          "cs.CL"
+        ],
+        "published_at": "2026-07-17T11:24:45Z",
+        "updated_at": "2026-07-17T11:24:45Z",
+        "abs_url": "https://arxiv.org/abs/2607.15865",
+        "pdf_url": "https://arxiv.org/pdf/2607.15865",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:03.208439Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15865",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "inference",
+          "deployment",
+          "code",
+          "memory"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: inference, deployment, code, memory",
+        "arXiv category weight: cs.CL",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: systems"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: inference, deployment, code, memory; arXiv category weight: cs.CL; No duplicate title in candidate pool; Recent topic repeat penalty: systems",
+      "matched_keywords": [
+        "inference",
+        "deployment",
+        "code",
+        "memory",
+        "cache",
+        "quantization"
+      ],
+      "topic": "Systems and Deployment",
+      "topic_slug": "systems",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 22,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.15810",
+        "arxiv_id": "2607.15810",
+        "title": "QUADS: Stabilizing NVFP4 Reinforcement Learning for MoE via QUantization-error Alignment across Dual Sides",
+        "abstract": "Rollout generation is a major bottleneck in Reinforcement Learning (RL) for Mixture-of-Experts (MoE) Large Language Models, motivating low-precision rollout acceleration such as FP8. As an emerging low-precision format, NVFP4 combines fine-grained scaling for accuracy preservation with native W4A4 FP4 GEMMs for higher throughput than FP8. However, we find that directly applying NVFP4 to MoE RL rollout is impractical. NVFP4 rollout with BF16 training collapses after roughly 150 steps, accompanied by rapidly growing rollout-trainer log-probability gaps. Through training-inference error analysis and controlled ablations, we identify activation error, rather than weight error, as the dominant source of FP4 RL instability: weights can be synchronized and aligned by a shared quantization-dequantization path, whereas activations are recomputed online and error is amplified by the coarse E2M1 grid. Therefore, to stabilize NVFP4 RL for MoE, we propose QUantization-error Alignment across Dual Sides (QUADS). On the trainer side, we introduce Asymmetric Quantization-Aware Training fake-quantizing weights while keeping activations unquantized for better alignment. On the rollout side, Residual Activation Compensation corrects high-error activation channels while preserving native W4A4 GEMMs. In our MoE RL experiments on several benchmarks, QUADS achieves BF16-level accuracy, improves average pass@1 by 21.49 points over naive NVFP4 RL, and delivers ~16% higher rollout throughput than FP8.",
+        "authors": [
+          "Zhengyang Zhuge",
+          "Hao Yu",
+          "Xin Wang",
+          "Zheng Li",
+          "Yizhong Cao",
+          "Dayiheng Liu",
+          "Jianwei Zhang"
+        ],
+        "primary_category": "cs.LG",
+        "categories": [
+          "cs.LG"
+        ],
+        "published_at": "2026-07-17T10:21:27Z",
+        "updated_at": "2026-07-17T10:21:27Z",
+        "abs_url": "https://arxiv.org/abs/2607.15810",
+        "pdf_url": "https://arxiv.org/pdf/2607.15810",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:03.208768Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15810",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": false,
+        "code_url": null,
+        "code_source": null,
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "rag",
+          "inference",
+          "serving",
+          "alignment",
+          "benchmark"
+        ],
+        "signal_sources": {},
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 0,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Practitioner keywords: rag, inference, serving, alignment, benchmark",
+        "arXiv category weight: cs.LG",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: systems",
+        "Safety/ethics/governance keywords: alignment"
+      ],
+      "selected_reason": "Practitioner keywords: rag, inference, serving, alignment, benchmark; arXiv category weight: cs.LG; No duplicate title in candidate pool; Recent topic repeat penalty: systems; Safety/ethics/governance keywords: alignment",
+      "matched_keywords": [
+        "rag",
+        "inference",
+        "serving",
+        "alignment",
+        "benchmark",
+        "throughput",
+        "quantization"
+      ],
+      "topic": "Systems and Deployment",
+      "topic_slug": "systems",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 23,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.15769",
+        "arxiv_id": "2607.15769",
+        "title": "Making Agent-Mediated Contributions Governable: A Project-Level Governance Manifest for Open-Source AI Collaboration",
+        "abstract": "Generative AI and coding agents are intensifying a central governance tension in open-source software (OSS): they scale contribution generation faster than maintainers can assess risk, evidence, and accountability. Existing responses improve agent-readability and traceability, but project rules must also organize contribution-specific risk, evidence, accountability, and review-gate states. We theorize this organizational arrangement as project-side governability infrastructure. A diagnostic audit of 50 GitHub repositories finds widespread general governance artifacts, observable agent-readability, and fragmented AI-governance cues, but no project-wide arrangement that coordinates shared rules, preparation obligations, verification rights, and maintainer decision authority across AI-mediated contribution workflows. We develop the Agent Governance Manifest (AGM) as a repository-hosted boundary resource and bidirectional governance contract linking contributor-side evidence preparation with maintainer-side verification. In a controlled reviewer-side evaluation with 15 participants and 75 task-level outputs, AGM-supported materials improved exact risk-label recovery (37/38 vs. 15/37) and perceived review support (6.14 vs. 3.27 on a 1-7 scale). In a contributor-side feasibility check, 15 participants completed 45 tasks; all final packages represented the core governance state correctly, and 41 passed strict structural validation. The study develops a three-layer framework of agent-readability, traceability, and governability, theorizes agent-mediated contributions as governable boundary objects, and advances compliance-enabling digital innovation governance while preserving maintainer decision authority.",
+        "authors": [
+          "Jinjin Gao",
+          "Luyang Li",
+          "Shufen Guo",
+          "Ligang He",
+          "Xiaoning Sun"
+        ],
+        "primary_category": "cs.SE",
+        "categories": [
+          "cs.SE",
+          "cs.CY"
+        ],
+        "published_at": "2026-07-17T08:58:54Z",
+        "updated_at": "2026-07-17T08:58:54Z",
+        "abs_url": "https://arxiv.org/abs/2607.15769",
+        "pdf_url": "https://arxiv.org/pdf/2607.15769",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:03.209054Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15769",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "agent",
+          "workflow",
+          "rag",
+          "serving",
+          "evaluation",
+          "open-source"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 0,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 2
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: agent, workflow, rag, serving, evaluation, open-source",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: agents",
+        "Safety/ethics/governance keywords: governance, risk"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: agent, workflow, rag, serving, evaluation, open-source; No duplicate title in candidate pool; Recent topic repeat penalty: agents; Safety/ethics/governance keywords: governance, risk",
+      "matched_keywords": [
+        "agent",
+        "workflow",
+        "rag",
+        "serving",
+        "evaluation",
+        "open-source",
+        "agents"
+      ],
+      "topic": "Agents and Tool Use",
+      "topic_slug": "agents",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 24,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.15768",
+        "arxiv_id": "2607.15768",
+        "title": "GeoChrono: Benchmarking and Rethinking Long-Term Temporal Understanding in Remote Sensing",
+        "abstract": "Remote sensing offers an unparalleled vantage point for observing the Earth's long-term surface evolution, yet it demands that a model not only perceive land cover at isolated moments, but also track changes, memorize evolution histories, and reason across time and space. However, existing studies lack a systematic evaluation that dissects these distinct competencies. To fill this gap, we introduce ChronoBench, a multidimensional benchmark that decomposes this task into four progressive cognitive levels (i.e., Land Cover Perception, Temporal Recognition, Long-Term Memory, and Spatio-Temporal Reasoning). The ChronoBench comprises 12 sub-tasks and 17,689 rigorously validated QA (Question-Answer) pairs. Extensive evaluations reveal that mainstream MLLMs fall drastically behind human experts, with Long-Term Memory emerging as the most critical bottleneck. Motivated by this finding, we further propose GeoChrono, an MLLM with enhanced capabilities for tracing, memorizing, and reasoning about long-term geographic evolution. Leveraging the physical prior that geographic parcels remain spatially fixed while their semantics evolve, we design a Temporal Trajectory Encoder~(TempEnc) that constructs per-location temporal trajectories for dedicated land cover evolution modeling, and we introduce a Coarse-to-Fine Token Compressor~(C2FComp) that adaptively preserves dynamic regions while compressing the static background. To support training, we also construct ChronoInstruct, a 104K-sample instruction-tuning dataset spanning all competency levels for training. GeoChrono achieves state-of-the-art performance on ChronoBench, surpassing the leading commercial MLLMs by over 20%, while C2FComp reduces visual tokens by over 56% while retaining GeoChrono's 94.6% performance. The code and data will be available at https://github.com/IntelliSensing/GeoChrono",
+        "authors": [
+          "Yujie Li",
+          "Jiancheng Pan",
+          "Zhiwei Wei",
+          "Jiuniu Wang",
+          "Mugen Peng",
+          "Wenjia Xu"
+        ],
+        "primary_category": "cs.CV",
+        "categories": [
+          "cs.CV",
+          "cs.AI"
+        ],
+        "published_at": "2026-07-17T08:58:29Z",
+        "updated_at": "2026-07-17T08:58:29Z",
+        "abs_url": "https://arxiv.org/abs/2607.15768",
+        "pdf_url": "https://arxiv.org/pdf/2607.15768",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:03.209071Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15768",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "rag",
+          "serving",
+          "evaluation",
+          "benchmark",
+          "code",
+          "memory"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: rag, serving, evaluation, benchmark, code, memory",
+        "arXiv category weight: cs.CV",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: rag, serving, evaluation, benchmark, code, memory; arXiv category weight: cs.CV; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation",
+      "matched_keywords": [
+        "rag",
+        "serving",
+        "evaluation",
+        "benchmark",
+        "code",
+        "memory",
+        "eval",
+        "dataset"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 25,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    },
+    {
+      "paper": {
+        "id": "2607.15766",
+        "arxiv_id": "2607.15766",
+        "title": "Before the Action: Benchmarking LLMs on Prospective Hypothesis Discovery",
+        "abstract": "Large language models (LLMs) excel at answering pre-specified questions, yet their ability to navigate the open-ended, pre-conclusion stage of discovery remains largely unmeasured. We introduce Prospective Hypothesis Discovery (PHD), which asks models to autonomously construct grounded, discriminative, and testable hypothesis spaces from inconclusive evidence, including anomalous observations and fragmented records, to guide subsequent investigation. To evaluate this capability, we introduce HypoArena, comprising HypoData, a benchmark of 988 cases across six scientific and analytical domains, and HypoEval, an evaluation framework for open-ended hypothesis sets. To construct HypoData at scale, we propose Retrospective Context Regression, a Forge--Audit pipeline that reconstructs pre-conclusion contexts from completed expert documents by removing explicit conclusions, target hypotheses, and retrospective causal attributions while preserving the factual substrate. Because PHD admits multiple valid outputs, HypoEval combines bidirectional pairwise judgments with Bradley--Terry--Davidson aggregation for ranking and six-dimensional rubric scoring for diagnosis. Experiments on 15 frontier LLMs reveal clear capability stratification and model-dependent effects of structured analytical skills, with gains for several lower-performing models on HypoArena but regressions for other systems, including a top-performing model. Compared with absolute rubric scoring, arena evaluation resolves finer-grained differences among models, with aggregated rankings showing strong agreement with human experts and an independent judge. Together, these results support treating PHD as a distinct target for evaluating how LLMs formulate investigative directions when final conclusions are withheld. Our code and data are publicly available at github.com/SKYLENAGE-AI/HypoArena and github.com/SKYLENAGE-AI/HypoArena.",
+        "authors": [
+          "Tianyun Zhong",
+          "Wangyi Jiang",
+          "Wei Wang",
+          "Xuanang Chen",
+          "Yaojie Lu",
+          "Shiwei Ye",
+          "Yuzhen Shi",
+          "Boyu Yang",
+          "Jinghang Wang",
+          "Han Li",
+          "Weiqi Zhai",
+          "Bing Zhao",
+          "Hu Wei",
+          "Haiyang Yu",
+          "Yongbin Li",
+          "Hongyu Lin",
+          "Le Sun",
+          "Xianpei Han"
+        ],
+        "primary_category": "cs.CL",
+        "categories": [
+          "cs.CL"
+        ],
+        "published_at": "2026-07-17T08:56:43Z",
+        "updated_at": "2026-07-17T08:56:43Z",
+        "abs_url": "https://arxiv.org/abs/2607.15766",
+        "pdf_url": "https://arxiv.org/pdf/2607.15766",
+        "source": "arxiv",
+        "fetched_at": "2026-07-20T22:10:03.209103Z"
+      },
+      "signal": {
+        "arxiv_id": "2607.15766",
+        "hf_daily": false,
+        "hf_upvotes": 0,
+        "hf_url": null,
+        "has_code": true,
+        "code_url": null,
+        "code_source": "paper_text",
+        "github_stars": 0,
+        "github_forks": 0,
+        "repo_updated_at": null,
+        "github_trending": false,
+        "semantic_scholar_id": null,
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields_of_study": [],
+        "external_ids": {},
+        "top_institution": false,
+        "institutions": [],
+        "top_conference": null,
+        "matched_keywords": [
+          "rag",
+          "serving",
+          "evaluation",
+          "benchmark",
+          "code"
+        ],
+        "signal_sources": {
+          "code": "paper_text"
+        },
+        "warnings": [
+          "External signal enrichment disabled; set AI_RESEARCH_EXTERNAL_SIGNALS=1 to enable."
+        ],
+        "extra": {}
+      },
+      "total_score": 8,
+      "score_breakdown": {
+        "institution_background": 0,
+        "hf_daily": 0,
+        "hf_upvotes": 0,
+        "top_conference": 0,
+        "code_available": 2,
+        "practitioner_relevance": 4,
+        "semantic_scholar_citations": 0,
+        "open_source_heat": 0,
+        "arxiv_category_weight": 2,
+        "novelty_or_duplicate": 1,
+        "recent_topic_repeat": -1,
+        "safety_ethics_governance": 0
+      },
+      "score_reasons": [
+        "Code or executable artifact signal",
+        "Practitioner keywords: rag, serving, evaluation, benchmark, code",
+        "arXiv category weight: cs.CL",
+        "No duplicate title in candidate pool",
+        "Recent topic repeat penalty: evaluation"
+      ],
+      "selected_reason": "Code or executable artifact signal; Practitioner keywords: rag, serving, evaluation, benchmark, code; arXiv category weight: cs.CL; No duplicate title in candidate pool; Recent topic repeat penalty: evaluation",
+      "matched_keywords": [
+        "rag",
+        "serving",
+        "evaluation",
+        "benchmark",
+        "code",
+        "eval",
+        "test"
+      ],
+      "topic": "Benchmarks and Evaluation",
+      "topic_slug": "evaluation",
+      "confidence_level": "medium",
+      "selection_tier": "mention",
+      "rank": 26,
+      "repeat_guard_status": "new",
+      "previous_seen_date": null,
+      "previous_seen_section": null,
+      "repeat_guard_reason": "selected as mention"
+    }
+  ]
+}

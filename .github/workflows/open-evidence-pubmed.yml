@@ -29,6 +29,17 @@ jobs:
           python-version: "3.12"
       - name: Install runtime
         run: python -m pip install --disable-pip-version-check requests urllib3
+      - name: Prepare normalized output directories
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          year = "${{ matrix.year }}"
+          queries = json.loads(Path("open_evidence_runner/pubmed_queries.json").read_text(encoding="utf-8"))
+          root = Path(f"output-{year}/normalized/pubmed/{year}")
+          for query_group in queries:
+              (root / query_group).mkdir(parents=True, exist_ok=True)
+          PY
       - name: Retrieve PubMed records through official E-utilities
         env:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}

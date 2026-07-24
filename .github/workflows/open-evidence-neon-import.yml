@@ -69,12 +69,19 @@ jobs:
             --source "${{ matrix.source }}" \
             --batch-id "${{ matrix.batch_id }}" \
             --output "${{ matrix.root }}/stage_selected.jsonl.gz"
+          python open_evidence_runner/sanitize_jsonl_for_neon.py \
+            --path "${{ matrix.root }}/stage_selected.jsonl.gz"
           python - <<'PY'
           import gzip, json
           from pathlib import Path
           root = Path("${{ matrix.root }}")
           path = root / "stage_selected.jsonl.gz"
-          count = sum(1 for line in gzip.open(path, "rt", encoding="utf-8") if line.strip())
+          count = 0
+          for line in gzip.open(path, "rt", encoding="utf-8"):
+              if not line.strip():
+                  continue
+              json.loads(line, parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)))
+              count += 1
           expected = int("${{ matrix.expected }}")
           assert count == expected, (count, expected)
           summary = json.loads((root / "stage_selected.summary.json").read_text())

@@ -16,26 +16,30 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  import-source:
+  stage-candidate-source:
     strategy:
       fail-fast: false
       max-parallel: 2
       matrix:
         include:
-          - source: arXiv
-            run_id: 30084959838
-            artifact: arxiv-backfill-all
-            root: artifact-arxiv
-            report: reports/arxiv-import.json
-            log: reports/arxiv-import.log
-            identity: reports/arxiv-identity.json
-          - source: Semantic Scholar
-            run_id: 30084756249
-            artifact: semantic-scholar-backfill-all
-            root: artifact-semantic-scholar
-            report: reports/semantic-scholar-import.json
-            log: reports/semantic-scholar-import.log
-            identity: reports/semantic-scholar-identity.json
+          - source: Semantic Scholar rescue
+            batch_id: s2-rescue-selected-20260724
+            run_id: 30103594843
+            artifact: semantic-scholar-seed-rescue-normalized-screened
+            root: artifact-s2-rescue
+            expected: 9144
+            report: reports/s2-rescue-staging.json
+            log: reports/s2-rescue-staging.log
+            identity: reports/s2-rescue-identity.json
+          - source: PubMed
+            batch_id: pubmed-selected-20260724
+            run_id: 30104290733
+            artifact: pubmed-normalized-screened
+            root: artifact-pubmed
+            expected: 4349
+            report: reports/pubmed-staging.json
+            log: reports/pubmed-staging.log
+            identity: reports/pubmed-identity.json
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -50,7 +54,7 @@ jobs:
           python open_evidence_runner/neon_data_api_identity.py
           --endpoint "https://ep-icy-lake-afna0la7.apirest.c-2.us-west-2.aws.neon.tech/explainability_bias/rest/v1"
           --output "${{ matrix.identity }}"
-      - name: Download verified source artifact
+      - name: Download verified normalized screening artifact
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.artifact }}
@@ -58,24 +62,46 @@ jobs:
           github-token: ${{ github.token }}
           repository: siner9586/ai_research
           run-id: ${{ matrix.run_id }}
-      - name: Stage metadata through OIDC-protected Neon Data API
+      - name: Combine selected candidate and screening records
+        run: |
+          python open_evidence_runner/prepare_selected_candidates_for_staging.py \
+            --artifact-root "${{ matrix.root }}" \
+            --source "${{ matrix.source }}" \
+            --batch-id "${{ matrix.batch_id }}" \
+            --output "${{ matrix.root }}/stage_selected.jsonl.gz"
+          python - <<'PY'
+          import gzip, json
+          from pathlib import Path
+          root = Path("${{ matrix.root }}")
+          path = root / "stage_selected.jsonl.gz"
+          count = sum(1 for line in gzip.open(path, "rt", encoding="utf-8") if line.strip())
+          expected = int("${{ matrix.expected }}")
+          assert count == expected, (count, expected)
+          summary = json.loads((root / "stage_selected.summary.json").read_text())
+          assert summary["records"] == expected
+          assert summary["completed"] is True
+          PY
+      - name: Stage selected records through OIDC-protected Neon Data API
         shell: bash
         run: |
           set -o pipefail
           mkdir -p reports
           python open_evidence_runner/neon_data_api_import.py \
             --source "${{ matrix.source }}" \
+            --batch-id "${{ matrix.batch_id }}" \
+            --master-pattern "**/stage_selected.jsonl.gz" \
             --artifact-root "${{ matrix.root }}" \
             --endpoint "https://ep-icy-lake-afna0la7.apirest.c-2.us-west-2.aws.neon.tech/explainability_bias/rest/v1" \
             --report "${{ matrix.report }}" 2>&1 | tee "${{ matrix.log }}"
-      - name: Upload import audit report
+      - name: Upload staging audit report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: neon-import-${{ matrix.source }}
+          name: neon-stage-${{ matrix.batch_id }}
           path: |
             ${{ matrix.identity }}
             ${{ matrix.report }}
             ${{ matrix.log }}
+            ${{ matrix.root }}/stage_selected.summary.json
           retention-days: 30
           if-no-files-found: warn

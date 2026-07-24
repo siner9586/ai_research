@@ -21,3 +21,10 @@ jobs:
       - run: python -m pip install --disable-pip-version-check requests
       - name: Compare cursor behavior across sort modes
         run: python open_evidence_runner/crossref_cursor_diagnostic.py
+      - name: Upload diagnostic JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: crossref-cursor-diagnostic
+          path: crossref_cursor_diagnostic.json
+          retention-days: 30
+          if-no-files-found: error

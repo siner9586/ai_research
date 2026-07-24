@@ -15,6 +15,8 @@ import requests
 
 AUDIENCE = "neon-open-evidence-import"
 TABLE = "open_evidence_import_staging"
+REPOSITORY = "siner9586/ai_research"
+REPOSITORY_ID = "1258287537"
 
 
 def request_oidc_token() -> str:
@@ -34,6 +36,28 @@ def decode_claims(token: str) -> dict[str, Any]:
     payload = token.split(".")[1]
     payload += "=" * (-len(payload) % 4)
     return json.loads(base64.urlsafe_b64decode(payload))
+
+
+def validate_claims(claims: dict[str, Any], allowed_workflow: str) -> str:
+    expected = {
+        "aud": AUDIENCE,
+        "sub": f"repo:{REPOSITORY}:pull_request",
+        "repository": REPOSITORY,
+        "repository_id": REPOSITORY_ID,
+    }
+    for key, value in expected.items():
+        if str(claims.get(key)) != value:
+            raise RuntimeError(f"Unexpected OIDC claim {key}")
+    safe_name = Path(allowed_workflow).name
+    if safe_name != allowed_workflow or not safe_name.endswith(".yml"):
+        raise RuntimeError("allowed_workflow must be a YAML filename without path components")
+    workflow_ref = str(claims.get("workflow_ref", ""))
+    required_prefix = f"{REPOSITORY}/.github/workflows/{safe_name}@refs/pull/"
+    if not workflow_ref.startswith(required_prefix):
+        raise RuntimeError(
+            f"Unexpected workflow_ref; required prefix {required_prefix!r}"
+        )
+    return workflow_ref
 
 
 def json_safe(value: Any) -> Any:
@@ -59,9 +83,9 @@ def strict_json_bytes(value: Any) -> bytes:
 def find_master(root: Path, source: str, pattern: str | None = None) -> Path:
     if pattern:
         matches = list(root.glob(pattern))
-        if matches:
+        if len(matches) == 1:
             return matches[0]
-        raise FileNotFoundError(f"No file matching {pattern} under {root}")
+        raise FileNotFoundError(f"Expected one file matching {pattern}, found {len(matches)} under {root}")
     patterns = {
         "arXiv": ["**/arxiv_all_paper_master.jsonl.gz"],
         "Semantic Scholar": ["**/semantic_scholar_all_paper_master.jsonl.gz"],
@@ -89,14 +113,14 @@ def find_master(root: Path, source: str, pattern: str | None = None) -> Path:
 def iter_jsonl_gz(path: Path) -> Iterable[dict[str, Any]]:
     with gzip.open(path, "rt", encoding="utf-8") as handle:
         for line_number, line in enumerate(handle, start=1):
-            if line.strip():
-                value = json.loads(line)
-                if not isinstance(value, dict):
-                    raise ValueError(f"JSONL record {line_number} must be an object")
-                safe = json_safe(value)
-                # Fail locally before any network write if a non-standard value remains.
-                strict_json_bytes(safe)
-                yield safe
+            if not line.strip():
+                continue
+            value = json.loads(line)
+            if not isinstance(value, dict):
+                raise ValueError(f"JSONL record {line_number} must be an object")
+            safe = json_safe(value)
+            strict_json_bytes(safe)
+            yield safe
 
 
 def source_record_id(source: str, payload: dict[str, Any]) -> str:
@@ -188,24 +212,16 @@ def main() -> None:
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--master-pattern")
     parser.add_argument("--batch-id")
+    parser.add_argument(
+        "--allowed-workflow",
+        default="open-evidence-neon-import.yml",
+        help="Exact workflow filename accepted in the OIDC workflow_ref claim.",
+    )
     args = parser.parse_args()
 
     token = request_oidc_token()
     claims = decode_claims(token)
-    expected = {
-        "aud": AUDIENCE,
-        "sub": "repo:siner9586/ai_research:pull_request",
-        "repository": "siner9586/ai_research",
-        "repository_id": "1258287537",
-    }
-    for key, value in expected.items():
-        if str(claims.get(key)) != value:
-            raise RuntimeError(f"Unexpected OIDC claim {key}")
-    workflow_ref = str(claims.get("workflow_ref", ""))
-    if not workflow_ref.startswith(
-        "siner9586/ai_research/.github/workflows/open-evidence-neon-import.yml@refs/pull/"
-    ):
-        raise RuntimeError("Unexpected workflow_ref")
+    workflow_ref = validate_claims(claims, args.allowed_workflow)
 
     master = find_master(args.artifact_root, args.source, args.master_pattern)
     batch_id = args.batch_id or f"{args.source.lower().replace(' ', '-')}-aggregate-v1"
@@ -242,6 +258,7 @@ def main() -> None:
         "oidc_repository": claims.get("repository"),
         "oidc_repository_id": claims.get("repository_id"),
         "oidc_workflow_ref": workflow_ref,
+        "allowed_workflow": args.allowed_workflow,
         "json_standard": "RFC8259_no_NaN_or_Infinity",
         "completed": exact_count == attempted,
     }

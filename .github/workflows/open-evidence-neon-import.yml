@@ -1,0 +1,54 @@
+name: open-evidence-neon-import
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  actions: read
+  contents: read
+
+concurrency:
+  group: open-evidence-neon-import-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  export-fulltext-queue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HTTP runtime
+        run: python -m pip install --disable-pip-version-check requests
+      - name: Export read-only fulltext and Drive queues
+        run: >-
+          python open_evidence_runner/export_fulltext_queue.py
+          --endpoint "https://ep-icy-lake-afna0la7.apirest.c-2.us-west-2.aws.neon.tech/explainability_bias/rest/v1"
+          --output reports/fulltext-queue
+      - name: Validate queue export package
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('reports/fulltext-queue')
+          summary = json.loads((root / 'summary.json').read_text())
+          assert summary['completed'] is True
+          assert summary['run_scope'] == 'read_only_queue_export'
+          assert (root / 'fulltext_queue.jsonl').exists()
+          assert (root / 'drive_pending_retryable.jsonl').exists()
+          PY
+      - name: Upload queue export audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-drive-queue
+          path: reports/fulltext-queue/
+          retention-days: 30
+          compression-level: 9
+          if-no-files-found: error

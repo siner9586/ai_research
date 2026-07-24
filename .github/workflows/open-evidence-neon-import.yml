@@ -1,0 +1,66 @@
+name: open-evidence-neon-import
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  actions: read
+  contents: read
+
+concurrency:
+  group: open-evidence-neon-import-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  import-source:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - source: arXiv
+            run_id: 30084959838
+            artifact: arxiv-backfill-all
+            root: artifact-arxiv
+            report: reports/arxiv-import.json
+          - source: Semantic Scholar
+            run_id: 30084756249
+            artifact: semantic-scholar-backfill-all
+            root: artifact-semantic-scholar
+            report: reports/semantic-scholar-import.json
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HTTP runtime
+        run: python -m pip install --disable-pip-version-check requests
+      - name: Download verified source artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.root }}
+          github-token: ${{ github.token }}
+          repository: siner9586/ai_research
+          run-id: ${{ matrix.run_id }}
+      - name: Stage metadata through OIDC-protected Neon Data API
+        run: >-
+          python open_evidence_runner/neon_data_api_import.py
+          --source "${{ matrix.source }}"
+          --artifact-root "${{ matrix.root }}"
+          --endpoint "https://ep-icy-lake-afna0la7.apirest.c-2.us-west-2.aws.neon.tech/explainability_bias/rest/v1"
+          --report "${{ matrix.report }}"
+      - name: Upload import audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-import-${{ matrix.source }}
+          path: ${{ matrix.report }}
+          retention-days: 30
+          if-no-files-found: error

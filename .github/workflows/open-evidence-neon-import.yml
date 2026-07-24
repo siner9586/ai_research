@@ -27,11 +27,13 @@ jobs:
             artifact: arxiv-backfill-all
             root: artifact-arxiv
             report: reports/arxiv-import.json
+            log: reports/arxiv-import.log
           - source: Semantic Scholar
             run_id: 30084756249
             artifact: semantic-scholar-backfill-all
             root: artifact-semantic-scholar
             report: reports/semantic-scholar-import.json
+            log: reports/semantic-scholar-import.log
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -50,17 +52,22 @@ jobs:
           repository: siner9586/ai_research
           run-id: ${{ matrix.run_id }}
       - name: Stage metadata through OIDC-protected Neon Data API
-        run: >-
-          python open_evidence_runner/neon_data_api_import.py
-          --source "${{ matrix.source }}"
-          --artifact-root "${{ matrix.root }}"
-          --endpoint "https://ep-icy-lake-afna0la7.apirest.c-2.us-west-2.aws.neon.tech/explainability_bias/rest/v1"
-          --report "${{ matrix.report }}"
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p reports
+          python open_evidence_runner/neon_data_api_import.py \
+            --source "${{ matrix.source }}" \
+            --artifact-root "${{ matrix.root }}" \
+            --endpoint "https://ep-icy-lake-afna0la7.apirest.c-2.us-west-2.aws.neon.tech/explainability_bias/rest/v1" \
+            --report "${{ matrix.report }}" 2>&1 | tee "${{ matrix.log }}"
       - name: Upload import audit report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: neon-import-${{ matrix.source }}
-          path: ${{ matrix.report }}
+          path: |
+            ${{ matrix.report }}
+            ${{ matrix.log }}
           retention-days: 30
-          if-no-files-found: error
+          if-no-files-found: warn

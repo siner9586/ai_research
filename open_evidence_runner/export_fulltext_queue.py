@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import base64
-import csv
 import json
 import os
 from pathlib import Path
@@ -11,6 +10,7 @@ from typing import Any
 import requests
 
 AUDIENCE = "neon-open-evidence-import"
+SCHEMA = "open_evidence"
 TABLES = [
     "papers",
     "screening_decisions",
@@ -39,7 +39,12 @@ def request_oidc_token() -> tuple[str, dict[str, Any]]:
     return token, claims
 
 
-def fetch_table(session: requests.Session, endpoint: str, token: str, table: str) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def fetch_table(
+    session: requests.Session,
+    endpoint: str,
+    token: str,
+    table: str,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     offset = 0
     page_size = 1000
@@ -48,7 +53,11 @@ def fetch_table(session: requests.Session, endpoint: str, token: str, table: str
         response = session.get(
             f"{endpoint.rstrip('/')}/{table}",
             params={"select": "*", "limit": page_size, "offset": offset},
-            headers={"Authorization": f"Bearer {token}", "Prefer": "count=exact"},
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Prefer": "count=exact",
+                "Accept-Profile": SCHEMA,
+            },
             timeout=(30, 180),
         )
         status_codes.append(response.status_code)
@@ -59,6 +68,7 @@ def fetch_table(session: requests.Session, endpoint: str, token: str, table: str
                 "status_code": response.status_code,
                 "response_excerpt": response.text[:500],
                 "status_codes": status_codes,
+                "requested_schema": SCHEMA,
             }
         page = response.json()
         if not isinstance(page, list):
@@ -75,6 +85,7 @@ def fetch_table(session: requests.Session, endpoint: str, token: str, table: str
         "rows": len(rows),
         "columns": sorted(rows[0]) if rows else [],
         "status_codes": status_codes,
+        "requested_schema": SCHEMA,
     }
 
 
@@ -93,7 +104,9 @@ def main() -> None:
 
     token, claims = request_oidc_token()
     workflow_ref = str(claims.get("workflow_ref", ""))
-    if not workflow_ref.startswith("siner9586/ai_research/.github/workflows/open-evidence-neon-import.yml@refs/pull/"):
+    if not workflow_ref.startswith(
+        "siner9586/ai_research/.github/workflows/open-evidence-neon-import.yml@refs/pull/"
+    ):
         raise RuntimeError("Unexpected workflow identity")
 
     session = requests.Session()
@@ -106,7 +119,11 @@ def main() -> None:
             tables[table] = rows
             write_jsonl(args.output / f"{table}.jsonl", rows)
 
-    papers = {str(row.get("paper_id")): row for row in tables.get("papers", []) if row.get("paper_id")}
+    papers = {
+        str(row.get("paper_id")): row
+        for row in tables.get("papers", [])
+        if row.get("paper_id")
+    }
     selected: set[str] = set()
     for table in ("screening_decisions", "candidate_screening_decisions"):
         for row in tables.get(table, []):
@@ -126,23 +143,42 @@ def main() -> None:
             oa_by_paper.setdefault(str(row["paper_id"]), []).append(row)
 
     queue: list[dict[str, Any]] = []
-    final_markers = {"oa_pdf_verified", "publisher_html_verified", "repository_manuscript_verified", "metadata_only", "paywalled_not_accessed", "not_found", "retracted", "access_requires_authorization"}
+    final_markers = {
+        "oa_pdf_verified",
+        "publisher_html_verified",
+        "repository_manuscript_verified",
+        "metadata_only",
+        "paywalled_not_accessed",
+        "not_found",
+        "retracted",
+        "access_requires_authorization",
+    }
     for paper_id in sorted(selected):
         paper_files = files_by_paper.get(paper_id, [])
-        statuses = {str(row.get("status") or row.get("validation_status") or row.get("fulltext_status") or "") for row in paper_files}
+        statuses = {
+            str(
+                row.get("status")
+                or row.get("validation_status")
+                or row.get("fulltext_status")
+                or ""
+            )
+            for row in paper_files
+        }
         if statuses & final_markers:
             continue
         paper = papers[paper_id]
-        queue.append({
-            "paper_id": paper_id,
-            "title": paper.get("canonical_title") or paper.get("title"),
-            "doi": paper.get("doi_normalized") or paper.get("doi"),
-            "arxiv_id": paper.get("arxiv_id"),
-            "pmid": paper.get("pmid"),
-            "publication_year": paper.get("publication_year") or paper.get("year"),
-            "existing_file_rows": paper_files,
-            "oa_locations": oa_by_paper.get(paper_id, []),
-        })
+        queue.append(
+            {
+                "paper_id": paper_id,
+                "title": paper.get("canonical_title") or paper.get("title"),
+                "doi": paper.get("doi_normalized") or paper.get("doi"),
+                "arxiv_id": paper.get("arxiv_id"),
+                "pmid": paper.get("pmid"),
+                "publication_year": paper.get("publication_year") or paper.get("year"),
+                "existing_file_rows": paper_files,
+                "oa_locations": oa_by_paper.get(paper_id, []),
+            }
+        )
 
     pending_drive = []
     for row in tables.get("drive_objects", []):
@@ -155,6 +191,7 @@ def main() -> None:
     summary = {
         "completed": True,
         "run_scope": "read_only_queue_export",
+        "requested_schema": SCHEMA,
         "accessible_tables": [d["table"] for d in diagnostics if d.get("accessible")],
         "inaccessible_tables": [d["table"] for d in diagnostics if not d.get("accessible")],
         "selected_papers": len(selected),
@@ -164,7 +201,9 @@ def main() -> None:
         "oidc_repository": claims.get("repository"),
         "oidc_workflow_ref": workflow_ref,
     }
-    (args.output / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    (args.output / "summary.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
 

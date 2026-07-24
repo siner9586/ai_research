@@ -46,16 +46,27 @@ def blank(value: Any) -> bool:
     return value is None or str(value).strip() in {"", "nan", "NaN", "None", "null"}
 
 
+def json_safe(value: Any) -> Any:
+    """Return an RFC 8259-safe value; PostgreSQL JSON does not accept NaN/Infinity."""
+    if isinstance(value, float):
+        return value if math.isfinite(value) else None
+    if isinstance(value, dict):
+        return {str(key): json_safe(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [json_safe(item) for item in value]
+    return value
+
+
 def parse_json(value: Any, default: Any) -> Any:
     if blank(value):
         return default
     if isinstance(value, type(default)):
-        return value
+        return json_safe(value)
     try:
         parsed = json.loads(str(value))
     except json.JSONDecodeError:
         return default
-    return parsed if isinstance(parsed, type(default)) else default
+    return json_safe(parsed) if isinstance(parsed, type(default)) else default
 
 
 def parse_bool(value: Any) -> bool | None:
@@ -104,7 +115,7 @@ def normalize_row(row: dict[str, Any]) -> dict[str, Any]:
             normalized[key] = text if ISO_DATE.fullmatch(text) else None
         else:
             normalized[key] = None if blank(value) else str(value).strip()
-    return normalized
+    return json_safe(normalized)
 
 
 def load_csv(path: Path) -> list[dict[str, Any]]:
@@ -137,7 +148,7 @@ def main() -> None:
             decision = decision_by_id.get(candidate_id)
             if decision is None:
                 raise RuntimeError(f"Missing screening decision for {candidate_id}")
-            payload = {**candidate, **decision}
+            payload = json_safe({**candidate, **decision})
             payload["source_name"] = args.source
             payload["staging_batch_id"] = args.batch_id
             state = str(payload.get("decision") or "")
@@ -151,7 +162,15 @@ def main() -> None:
                 raise RuntimeError(f"Unexpected decision {state!r} for {candidate_id}")
             year_key = str(payload.get("publication_year") or "unknown")
             years[year_key] = years.get(year_key, 0) + 1
-            handle.write(json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n")
+            handle.write(
+                json.dumps(
+                    payload,
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                    allow_nan=False,
+                )
+                + "\n"
+            )
             written += 1
 
     if written != len(candidates) or written != len(decisions):
@@ -168,10 +187,14 @@ def main() -> None:
         "publication_years": years,
         "output": str(args.output),
         "completed": True,
+        "json_standard": "RFC8259_no_NaN_or_Infinity",
     }
     report_path = args.output.with_suffix("").with_suffix(".summary.json")
-    report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(json.dumps(report, ensure_ascii=False, indent=2))
+    report_path.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False),
+        encoding="utf-8",
+    )
+    print(json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False))
 
 
 if __name__ == "__main__":

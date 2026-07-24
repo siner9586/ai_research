@@ -1,0 +1,60 @@
+name: open-evidence-crossref-annual-summary
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: open-evidence-crossref-annual-summary-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  extract-year:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - year: 2018
+            artifact_id: 8597046581
+          - year: 2019
+            artifact_id: 8597187188
+          - year: 2020
+            artifact_id: 8598355860
+          - year: 2021
+            artifact_id: 8602539207
+          - year: 2022
+            artifact_id: 8602982507
+          - year: 2023
+            artifact_id: 8605805885
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HTTP runtime
+        run: python -m pip install --disable-pip-version-check requests
+      - name: Extract annual completion summary and manifest using ZIP byte ranges
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python open_evidence_runner/extract_remote_crossref_year.py \
+            --repository siner9586/ai_research \
+            --artifact-id "${{ matrix.artifact_id }}" \
+            --year "${{ matrix.year }}" \
+            --output "summary-${{ matrix.year }}"
+      - name: Upload compact annual audit package
+        uses: actions/upload-artifact@v4
+        with:
+          name: crossref-${{ matrix.year }}-summary-only
+          path: summary-${{ matrix.year }}/
+          retention-days: 30
+          compression-level: 9
+          if-no-files-found: error

@@ -16,34 +16,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  stage-independent-v2:
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        include:
-          - source: Independent screen v2 S2 rescue
-            batch_id: independent-screen-v2-s2-20260724
-            run_id: 30108606749
-            artifact: independent-screen-v2-output-s2
-            root: artifact-v2-s2
-            expected: 9144
-            reviewer: machine-rule-v2:s2-rescue
-            report: reports/v2-s2-staging.json
-            log: reports/v2-s2-staging.log
-            identity: reports/v2-s2-identity.json
-          - source: Independent screen v2 PubMed
-            batch_id: independent-screen-v2-pubmed-20260724
-            run_id: 30108606749
-            artifact: independent-screen-v2-output-pubmed
-            root: artifact-v2-pubmed
-            expected: 4349
-            reviewer: machine-rule-v2:pubmed
-            report: reports/v2-pubmed-staging.json
-            log: reports/v2-pubmed-staging.log
-            identity: reports/v2-pubmed-identity.json
+  export-fulltext-queue:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -51,70 +26,29 @@ jobs:
           python-version: "3.12"
       - name: Install HTTP runtime
         run: python -m pip install --disable-pip-version-check requests
-      - name: Verify OIDC Data API database role
+      - name: Export read-only fulltext and Drive queues
         run: >-
-          python open_evidence_runner/neon_data_api_identity.py
+          python open_evidence_runner/export_fulltext_queue.py
           --endpoint "https://ep-icy-lake-afna0la7.apirest.c-2.us-west-2.aws.neon.tech/explainability_bias/rest/v1"
-          --output "${{ matrix.identity }}"
-      - name: Download public independent-screen artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ matrix.artifact }}
-          path: ${{ matrix.root }}
-          github-token: ${{ github.token }}
-          repository: siner9586/ai_research
-          run-id: ${{ matrix.run_id }}
-      - name: Prepare strict v2 decision payloads
+          --output reports/fulltext-queue
+      - name: Validate queue export package
         run: |
-          python open_evidence_runner/prepare_screen_v2_for_staging.py \
-            --artifact-root "${{ matrix.root }}" \
-            --source "${{ matrix.source }}" \
-            --batch-id "${{ matrix.batch_id }}" \
-            --output "${{ matrix.root }}/stage_screen_v2.jsonl.gz"
           python - <<'PY'
-          import gzip, json
+          import json
           from pathlib import Path
-          root = Path("${{ matrix.root }}")
-          path = root / "stage_screen_v2.jsonl.gz"
-          rows = []
-          for line in gzip.open(path, "rt", encoding="utf-8"):
-              if not line.strip():
-                  continue
-              row = json.loads(line, parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)))
-              rows.append(row)
-          expected = int("${{ matrix.expected }}")
-          assert len(rows) == expected, (len(rows), expected)
-          assert {row["reviewer"] for row in rows} == {"${{ matrix.reviewer }}"}
-          assert {row["screening_stage"] for row in rows} == {"title_abstract_independent_rule_v2"}
-          assert all(row["candidate_id"] for row in rows)
-          summary = json.loads((root / "stage_screen_v2.summary.json").read_text())
-          assert summary["records"] == expected
-          assert summary["completed"] is True
-          assert summary["final_inclusion"] is False
+          root = Path('reports/fulltext-queue')
+          summary = json.loads((root / 'summary.json').read_text())
+          assert summary['completed'] is True
+          assert summary['run_scope'] == 'read_only_queue_export'
+          assert (root / 'fulltext_queue.jsonl').exists()
+          assert (root / 'drive_pending_retryable.jsonl').exists()
           PY
-      - name: Stage v2 decisions through OIDC-protected Neon Data API
-        shell: bash
-        run: |
-          set -o pipefail
-          mkdir -p reports
-          python open_evidence_runner/neon_data_api_import.py \
-            --source "${{ matrix.source }}" \
-            --batch-id "${{ matrix.batch_id }}" \
-            --master-pattern "**/stage_screen_v2.jsonl.gz" \
-            --artifact-root "${{ matrix.root }}" \
-            --allowed-workflow "open-evidence-neon-import.yml" \
-            --endpoint "https://ep-icy-lake-afna0la7.apirest.c-2.us-west-2.aws.neon.tech/explainability_bias/rest/v1" \
-            --report "${{ matrix.report }}" 2>&1 | tee "${{ matrix.log }}"
-      - name: Upload v2 staging audit report
+      - name: Upload queue export audit artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: neon-stage-${{ matrix.batch_id }}
-          path: |
-            ${{ matrix.identity }}
-            ${{ matrix.report }}
-            ${{ matrix.log }}
-            ${{ matrix.root }}/stage_screen_v2.summary.json
+          name: open-evidence-fulltext-drive-queue
+          path: reports/fulltext-queue/
           retention-days: 30
           compression-level: 9
-          if-no-files-found: warn
+          if-no-files-found: error

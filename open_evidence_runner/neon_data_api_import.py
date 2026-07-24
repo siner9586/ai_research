@@ -4,6 +4,7 @@ import argparse
 import base64
 import gzip
 import json
+import math
 import os
 import time
 import zipfile
@@ -33,6 +34,26 @@ def decode_claims(token: str) -> dict[str, Any]:
     payload = token.split(".")[1]
     payload += "=" * (-len(payload) % 4)
     return json.loads(base64.urlsafe_b64decode(payload))
+
+
+def json_safe(value: Any) -> Any:
+    """Recursively replace non-finite floats before PostgreSQL JSONB transport."""
+    if isinstance(value, float):
+        return value if math.isfinite(value) else None
+    if isinstance(value, dict):
+        return {str(key): json_safe(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [json_safe(item) for item in value]
+    return value
+
+
+def strict_json_bytes(value: Any) -> bytes:
+    return json.dumps(
+        json_safe(value),
+        ensure_ascii=False,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
 
 
 def find_master(root: Path, source: str, pattern: str | None = None) -> Path:
@@ -67,29 +88,45 @@ def find_master(root: Path, source: str, pattern: str | None = None) -> Path:
 
 def iter_jsonl_gz(path: Path) -> Iterable[dict[str, Any]]:
     with gzip.open(path, "rt", encoding="utf-8") as handle:
-        for line in handle:
+        for line_number, line in enumerate(handle, start=1):
             if line.strip():
                 value = json.loads(line)
                 if not isinstance(value, dict):
-                    raise ValueError("JSONL records must be objects")
-                yield value
+                    raise ValueError(f"JSONL record {line_number} must be an object")
+                safe = json_safe(value)
+                # Fail locally before any network write if a non-standard value remains.
+                strict_json_bytes(safe)
+                yield safe
 
 
 def source_record_id(source: str, payload: dict[str, Any]) -> str:
     if payload.get("candidate_id"):
-        return str(payload["candidate_id"])
-    if source == "arXiv":
-        return str(payload.get("arxiv_id") or payload.get("source_external_id"))
-    if source == "Semantic Scholar":
-        return str(payload.get("s2_paper_id") or payload.get("source_external_id"))
-    return str(payload.get("source_external_id") or payload.get("doi_normalized") or payload.get("pmid"))
+        value = str(payload["candidate_id"])
+    elif source == "arXiv":
+        value = str(payload.get("arxiv_id") or payload.get("source_external_id") or "")
+    elif source == "Semantic Scholar":
+        value = str(payload.get("s2_paper_id") or payload.get("source_external_id") or "")
+    else:
+        value = str(
+            payload.get("source_external_id")
+            or payload.get("doi_normalized")
+            or payload.get("pmid")
+            or ""
+        )
+    if not value:
+        raise ValueError(f"Missing stable source record identifier for {source}")
+    return value
 
 
-def chunks(records: Iterable[dict[str, Any]], max_rows: int = 200, max_bytes: int = 2_500_000):
+def chunks(
+    records: Iterable[dict[str, Any]],
+    max_rows: int = 200,
+    max_bytes: int = 2_500_000,
+):
     batch: list[dict[str, Any]] = []
     size = 2
     for record in records:
-        encoded = json.dumps(record, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        encoded = strict_json_bytes(record)
         if batch and (len(batch) >= max_rows or size + len(encoded) + 1 > max_bytes):
             yield batch
             batch = []
@@ -100,7 +137,12 @@ def chunks(records: Iterable[dict[str, Any]], max_rows: int = 200, max_bytes: in
         yield batch
 
 
-def post_batch(session: requests.Session, endpoint: str, token: str, rows: list[dict[str, Any]]) -> None:
+def post_batch(
+    session: requests.Session,
+    endpoint: str,
+    token: str,
+    rows: list[dict[str, Any]],
+) -> None:
     response = session.post(
         f"{endpoint}/{TABLE}?on_conflict=source_name,source_record_id",
         headers={
@@ -108,11 +150,13 @@ def post_batch(session: requests.Session, endpoint: str, token: str, rows: list[
             "Content-Type": "application/json",
             "Prefer": "resolution=merge-duplicates,return=minimal",
         },
-        data=json.dumps(rows, ensure_ascii=False, separators=(",", ":")).encode("utf-8"),
+        data=strict_json_bytes(rows),
         timeout=(30, 180),
     )
     if response.status_code not in (200, 201, 204):
-        raise RuntimeError(f"Data API insert failed HTTP {response.status_code}: {response.text[:1000]}")
+        raise RuntimeError(
+            f"Data API insert failed HTTP {response.status_code}: {response.text[:1000]}"
+        )
 
 
 def count_source(session: requests.Session, endpoint: str, token: str, source: str) -> int:
@@ -127,7 +171,9 @@ def count_source(session: requests.Session, endpoint: str, token: str, source: s
         timeout=(30, 120),
     )
     if response.status_code not in (200, 206):
-        raise RuntimeError(f"Data API count failed HTTP {response.status_code}: {response.text[:1000]}")
+        raise RuntimeError(
+            f"Data API count failed HTTP {response.status_code}: {response.text[:1000]}"
+        )
     content_range = response.headers.get("Content-Range", "")
     if "/" not in content_range:
         raise RuntimeError(f"Missing exact count in Content-Range: {content_range}")
@@ -172,7 +218,7 @@ def main() -> None:
             "batch_id": batch_id,
             "source_name": args.source,
             "source_record_id": source_record_id(args.source, payload),
-            "payload": payload,
+            "payload": json_safe(payload),
         }
         for payload in iter_jsonl_gz(master)
     )
@@ -196,11 +242,14 @@ def main() -> None:
         "oidc_repository": claims.get("repository"),
         "oidc_repository_id": claims.get("repository_id"),
         "oidc_workflow_ref": workflow_ref,
+        "json_standard": "RFC8259_no_NaN_or_Infinity",
         "completed": exact_count == attempted,
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)
-    args.report.write_text(json.dumps(report, indent=2), encoding="utf-8")
-    print(json.dumps(report, indent=2))
+    args.report.write_text(
+        json.dumps(report, indent=2, allow_nan=False), encoding="utf-8"
+    )
+    print(json.dumps(report, indent=2, allow_nan=False))
     if not report["completed"]:
         raise SystemExit("Staging count does not match attempted record count")
 

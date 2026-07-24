@@ -1,16 +1,13 @@
 name: open-evidence-pubmed-backfill
 
 on:
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: open-evidence-pubmed-${{ github.event.pull_request.number || github.ref }}
+  group: open-evidence-pubmed-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:

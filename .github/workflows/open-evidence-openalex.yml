@@ -1,0 +1,20 @@
+name: open-evidence-openalex-backfill-legacy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: open-evidence-openalex-legacy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  legacy-notice:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Legacy workflow notice
+        run: |
+          echo 'The monolithic year-level OpenAlex workflow is retained only for audit history.'
+          echo 'Use open-evidence-openalex-term-backfill for checkpointed year-by-term execution.'

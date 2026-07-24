@@ -32,8 +32,7 @@ def first(v): return v[0] if isinstance(v,list) and v else None
 def pubdate(x):
  for k in ('published-online','published-print','published','issued','created'):
   p=first((x.get(k) or {}).get('date-parts'))
-  if p:
-   return f"{int(p[0]):04d}-{int(p[1]) if len(p)>1 else 1:02d}-{int(p[2]) if len(p)>2 else 1:02d}"
+  if p: return f"{int(p[0]):04d}-{int(p[1]) if len(p)>1 else 1:02d}-{int(p[2]) if len(p)>2 else 1:02d}"
  return None
 
 def norm(x,y,q,t):
@@ -48,39 +47,48 @@ def norm(x,y,q,t):
 def session():
  r=Retry(total=8,connect=8,read=8,status=8,backoff_factor=1,status_forcelist=(429,500,502,503,504),allowed_methods=frozenset({'GET'}),respect_retry_after_header=True,raise_on_status=False)
  s=requests.Session(); s.mount('https://',HTTPAdapter(max_retries=r))
- mail=os.getenv('CROSSREF_MAILTO') or os.getenv('UNPAYWALL_EMAIL'); ua='ExplainabilityBiasOpenEvidence/1.0'+(f' (mailto:{mail})' if mail else '')
+ mail=os.getenv('CROSSREF_MAILTO') or os.getenv('UNPAYWALL_EMAIL'); ua='ExplainabilityBiasOpenEvidence/2.0'+(f' (mailto:{mail})' if mail else '')
  s.headers.update({'User-Agent':ua,'Accept':'application/json'}); return s
 
 def dumpgz(p,o):
  p.parent.mkdir(parents=True,exist_ok=True)
  with gzip.open(p,'wt',encoding='utf-8') as f: json.dump(o,f,ensure_ascii=False)
-
 def checkpoint(p,o): p.parent.mkdir(parents=True,exist_ok=True); p.write_text(json.dumps(o,ensure_ascii=False,indent=2),encoding='utf-8')
+
+def page_fingerprint(items):
+ ids=[]
+ for item in items:
+  ids.append(str(item.get('DOI') or item.get('URL') or hashlib.sha256(json.dumps(item,sort_keys=True).encode()).hexdigest()))
+ return hashlib.sha256('\n'.join(ids).encode()).hexdigest()
 
 def crawl(s,root,y,q,t,i,deadline):
  cp=root/'checkpoints'/str(y)/q/f'{i:02d}.json'; old=json.loads(cp.read_text()) if cp.exists() else {}
  if old.get('completed'): return old['result']
  cur=old.get('cursor','*'); pages=old.get('pages',0); found=old.get('records',0); start=now(); err=None; done=False
+ seen=set(old.get('page_fingerprints') or [])
  out=root/'normalized'/'crossref'/str(y)/q/f'{i:02d}.jsonl.gz'
  while time.monotonic()<deadline:
   end='2026-07-24' if y==2026 else f'{y}-12-31'
-  r=s.get(API,params={'query.bibliographic':t,'filter':f'from-pub-date:{y}-01-01,until-pub-date:{end}','rows':ROWS,'cursor':cur},timeout=(30,120))
+  r=s.get(API,params={'query.bibliographic':t,'filter':f'from-pub-date:{y}-01-01,until-pub-date:{end}','rows':ROWS,'cursor':cur},timeout=(30,180))
   if r.status_code!=200: err=f'http_{r.status_code}:{r.text[:300]}'; break
   try: p=r.json()
   except ValueError as e: err=f'invalid_json:{e}'; break
-  m=p.get('message') or {}; items=m.get('items') or []; pages+=1
+  m=p.get('message') or {}; items=m.get('items') or []; fp=page_fingerprint(items)
+  if items and fp in seen: err='repeated_page_content'; break
+  seen.add(fp); pages+=1
   dumpgz(root/'raw'/'crossref'/str(y)/q/f'{i:02d}'/f'page_{pages:06d}.json.gz',p)
   out.parent.mkdir(parents=True,exist_ok=True)
   with gzip.open(out,'at',encoding='utf-8') as f:
    for x in items: f.write(json.dumps(norm(x,y,q,t),ensure_ascii=False)+'\n')
   found+=len(items); nxt=m.get('next-cursor'); done=len(items)<ROWS
-  checkpoint(cp,{'cursor':nxt,'pages':pages,'records':found,'completed':done,'updated_at':now()})
+  checkpoint(cp,{'cursor':nxt,'pages':pages,'records':found,'completed':done,'page_fingerprints':sorted(seen),'updated_at':now()})
   if done: cur=nxt or 'END_SHORT_PAGE'; break
-  if not nxt or nxt==cur: err='missing_or_repeated_next_cursor'; break
-  cur=nxt; time.sleep(.15+random.random()*.2)
+  if not nxt: err='missing_next_cursor_on_full_page'; break
+  cur=nxt
+  time.sleep(.25+random.random()*.25)
  if not done and not err: err='workflow_deadline_reached'
  res={'query_group':q,'query_text':t,'pages_completed':pages,'records_found':found,'cursor_start':'*','cursor_end':cur,'completed':done,'started_at':start,'finished_at':now(),'error':err}
- checkpoint(cp,{'cursor':cur,'pages':pages,'records':found,'completed':done,'result':res,'updated_at':now()}); return res
+ checkpoint(cp,{'cursor':cur,'pages':pages,'records':found,'completed':done,'page_fingerprints':sorted(seen),'result':res,'updated_at':now()}); return res
 
 def merge(root,y):
  rec={}
@@ -108,6 +116,6 @@ def main():
  with man.open('w',newline='',encoding='utf-8-sig') as f:
   w=csv.DictWriter(f,fieldnames=list(results[0])); w.writeheader(); w.writerows(results)
  expected=sum(map(len,Q.values())); complete=len(results)==expected and all(x['completed'] for x in results)
- summary={'run_id':f'crossref-{z.year}-{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}','source':'Crossref','year':z.year,'subqueries_expected':expected,'subqueries_attempted':len(results),'subqueries_completed':sum(x['completed'] for x in results),'pages_completed':sum(x['pages_completed'] for x in results),'raw_records':sum(x['records_found'] for x in results),'unique_records':n,'completed':complete,'started_at':started,'finished_at':now(),'errors':[x for x in results if x['error']],'master_path':str(master.relative_to(z.output)),'manifest_path':str(man.relative_to(z.output))}
+ summary={'run_id':f'crossref-v2-{z.year}-{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}','source':'Crossref','year':z.year,'subqueries_expected':expected,'subqueries_attempted':len(results),'subqueries_completed':sum(x['completed'] for x in results),'pages_completed':sum(x['pages_completed'] for x in results),'raw_records':sum(x['records_found'] for x in results),'unique_records':n,'completed':complete,'started_at':started,'finished_at':now(),'errors':[x for x in results if x['error']],'master_path':str(master.relative_to(z.output)),'manifest_path':str(man.relative_to(z.output))}
  p=z.output/'completion'/f'crossref_{z.year}_summary.json'; p.parent.mkdir(parents=True,exist_ok=True); p.write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8'); print(json.dumps(summary,ensure_ascii=False,indent=2))
 if __name__=='__main__': main()

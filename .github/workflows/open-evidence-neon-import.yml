@@ -28,12 +28,14 @@ jobs:
             root: artifact-arxiv
             report: reports/arxiv-import.json
             log: reports/arxiv-import.log
+            identity: reports/arxiv-identity.json
           - source: Semantic Scholar
             run_id: 30084756249
             artifact: semantic-scholar-backfill-all
             root: artifact-semantic-scholar
             report: reports/semantic-scholar-import.json
             log: reports/semantic-scholar-import.log
+            identity: reports/semantic-scholar-identity.json
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -43,6 +45,11 @@ jobs:
           python-version: "3.12"
       - name: Install HTTP runtime
         run: python -m pip install --disable-pip-version-check requests
+      - name: Verify OIDC Data API database role
+        run: >-
+          python open_evidence_runner/neon_data_api_identity.py
+          --endpoint "https://ep-icy-lake-afna0la7.apirest.c-2.us-west-2.aws.neon.tech/explainability_bias/rest/v1"
+          --output "${{ matrix.identity }}"
       - name: Download verified source artifact
         uses: actions/download-artifact@v4
         with:
@@ -67,6 +74,7 @@ jobs:
         with:
           name: neon-import-${{ matrix.source }}
           path: |
+            ${{ matrix.identity }}
             ${{ matrix.report }}
             ${{ matrix.log }}
           retention-days: 30

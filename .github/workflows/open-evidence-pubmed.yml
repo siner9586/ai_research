@@ -46,7 +46,7 @@ jobs:
           NCBI_EMAIL: ${{ secrets.NCBI_EMAIL }}
           NCBI_TOOL: ExplainabilityBiasOpenEvidence
         run: |
-          python open_evidence_runner/pubmed_backfill.py \
+          python open_evidence_runner/pubmed_backfill_v2.py \
             --year "${{ matrix.year }}" \
             --output "output-${{ matrix.year }}" \
             --queries open_evidence_runner/pubmed_queries.json

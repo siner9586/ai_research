@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any
 
 JSON_FIELDS = {"corpus_layers": [], "reasons": [], "evidence": []}
-INT_FIELDS = {"technical_score", "behavior_score", "professional_score", "resource_score", "governance_score"}
 
 
 def blank(value: Any) -> bool:
@@ -64,6 +63,7 @@ def main() -> None:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     count = 0
     decision_counts: dict[str, int] = {}
+    reviewer_counts: dict[str, int] = {}
     with gzip.open(source, "rt", encoding="utf-8-sig", newline="") as input_handle, gzip.open(args.output, "wt", encoding="utf-8") as output_handle:
         for row in csv.DictReader(input_handle):
             candidate_id = str(row.get("candidate_id") or "").strip()
@@ -72,10 +72,13 @@ def main() -> None:
             decision = str(row.get("decision") or "").strip()
             if decision not in {"include", "uncertain", "exclude"}:
                 raise RuntimeError(f"Unexpected decision {decision!r}")
+            reviewer = str(row.get("reviewer") or "").strip()
+            if not reviewer.startswith("machine-rule-v2:"):
+                raise RuntimeError(f"Unexpected v2 reviewer {reviewer!r}")
             payload = {
                 "candidate_id": candidate_id,
                 "screening_stage": str(row.get("screening_stage") or "title_abstract_independent_rule_v2"),
-                "reviewer": str(row.get("reviewer") or ""),
+                "reviewer": reviewer,
                 "decision": decision,
                 "corpus_layers": parse_json(row.get("corpus_layers"), []),
                 "reasons": parse_json(row.get("reasons"), []),
@@ -91,21 +94,19 @@ def main() -> None:
                 "run_id": str(row.get("run_id") or "independent-screen-v2-20260724"),
                 "source_artifact_layer": args.source,
             }
-            record = {
-                "batch_id": args.batch_id,
-                "source_name": args.source,
-                "source_record_id": candidate_id,
-                "payload": payload,
-            }
-            output_handle.write(json.dumps(record, ensure_ascii=False, separators=(",", ":"), allow_nan=False) + "\n")
+            # The generic OIDC importer adds the staging envelope. Emit only the
+            # auditable decision payload here so it is not double-wrapped.
+            output_handle.write(json.dumps(payload, ensure_ascii=False, separators=(",", ":"), allow_nan=False) + "\n")
             count += 1
             decision_counts[decision] = decision_counts.get(decision, 0) + 1
+            reviewer_counts[reviewer] = reviewer_counts.get(reviewer, 0) + 1
 
     summary = {
         "source": args.source,
         "batch_id": args.batch_id,
         "records": count,
         "decision_counts": decision_counts,
+        "reviewer_counts": reviewer_counts,
         "output": str(args.output),
         "completed": True,
         "final_inclusion": False,

@@ -65,8 +65,12 @@ jobs:
           pattern: semantic-scholar-seed-rescue-*
           path: combined
           merge-multiple: true
-      - name: Build combined rescue master and validation summary
-        run: python open_evidence_runner/combine_seed_rescue.py --input combined --output aggregate
+      - name: Build combined rescue master and cross-year validation summary
+        run: |
+          python open_evidence_runner/combine_seed_rescue.py \
+            --input combined \
+            --output aggregate \
+            --seeds open_evidence_runner/missed_gold_seeds_20260724.csv
       - name: Upload combined rescue evidence package
         if: always()
         uses: actions/upload-artifact@v4

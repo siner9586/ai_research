@@ -71,6 +71,14 @@ jobs:
             --input combined \
             --output aggregate \
             --seeds open_evidence_runner/missed_gold_seeds_20260724.csv
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          summary = json.loads(Path('aggregate/semantic_scholar_seed_rescue_summary.json').read_text())
+          assert summary['version_year_mismatches_resolved'] >= 1
+          assert summary['missed_gold_seeds_recovered'] == summary['missed_gold_seeds_expected']
+          assert summary['recall_target_passed'] is True
+          PY
       - name: Upload combined rescue evidence package
         if: always()
         uses: actions/upload-artifact@v4

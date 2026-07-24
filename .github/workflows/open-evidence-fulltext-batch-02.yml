@@ -1,0 +1,68 @@
+name: open-evidence-fulltext-batch-02
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF audit runtime
+        run: python -m pip install --disable-pip-version-check requests pypdf
+      - name: Download and verify lawful open fulltexts
+        run: |
+          python open_evidence_runner/fulltext_batch_02_audit.py fulltext-output
+          python - <<'PY'
+          import csv, json
+          from pathlib import Path
+          from pypdf import PdfReader
+          root=Path('fulltext-output')
+          rows=list(csv.DictReader((root/'fulltext_audit.csv').open(encoding='utf-8-sig')))
+          for row in rows:
+              if row.get('status')!='verified_pdf':
+                  continue
+              path=root/row['local_file']
+              reader=PdfReader(str(path))
+              row['page_count']=len(reader.pages)
+              text=' '.join((page.extract_text() or '') for page in reader.pages[:2]).lower()
+              title=' '.join(row['title'].lower().split())
+              tokens=[t for t in title.split() if len(t)>=5]
+              row['title_token_match_ratio']=round(sum(t in text for t in tokens)/max(1,len(tokens)),4)
+              row['title_match']=row['title_token_match_ratio']>=0.45
+          fields=sorted({k for r in rows for k in r})
+          with (root/'fulltext_audit_enriched.csv').open('w',newline='',encoding='utf-8-sig') as h:
+              w=csv.DictWriter(h,fieldnames=fields); w.writeheader(); w.writerows(rows)
+          (root/'fulltext_audit_enriched.json').write_text(json.dumps(rows,ensure_ascii=False,indent=2),encoding='utf-8')
+          summary=json.loads((root/'summary.json').read_text())
+          summary['title_matched']=sum(str(r.get('title_match')).lower()=='true' for r in rows)
+          summary['verified_page_count_total']=sum(int(r.get('page_count') or 0) for r in rows)
+          (root/'summary.json').write_text(json.dumps(summary,indent=2),encoding='utf-8')
+          PY
+      - name: Validate audit summary
+        run: |
+          python - <<'PY'
+          import json
+          s=json.load(open('fulltext-output/summary.json'))
+          assert s['targets']==10
+          assert s['completed'] is True
+          assert s['verified']+s['retryable']+s['failed']==10
+          PY
+      - name: Upload verified PDFs and audit manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-audit-2
+          path: fulltext-output/
+          retention-days: 30
+          compression-level: 9
+          if-no-files-found: error

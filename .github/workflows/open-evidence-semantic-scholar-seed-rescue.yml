@@ -1,16 +1,13 @@
 name: open-evidence-semantic-scholar-seed-rescue
 
 on:
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: open-evidence-semantic-scholar-seed-rescue-${{ github.event.pull_request.number || github.ref }}
+  group: open-evidence-semantic-scholar-seed-rescue-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:

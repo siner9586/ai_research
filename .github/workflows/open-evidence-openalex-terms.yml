@@ -1,0 +1,166 @@
+name: open-evidence-openalex-term-backfill
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: open-evidence-openalex-terms-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+env:
+  YEARS: '[2018,2019,2020,2021,2022,2023,2024,2025,2026]'
+
+jobs:
+  openalex-terms-a:
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        year: [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]
+        term_key:
+          - Q01_XAI_FAITHFULNESS__01
+          - Q01_XAI_FAITHFULNESS__02
+          - Q01_XAI_FAITHFULNESS__03
+          - Q01_XAI_FAITHFULNESS__04
+          - Q02_XAI_STABILITY__01
+          - Q02_XAI_STABILITY__02
+          - Q02_XAI_STABILITY__03
+          - Q02_XAI_STABILITY__04
+          - Q03_XAI_COMPLETENESS__01
+          - Q03_XAI_COMPLETENESS__02
+          - Q03_XAI_COMPLETENESS__03
+          - Q03_XAI_COMPLETENESS__04
+          - Q04_XAI_MECHANISTIC_ALIGNMENT__01
+          - Q04_XAI_MECHANISTIC_ALIGNMENT__02
+          - Q04_XAI_MECHANISTIC_ALIGNMENT__03
+          - Q04_XAI_MECHANISTIC_ALIGNMENT__04
+          - Q05_HUMAN_AI_RELIANCE__01
+          - Q05_HUMAN_AI_RELIANCE__02
+          - Q05_HUMAN_AI_RELIANCE__03
+          - Q05_HUMAN_AI_RELIANCE__04
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps: &term_steps
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install runtime
+        run: python -m pip install --disable-pip-version-check requests
+      - name: Exhaust one official OpenAlex cursor chain
+        env:
+          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
+        run: >-
+          python open_evidence_runner/openalex_term_backfill.py
+          --year "${{ matrix.year }}"
+          --term-key "${{ matrix.term_key }}"
+          --terms open_evidence_runner/openalex_terms.json
+          --output output
+          --hours 4.5
+      - name: Upload term audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openalex-term-${{ matrix.year }}-${{ matrix.term_key }}
+          path: output/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error
+
+  openalex-terms-b:
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        year: [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]
+        term_key:
+          - Q06_ALGORITHMIC_ADVICE__01
+          - Q06_ALGORITHMIC_ADVICE__02
+          - Q06_ALGORITHMIC_ADVICE__03
+          - Q06_ALGORITHMIC_ADVICE__04
+          - Q07_AUTOMATION_BIAS__01
+          - Q07_AUTOMATION_BIAS__02
+          - Q07_AUTOMATION_BIAS__03
+          - Q08_TRUST_CALIBRATION__01
+          - Q08_TRUST_CALIBRATION__02
+          - Q08_TRUST_CALIBRATION__03
+          - Q09_PROFESSIONAL_DECISION__01
+          - Q09_PROFESSIONAL_DECISION__02
+          - Q09_PROFESSIONAL_DECISION__03
+          - Q09_PROFESSIONAL_DECISION__04
+          - Q10_MANAGEMENT_ORGANIZATION__01
+          - Q10_MANAGEMENT_ORGANIZATION__02
+          - Q10_MANAGEMENT_ORGANIZATION__03
+          - Q10_MANAGEMENT_ORGANIZATION__04
+          - Q11_TRANSFORMER_EXPLANATION__01
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps: *term_steps
+
+  openalex-terms-c:
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        year: [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]
+        term_key:
+          - Q11_TRANSFORMER_EXPLANATION__02
+          - Q11_TRANSFORMER_EXPLANATION__03
+          - Q11_TRANSFORMER_EXPLANATION__04
+          - Q12_LLM_EXPLANATION__01
+          - Q12_LLM_EXPLANATION__02
+          - Q12_LLM_EXPLANATION__03
+          - Q13_OPEN_DATA_REPLICATION__01
+          - Q13_OPEN_DATA_REPLICATION__02
+          - Q13_OPEN_DATA_REPLICATION__03
+          - Q13_OPEN_DATA_REPLICATION__04
+          - Q14_CHINESE_XAI__01
+          - Q14_CHINESE_XAI__02
+          - Q14_CHINESE_XAI__03
+          - Q14_CHINESE_XAI__04
+          - Q15_CHINESE_HUMAN_AI__01
+          - Q15_CHINESE_HUMAN_AI__02
+          - Q15_CHINESE_HUMAN_AI__03
+          - Q15_CHINESE_HUMAN_AI__04
+          - Q15_CHINESE_HUMAN_AI__05
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps: *term_steps
+
+  aggregate:
+    if: always()
+    needs: [openalex-terms-a, openalex-terms-b, openalex-terms-c]
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download all term artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: openalex-term-*
+          path: combined
+          merge-multiple: true
+      - name: Build annual masters and aggregate audit
+        run: >-
+          python open_evidence_runner/combine_openalex_terms.py
+          --input combined
+          --output aggregate
+          --terms open_evidence_runner/openalex_terms.json
+      - name: Upload aggregate audit package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openalex-term-backfill-all
+          path: aggregate/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

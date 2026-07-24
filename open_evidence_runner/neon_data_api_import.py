@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import base64
 import gzip
-import io
 import json
 import os
 import time
@@ -36,16 +35,22 @@ def decode_claims(token: str) -> dict[str, Any]:
     return json.loads(base64.urlsafe_b64decode(payload))
 
 
-def find_master(root: Path, source: str) -> Path:
+def find_master(root: Path, source: str, pattern: str | None = None) -> Path:
+    if pattern:
+        matches = list(root.glob(pattern))
+        if matches:
+            return matches[0]
+        raise FileNotFoundError(f"No file matching {pattern} under {root}")
     patterns = {
         "arXiv": ["**/arxiv_all_paper_master.jsonl.gz"],
         "Semantic Scholar": ["**/semantic_scholar_all_paper_master.jsonl.gz"],
     }
-    for pattern in patterns[source]:
-        matches = list(root.glob(pattern))
+    if source not in patterns:
+        raise ValueError(f"A master pattern is required for source {source}")
+    for candidate_pattern in patterns[source]:
+        matches = list(root.glob(candidate_pattern))
         if matches:
             return matches[0]
-    # Some downloaded artifacts contain a nested ZIP instead of extracted members.
     for archive_path in root.glob("**/*.zip"):
         try:
             with zipfile.ZipFile(archive_path) as archive:
@@ -64,15 +69,20 @@ def iter_jsonl_gz(path: Path) -> Iterable[dict[str, Any]]:
     with gzip.open(path, "rt", encoding="utf-8") as handle:
         for line in handle:
             if line.strip():
-                yield json.loads(line)
+                value = json.loads(line)
+                if not isinstance(value, dict):
+                    raise ValueError("JSONL records must be objects")
+                yield value
 
 
 def source_record_id(source: str, payload: dict[str, Any]) -> str:
+    if payload.get("candidate_id"):
+        return str(payload["candidate_id"])
     if source == "arXiv":
         return str(payload.get("arxiv_id") or payload.get("source_external_id"))
     if source == "Semantic Scholar":
         return str(payload.get("s2_paper_id") or payload.get("source_external_id"))
-    raise ValueError(source)
+    return str(payload.get("source_external_id") or payload.get("doi_normalized") or payload.get("pmid"))
 
 
 def chunks(records: Iterable[dict[str, Any]], max_rows: int = 200, max_bytes: int = 2_500_000):
@@ -126,10 +136,12 @@ def count_source(session: requests.Session, endpoint: str, token: str, source: s
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", choices=["arXiv", "Semantic Scholar"], required=True)
+    parser.add_argument("--source", required=True)
     parser.add_argument("--artifact-root", type=Path, required=True)
     parser.add_argument("--endpoint", required=True)
     parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument("--master-pattern")
+    parser.add_argument("--batch-id")
     args = parser.parse_args()
 
     token = request_oidc_token()
@@ -144,16 +156,17 @@ def main() -> None:
         if str(claims.get(key)) != value:
             raise RuntimeError(f"Unexpected OIDC claim {key}")
     workflow_ref = str(claims.get("workflow_ref", ""))
-    if not workflow_ref.startswith("siner9586/ai_research/.github/workflows/open-evidence-neon-import.yml@refs/pull/"):
+    if not workflow_ref.startswith(
+        "siner9586/ai_research/.github/workflows/open-evidence-neon-import.yml@refs/pull/"
+    ):
         raise RuntimeError("Unexpected workflow_ref")
 
-    master = find_master(args.artifact_root, args.source)
-    batch_id = f"{args.source.lower().replace(' ', '-')}-aggregate-v1"
+    master = find_master(args.artifact_root, args.source, args.master_pattern)
+    batch_id = args.batch_id or f"{args.source.lower().replace(' ', '-')}-aggregate-v1"
     session = requests.Session()
     attempted = 0
     batches = 0
     started = time.time()
-
     staged_rows = (
         {
             "batch_id": batch_id,
@@ -174,6 +187,7 @@ def main() -> None:
     exact_count = count_source(session, args.endpoint.rstrip("/"), token, args.source)
     report = {
         "source": args.source,
+        "batch_id": batch_id,
         "master": str(master),
         "records_attempted": attempted,
         "staging_exact_count": exact_count,

@@ -55,7 +55,7 @@ def main():
   names=[m['filename'] for m in ms]
   (x.output/'artifact_members.json').write_text(json.dumps({'artifact_size':total,'entries':len(ms),'expected_entries':e,'filenames':names},ensure_ascii=False,indent=2),encoding='utf-8')
   summaries=[m for m in ms if Path(m['filename']).name.lower().endswith('summary.json') and 'openalex' in m['filename'].lower()]
-  queries=[m for m in ms if Path(m['filename']).name.lower().endswith(('search_queries.csv','queries.csv')) and 'openalex' in m['filename'].lower()]
+  queries=[m for m in ms if Path(m['filename']).name.lower() in {'openalex_term_manifest.csv','search_queries.csv','queries.csv'}]
   if not summaries or not queries:
    candidates=[m for m in ms if any(k in m['filename'].lower() for k in ('summary','query','manifest'))]
    (x.output/'candidate_members.json').write_text(json.dumps(candidates,ensure_ascii=False,indent=2),encoding='utf-8')

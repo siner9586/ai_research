@@ -17,6 +17,8 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install --disable-pip-version-check requests
       - name: Extract compact OpenAlex audit summary
+        id: extract
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: >-
@@ -24,10 +26,15 @@ jobs:
           --repository siner9586/ai_research
           --artifact-id 8618274345
           --output openalex-summary
-      - uses: actions/upload-artifact@v4
+      - name: Upload compact summary or diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: openalex-summary-only
+          name: openalex-summary-or-diagnostic
           path: openalex-summary/
           retention-days: 30
           compression-level: 9
           if-no-files-found: error
+      - name: Fail after preserving diagnostic
+        if: steps.extract.outcome != 'success'
+        run: exit 1

@@ -6,13 +6,13 @@ EOCD=b'PK\x05\x06'; ZIP64_LOCATOR=b'PK\x06\x07'; ZIP64_EOCD=b'PK\x06\x06'; CENTR
 def signed(repo,aid,tok):
  r=requests.get(f'https://api.github.com/repos/{repo}/actions/artifacts/{aid}/zip',headers={'Authorization':f'Bearer {tok}','Accept':'application/vnd.github+json'},allow_redirects=False,timeout=60); r.raise_for_status(); return r.headers['Location']
 def rr(url,a,b):
- r=requests.get(url,headers={'Range':f'bytes={a}-{b}','Accept-Encoding':'identity'},timeout=(30,180));
+ r=requests.get(url,headers={'Range':f'bytes={a}-{b}','Accept-Encoding':'identity'},timeout=(30,180))
  if r.status_code!=206: raise RuntimeError(f'range_http_{r.status_code}')
  d=r.content
  if len(d)!=b-a+1: raise RuntimeError('short_range')
  return d
 def size(url):
- r=requests.get(url,headers={'Range':'bytes=0-0','Accept-Encoding':'identity'},timeout=(30,120));
+ r=requests.get(url,headers={'Range':'bytes=0-0','Accept-Encoding':'identity'},timeout=(30,120))
  if r.status_code!=206: raise RuntimeError(f'no_range_{r.status_code}')
  m=re.search(r'/(\d+)$',r.headers.get('Content-Range','')); return int(m.group(1)) if m else (_ for _ in ()).throw(RuntimeError('no_size'))
 def zip64(extra,u,c,o):
@@ -50,14 +50,27 @@ def read(url,m):
  return data
 def main():
  a=argparse.ArgumentParser(); a.add_argument('--repository',required=True); a.add_argument('--artifact-id',required=True); a.add_argument('--output',type=Path,required=True); x=a.parse_args(); x.output.mkdir(parents=True,exist_ok=True)
- url=signed(x.repository,x.artifact_id,os.environ['GITHUB_TOKEN']); total=size(url); off,n,e=central(url,total); ms=members(url,off,n)
- interesting=[m for m in ms if m['filename'].endswith(('openalex_all_summary.json','openalex_all_search_queries.csv'))]
- if len(interesting)!=2: raise RuntimeError(f'expected_two:{[m["filename"] for m in interesting]}')
- (x.output/'openalex_artifact_member_sizes.json').write_text(json.dumps(interesting,indent=2),encoding='utf-8')
- with zipfile.ZipFile(x.output/'openalex-summary-only.zip','w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
-  for m in interesting:
-   d=read(url,m); z.writestr(Path(m['filename']).name,d)
-   if m['filename'].endswith('openalex_all_summary.json'):
-    s=json.loads(d); (x.output/'openalex_all_summary.json').write_text(json.dumps(s,ensure_ascii=False,indent=2),encoding='utf-8'); print(json.dumps(s,ensure_ascii=False,indent=2))
- print(json.dumps({'artifact_size':total,'entries':len(ms),'expected_entries':e},indent=2))
+ try:
+  url=signed(x.repository,x.artifact_id,os.environ['GITHUB_TOKEN']); total=size(url); off,n,e=central(url,total); ms=members(url,off,n)
+  names=[m['filename'] for m in ms]
+  (x.output/'artifact_members.json').write_text(json.dumps({'artifact_size':total,'entries':len(ms),'expected_entries':e,'filenames':names},ensure_ascii=False,indent=2),encoding='utf-8')
+  summaries=[m for m in ms if Path(m['filename']).name.lower().endswith('summary.json') and 'openalex' in m['filename'].lower()]
+  queries=[m for m in ms if Path(m['filename']).name.lower().endswith(('search_queries.csv','queries.csv')) and 'openalex' in m['filename'].lower()]
+  if not summaries or not queries:
+   candidates=[m for m in ms if any(k in m['filename'].lower() for k in ('summary','query','manifest'))]
+   (x.output/'candidate_members.json').write_text(json.dumps(candidates,ensure_ascii=False,indent=2),encoding='utf-8')
+   raise RuntimeError(f'aggregate_members_not_found:summaries={len(summaries)};queries={len(queries)}')
+  summary=sorted(summaries,key=lambda m:(m['file_size'],m['filename']),reverse=True)[0]
+  query=sorted(queries,key=lambda m:(m['file_size'],m['filename']),reverse=True)[0]
+  selected=[summary,query]
+  (x.output/'openalex_artifact_member_sizes.json').write_text(json.dumps(selected,indent=2),encoding='utf-8')
+  with zipfile.ZipFile(x.output/'openalex-summary-only.zip','w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
+   for m in selected:
+    d=read(url,m); z.writestr(Path(m['filename']).name,d)
+    if m is summary:
+     s=json.loads(d); (x.output/'openalex_all_summary.json').write_text(json.dumps(s,ensure_ascii=False,indent=2),encoding='utf-8'); print(json.dumps(s,ensure_ascii=False,indent=2))
+  (x.output/'result.json').write_text(json.dumps({'status':'extracted','artifact_size':total,'entries':len(ms),'summary_member':summary['filename'],'query_member':query['filename']},ensure_ascii=False,indent=2),encoding='utf-8')
+ except Exception as exc:
+  (x.output/'result.json').write_text(json.dumps({'status':'diagnostic','error':f'{type(exc).__name__}:{exc}'},ensure_ascii=False,indent=2),encoding='utf-8')
+  raise
 if __name__=='__main__': main()

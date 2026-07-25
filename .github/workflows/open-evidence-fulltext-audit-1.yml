@@ -29,9 +29,9 @@ jobs:
           p=Path('fulltext-audit-1/completion_summary.json')
           s=json.loads(p.read_text())
           assert s['targets']==4
-          assert s['verified']>=1
+          assert s['verified']==4
           PY
-      - name: Upload verified PDFs and audit manifest
+      - name: Upload complete audit package
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -39,4 +39,36 @@ jobs:
           path: fulltext-audit-1/
           retention-days: 30
           compression-level: 6
+          if-no-files-found: error
+      - name: Upload Nature fulltext as single-file artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fulltext-doi-10.1038-s41598-026-34983-y
+          path: fulltext-audit-1/doi_10.1038_s41598-026-34983-y.pdf
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload cognitive-forcing fulltext as single-file artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fulltext-doi-10.1145-3449287
+          path: fulltext-audit-1/doi_10.1145_3449287.pdf
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload LLM-reliance fulltext as single-file artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fulltext-doi-10.1145-3706598.3714020
+          path: fulltext-audit-1/doi_10.1145_3706598.3714020.pdf
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload trust-adjustment fulltext as single-file artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fulltext-doi-10.1145-3742413.3789136
+          path: fulltext-audit-1/doi_10.1145_3742413.3789136.pdf
+          retention-days: 30
+          compression-level: 0
           if-no-files-found: error

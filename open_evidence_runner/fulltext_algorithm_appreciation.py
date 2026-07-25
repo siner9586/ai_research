@@ -45,28 +45,15 @@ def save(path: Path,value: dict) -> None:
 
 
 def execute(out: Path) -> dict:
-    diagnostic={"target":TARGET,"stage":"start"}
-    session=requests.Session()
-    session.headers.update({'User-Agent':'open-evidence-fulltext-audit/3.2 lawful institutional repository','Accept':'text/html,application/pdf;q=0.9,*/*;q=0.5'})
-    landing=session.get(TARGET['landing_url'],timeout=(30,180),allow_redirects=True)
-    diagnostic.update({'stage':'landing_received','landing_status':landing.status_code,'landing_final_url':landing.url,'landing_content_type':landing.headers.get('Content-Type')})
-    save(out/'diagnostic.json',diagnostic)
-    landing.raise_for_status()
-    if (urlparse(landing.url).hostname or '').lower() not in ALLOWED_HOSTS:
-        raise RuntimeError('landing_redirect_host_not_allowed')
-    landing_text=landing.text
-    landing_title_ratio=token_ratio(TARGET['title'],landing_text)
-    landing_checks={
-        'title_token_ratio':round(landing_title_ratio,4),
-        'title_match':landing_title_ratio>=0.7,
-        'doi_match':TARGET['doi'].lower() in landing_text.lower(),
-        'license_signal_observed':'by-nc-nd' in landing_text.lower() or 'attribution-noncommercial-noderivatives' in norm(landing_text),
+    diagnostic={
+        "target":TARGET,
+        "stage":"start",
+        "landing_page_fetch":"skipped_after_hosted_runner_returned_http_403",
+        "validation_basis":"official eScholarship PDF embeds repository permalink, title, DOI, authors, publication data and CC BY-NC-ND 4.0 statement",
     }
-    diagnostic.update({'stage':'landing_validated','landing_checks':landing_checks})
     save(out/'diagnostic.json',diagnostic)
-    if not landing_checks['title_match'] or not landing_checks['doi_match']:
-        raise RuntimeError(f'landing_metadata_mismatch:{landing_checks}')
-
+    session=requests.Session()
+    session.headers.update({'User-Agent':'open-evidence-fulltext-audit/3.3 lawful institutional repository PDF audit','Accept':'application/pdf,*/*;q=0.5'})
     response=session.get(TARGET['pdf_url'],timeout=(30,240),allow_redirects=True,stream=True)
     diagnostic.update({'stage':'pdf_response_received','pdf_status':response.status_code,'pdf_final_url':response.url,'pdf_content_type':response.headers.get('Content-Type')})
     save(out/'diagnostic.json',diagnostic)
@@ -94,11 +81,12 @@ def execute(out: Path) -> dict:
     title_ratio=token_ratio(TARGET['title'],text)
     doi_match=TARGET['doi'].lower() in text.lower()
     normalized_pdf=norm(text)
+    permalink_match='escholarship org uc item 9v38k9m6' in normalized_pdf
     license_match=('by nc nd' in normalized_pdf or ('attribution' in normalized_pdf and 'noncommercial' in normalized_pdf and 'noderivatives' in normalized_pdf))
-    pdf_checks={'pages':pages,'title_ratio':round(title_ratio,4),'doi_match':doi_match,'license_match':license_match}
+    pdf_checks={'pages':pages,'title_ratio':round(title_ratio,4),'doi_match':doi_match,'repository_permalink_match':permalink_match,'license_match':license_match}
     diagnostic.update({'stage':'pdf_parsed','pdf_checks':pdf_checks,'sha256':sha256(path)})
     save(out/'diagnostic.json',diagnostic)
-    if not (pages>0 and doi_match and title_ratio>=0.7 and license_match):
+    if not (pages==15 and doi_match and permalink_match and title_ratio>=0.7 and license_match):
         raise RuntimeError(f'pdf_metadata_mismatch:{pdf_checks}')
     report={
         **TARGET,
@@ -111,8 +99,8 @@ def execute(out: Path) -> dict:
         'page_count':pages,
         'title_match_ratio':round(title_ratio,4),
         'doi_match':doi_match,
+        'repository_permalink_match':permalink_match,
         'license_match':license_match,
-        'landing_checks':landing_checks,
         'validation_status':'verified',
         'local_file':path.name,
     }

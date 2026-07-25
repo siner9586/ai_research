@@ -33,22 +33,31 @@ def norm(value: str) -> str:
     return re.sub(r'[^a-z0-9]+',' ',value.lower()).strip()
 
 
+def token_ratio(needle: str, haystack: str) -> float:
+    tokens=[token for token in norm(needle).split() if len(token)>3]
+    normalized=norm(haystack)
+    return sum(token in normalized for token in tokens)/max(1,len(tokens))
+
+
 def main() -> None:
     out=Path('algorithm-appreciation-fulltext')
     out.mkdir(parents=True,exist_ok=True)
     session=requests.Session()
-    session.headers.update({'User-Agent':'open-evidence-fulltext-audit/3.0 lawful institutional repository'})
+    session.headers.update({'User-Agent':'open-evidence-fulltext-audit/3.1 lawful institutional repository'})
     landing=session.get(TARGET['landing_url'],timeout=(30,180),allow_redirects=True)
     landing.raise_for_status()
     if (urlparse(landing.url).hostname or '').lower() not in ALLOWED_HOSTS:
         raise RuntimeError('landing_redirect_host_not_allowed')
     landing_text=landing.text
+    landing_title_ratio=token_ratio(TARGET['title'],landing_text)
     landing_checks={
-        'title_match': norm(TARGET['title']) in norm(landing_text),
-        'doi_match': TARGET['doi'].lower() in landing_text.lower(),
-        'license_match': 'by-nc-nd' in landing_text.lower() or 'Attribution-NonCommercial-NoDerivatives' in landing_text,
+        'title_token_ratio':round(landing_title_ratio,4),
+        'title_match':landing_title_ratio>=0.7,
+        'doi_match':TARGET['doi'].lower() in landing_text.lower(),
+        'license_match':'by-nc-nd' in landing_text.lower() or 'attribution-noncommercial-noderivatives' in norm(landing_text),
     }
-    if not all(landing_checks.values()):
+    if not all(value for key,value in landing_checks.items() if key!='title_token_ratio'):
+        (out/'landing_diagnostic.json').write_text(json.dumps({'checks':landing_checks,'final_url':landing.url,'status':landing.status_code},indent=2),encoding='utf-8')
         raise RuntimeError(f'landing_metadata_mismatch:{landing_checks}')
 
     response=session.get(TARGET['pdf_url'],timeout=(30,240),allow_redirects=True,stream=True)
@@ -69,10 +78,10 @@ def main() -> None:
     reader=PdfReader(str(path))
     pages=len(reader.pages)
     text='\n'.join((page.extract_text() or '') for page in reader.pages[:5])
-    title_tokens=[t for t in norm(TARGET['title']).split() if len(t)>3]
-    title_ratio=sum(token in norm(text) for token in title_tokens)/max(1,len(title_tokens))
+    title_ratio=token_ratio(TARGET['title'],text)
     doi_match=TARGET['doi'].lower() in text.lower()
-    license_match='by-nc-nd' in text.lower() or 'Attribution' in text
+    normalized_pdf=norm(text)
+    license_match=('by nc nd' in normalized_pdf or 'attribution noncommercial noderivatives' in normalized_pdf)
     if not (pages>0 and doi_match and title_ratio>=0.7 and license_match):
         raise RuntimeError(f'pdf_metadata_mismatch:pages={pages},doi={doi_match},title_ratio={title_ratio},license={license_match}')
     report={

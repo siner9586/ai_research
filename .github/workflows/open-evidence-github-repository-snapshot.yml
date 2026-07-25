@@ -1,0 +1,56 @@
+name: open-evidence-github-repository-snapshot
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        target_id:
+          - peterbhase-InterpretableNLP-ACL2020
+          - anoymous-518-anon-artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Snapshot exact public repository state without executing code
+        run: >-
+          python open_evidence_runner/snapshot_public_github_repository.py
+          --target-id "${{ matrix.target_id }}"
+          --output "repository-snapshot-${{ matrix.target_id }}"
+      - name: Validate snapshot metadata and hashes
+        run: |
+          python - <<'PY'
+          import csv, hashlib, json
+          from pathlib import Path
+          root=Path('repository-snapshot-${{ matrix.target_id }}')
+          report=json.loads((root/'repository_snapshot_audit.json').read_text())
+          archive=root/report['archive_file']
+          h=hashlib.sha256(archive.read_bytes()).hexdigest()
+          rows=list(csv.DictReader((root/'file_manifest.csv').open()))
+          assert report['target_id']=='${{ matrix.target_id }}'
+          assert report['completed'] is True
+          assert report['code_executed'] is False
+          assert report['archive_sha256']==h
+          assert len(rows)==report['file_count']
+          assert report['commit_hash']
+          PY
+      - name: Upload immutable repository snapshot and audit manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: repository-snapshot-${{ matrix.target_id }}
+          path: repository-snapshot-${{ matrix.target_id }}/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

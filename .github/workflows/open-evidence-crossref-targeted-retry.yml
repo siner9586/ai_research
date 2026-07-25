@@ -1,0 +1,49 @@
+name: open-evidence-crossref-targeted-retry
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: open-evidence-crossref-targeted-retry-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  retry-year:
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        year: [2024, 2025]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install --disable-pip-version-check requests
+      - name: Continue only the unfinished official Crossref cursor chains
+        env:
+          CROSSREF_MAILTO: ${{ secrets.CROSSREF_MAILTO }}
+          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
+        run: >-
+          python open_evidence_runner/crossref_targeted_retry.py
+          --year "${{ matrix.year }}"
+          --specs open_evidence_runner/crossref_targeted_retry_specs.json
+          --output "retry-${{ matrix.year }}"
+          --hours 5.5
+      - name: Upload targeted retry audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crossref-${{ matrix.year }}-targeted-retry
+          path: retry-${{ matrix.year }}/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

@@ -4,7 +4,6 @@ import argparse
 import csv
 import hashlib
 import json
-import os
 import shutil
 import subprocess
 import zipfile
@@ -22,6 +21,12 @@ TARGETS = {
         "expected_default_branch": "main",
         "linked_paper": "arxiv:2602.04003",
         "expected_license": "NO_LICENSE_FILE_FOUND",
+    },
+    "distillpub-post--building-blocks": {
+        "repository": "distillpub/post--building-blocks",
+        "expected_default_branch": "master",
+        "linked_paper": "doi:10.23915/distill.00010",
+        "expected_license": "CC BY 4.0 article source; verify repository files",
     },
 }
 

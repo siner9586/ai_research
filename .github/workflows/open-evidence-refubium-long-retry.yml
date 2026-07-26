@@ -1,0 +1,53 @@
+name: open-evidence-refubium-long-retry
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF audit runtime
+        run: python -m pip install --disable-pip-version-check pypdf
+      - name: Download with bounded retries and validate repository checksum
+        run: python open_evidence_runner/refubium_long_retry.py --output refubium-long-retry
+      - name: Validate accounting
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('refubium-long-retry/completion_summary.json')
+          if not p.exists(): raise SystemExit('completion summary missing')
+          s=json.loads(p.read_text())
+          assert s['targets']==1
+          assert s['verified']+s['retryable']==1
+          PY
+      - name: Upload audit package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-refubium-long-retry
+          path: refubium-long-retry/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error
+      - name: Upload verified Refubium PDF
+        if: ${{ hashFiles('refubium-long-retry/doi_10.1145_3757451.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: fulltext-refubium-doi-10.1145-3757451
+          path: refubium-long-retry/doi_10.1145_3757451.pdf
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error

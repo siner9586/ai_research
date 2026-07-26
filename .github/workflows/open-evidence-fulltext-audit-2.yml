@@ -1,8 +1,6 @@
 name: open-evidence-fulltext-audit-2
 
 on:
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -39,100 +37,4 @@ jobs:
           path: fulltext-audit-2/
           retention-days: 30
           compression-level: 6
-          if-no-files-found: error
-      - name: Upload arXiv 1801.04099
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-arxiv-1801.04099
-          path: fulltext-audit-2/arxiv_1801.04099.pdf
-          retention-days: 30
-          compression-level: 0
-          if-no-files-found: error
-      - name: Upload arXiv 1811.07901
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-arxiv-1811.07901
-          path: fulltext-audit-2/arxiv_1811.07901.pdf
-          retention-days: 30
-          compression-level: 0
-          if-no-files-found: error
-      - name: Upload arXiv 1909.06907
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-arxiv-1909.06907
-          path: fulltext-audit-2/arxiv_1909.06907.pdf
-          retention-days: 30
-          compression-level: 0
-          if-no-files-found: error
-      - name: Upload arXiv 2001.07641
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-arxiv-2001.07641
-          path: fulltext-audit-2/arxiv_2001.07641.pdf
-          retention-days: 30
-          compression-level: 0
-          if-no-files-found: error
-      - name: Upload arXiv 2006.14779
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-arxiv-2006.14779
-          path: fulltext-audit-2/arxiv_2006.14779.pdf
-          retention-days: 30
-          compression-level: 0
-          if-no-files-found: error
-      - name: Upload Nature 2021
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-doi-10.1038-s41598-021-87480-9
-          path: fulltext-audit-2/doi_10.1038_s41598-021-87480-9.pdf
-          retention-days: 30
-          compression-level: 0
-          if-no-files-found: error
-      - name: Upload ACM 3375627
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-doi-10.1145-3375627-3375833
-          path: fulltext-audit-2/doi_10.1145_3375627.3375833.pdf
-          retention-days: 30
-          compression-level: 0
-          if-no-files-found: error
-      - name: Upload ACM 3377325
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-doi-10.1145-3377325-3377498
-          path: fulltext-audit-2/doi_10.1145_3377325.3377498.pdf
-          retention-days: 30
-          compression-level: 0
-          if-no-files-found: error
-      - name: Upload ACL 491
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-doi-10.18653-v1-2020-acl-main-491
-          path: fulltext-audit-2/doi_10.18653_v1_2020.acl-main.491.pdf
-          retention-days: 30
-          compression-level: 0
-          if-no-files-found: error
-      - name: Upload Findings 390
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-doi-10.18653-v1-2020-findings-emnlp-390
-          path: fulltext-audit-2/doi_10.18653_v1_2020.findings-emnlp.390.pdf
-          retention-days: 30
-          compression-level: 0
-          if-no-files-found: error
-      - name: Upload JMIR 29386
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-doi-10.2196-29386
-          path: fulltext-audit-2/doi_10.2196_29386.pdf
-          retention-days: 30
-          compression-level: 0
-          if-no-files-found: error
-      - name: Upload Frontiers 00309
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-doi-10.3389-fnhum-2018-00309
-          path: fulltext-audit-2/doi_10.3389_fnhum.2018.00309.pdf
-          retention-days: 30
-          compression-level: 0
           if-no-files-found: error

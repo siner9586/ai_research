@@ -1,8 +1,6 @@
 name: open-evidence-fulltext-audit-1
 
 on:
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -26,8 +24,7 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          p=Path('fulltext-audit-1/completion_summary.json')
-          s=json.loads(p.read_text())
+          s=json.loads(Path('fulltext-audit-1/completion_summary.json').read_text())
           assert s['targets']==4
           assert s['verified']==4
           PY

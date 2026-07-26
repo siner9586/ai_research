@@ -44,7 +44,8 @@ def main():
             doi_match=target['doi'].lower() in ids or target['doi'].lower() in content.decode('utf-8','ignore').lower()
             body=article.find('.//body'); body_text=' '.join(''.join(body.itertext()).split()) if body is not None else ''
             if ratio<0.75 or not doi_match or len(body_text)<3000: raise RuntimeError(f'fulltext_validation_failed:ratio={ratio};doi={doi_match};body={len(body_text)}')
-            lic=' '.join(''.join(x.itertext()).split() for x in article.findall('.//license-p'))
+            license_parts=[' '.join(''.join(x.itertext()).split()) for x in article.findall('.//license-p')]
+            lic=' '.join(part for part in license_parts if part)
             supp=[]
             for x in article.findall('.//supplementary-material')+article.findall('.//supplement'):
                 href=x.attrib.get(XLINK) or x.attrib.get('href'); label=' '.join(''.join(x.itertext()).split())[:500]

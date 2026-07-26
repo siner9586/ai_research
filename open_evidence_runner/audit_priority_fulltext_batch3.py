@@ -9,21 +9,23 @@ from urllib.parse import urlparse
 
 import requests
 from pypdf import PdfReader
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 TARGETS = [
     {
         "paper_id": "doi:10.1145/3757451",
         "title": "The AI is uncertain, so am I. What now? Navigating Shortcomings of Uncertainty Representations in Human-AI Collaboration with Capability-focused Guidance",
         "doi": "10.1145/3757451",
-        "url": "https://refubium.fu-berlin.de/bitstream/handle/fub188/50614/3757451.pdf?isAllowed=y&sequence=1",
-        "version": "accepted_or_published_repository_copy",
+        "url": "https://refubium.fu-berlin.de/bitstream/handle/fub188/50614/3757451.pdf?isAllowed=y&save=y&sequence=1",
+        "version": "repository_copy",
         "license": "CC BY-SA 4.0",
     },
     {
         "paper_id": "doi:10.1016/j.landig.2025.100912",
         "title": "The impact of artificial intelligence-driven decision support on uncertain antimicrobial prescribing: a randomised, multimethod study",
         "doi": "10.1016/j.landig.2025.100912",
-        "url": "https://www.sciencedirect.com/science/article/pii/S2589750025000949/pdfft?isDTMRedir=true&download=true",
+        "url": "https://www.thelancet.com/action/showPdf?pii=S2589-7500%2825%2900094-9",
         "version": "publishedVersion",
         "license": "Creative Commons open access",
     },
@@ -31,15 +33,15 @@ TARGETS = [
         "paper_id": "doi:10.1016/j.chbah.2023.100009",
         "title": "Choosing between human and algorithmic advisors: The role of responsibility sharing",
         "doi": "10.1016/j.chbah.2023.100009",
-        "url": "https://www.sciencedirect.com/science/article/pii/S2949882123000099/pdfft?isDTMRedir=true&download=true",
-        "version": "publishedVersion",
+        "url": "https://assets-eu.researchsquare.com/files/rs-2324206/v1/3698756e-934e-41fe-b621-147be00da96d.pdf?c=1675837808",
+        "version": "preprint",
         "license": "CC BY 4.0",
     },
     {
         "paper_id": "doi:10.1609/aaai.v38i16.29783",
         "title": "Learning Robust Rationales for Model Explainability: A Guidance-Based Approach",
         "doi": "10.1609/aaai.v38i16.29783",
-        "url": "https://ojs.aaai.org/index.php/AAAI/article/download/29783/31352",
+        "url": "https://ojs.aaai.org/index.php/AAAI/article/view/29783/31352",
         "version": "publishedVersion",
         "license": "AAAI open access",
     },
@@ -47,9 +49,9 @@ TARGETS = [
 
 ALLOWED_HOSTS = {
     "refubium.fu-berlin.de",
-    "www.sciencedirect.com",
-    "sciencedirect.com",
-    "pdf.sciencedirectassets.com",
+    "www.thelancet.com",
+    "thelancet.com",
+    "assets-eu.researchsquare.com",
     "ojs.aaai.org",
     "aaai.org",
 }
@@ -74,7 +76,7 @@ def audit_one(session: requests.Session, target: dict, output: Path) -> dict:
     if requested_host not in ALLOWED_HOSTS:
         return {**target, "fulltext_status": "retryable", "error": f"host_not_allowed:{requested_host}"}
     try:
-        response = session.get(target["url"], timeout=(30, 240), stream=True, allow_redirects=True)
+        response = session.get(target["url"], timeout=(90, 300), stream=True, allow_redirects=True)
     except Exception as exc:
         return {**target, "fulltext_status": "retryable", "error": f"{type(exc).__name__}:{exc}"}
     final_host = (urlparse(response.url).hostname or "").lower()
@@ -112,7 +114,13 @@ def audit_one(session: requests.Session, target: dict, output: Path) -> dict:
     path.write_bytes(body)
     reader = PdfReader(str(path))
     pages = len(reader.pages)
-    text = "\n".join((page.extract_text() or "") for page in reader.pages[: min(pages, 10)])
+    text_parts = []
+    for page in reader.pages[: min(pages, 10)]:
+        try:
+            text_parts.append(page.extract_text() or "")
+        except Exception:
+            pass
+    text = "\n".join(text_parts)
     title_tokens = [token for token in norm(target["title"]).split() if len(token) > 3]
     title_ratio = sum(token in norm(text) for token in title_tokens) / max(1, len(title_tokens))
     doi_match = target["doi"].lower() in text.lower()
@@ -135,7 +143,9 @@ def main() -> None:
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     session = requests.Session()
-    session.headers.update({"User-Agent": "open-evidence-priority-fulltext/1.0 (lawful OA research audit)"})
+    retry = Retry(total=3, connect=3, read=3, status=2, backoff_factor=3, status_forcelist=(429, 500, 502, 503, 504), allowed_methods=frozenset({"GET", "HEAD"}), raise_on_status=False)
+    session.mount("https://", HTTPAdapter(max_retries=retry))
+    session.headers.update({"User-Agent": "open-evidence-priority-fulltext/1.1 (lawful OA research audit)"})
     results = [audit_one(session, target, args.output) for target in TARGETS]
     counts: dict[str, int] = {}
     for result in results:

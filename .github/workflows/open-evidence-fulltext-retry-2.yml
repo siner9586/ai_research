@@ -1,0 +1,41 @@
+name: open-evidence-fulltext-retry-2
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4 lxml pypdf
+      - name: Retrieve and verify lawful open fulltexts
+        run: python open_evidence_runner/fulltext_retry_batch_2.py
+      - name: Upload complete audit package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-retry-2
+          path: fulltext-retry-2/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error
+      - name: Upload verified PDFs separately
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-retry-2-pdfs
+          path: fulltext-retry-2/*.pdf
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: warn

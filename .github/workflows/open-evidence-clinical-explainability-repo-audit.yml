@@ -1,0 +1,42 @@
+name: open-evidence-clinical-explainability-repo-audit
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install audit runtime
+        run: python -m pip install --disable-pip-version-check requests pandas openpyxl
+      - name: Audit fixed data/code repository revision
+        run: python open_evidence_runner/audit_clinical_explainability_repo.py --output clinical-explainability-repo-audit
+      - name: Validate evidence boundaries
+        run: |
+          python - <<'PY'
+          import json,pathlib
+          s=json.loads(pathlib.Path('clinical-explainability-repo-audit/completion_summary.json').read_text())
+          assert s['fixed_commit']=='1c48b4f6ce1f612833ce448537bdf02cdfcc758f'
+          assert s['data_file_count']>=1
+          assert s['embedded_secret_candidates']==[]
+          assert s['code_executed'] is False
+          PY
+      - name: Upload fixed repository data/code audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clinical-explainability-fixed-repo-audit
+          path: clinical-explainability-repo-audit/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

@@ -1,0 +1,53 @@
+name: open-evidence-pmc-oa-recovery
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - slug: bs14100964
+            pmcid: PMC11505338
+            paper_id: doi:10.3390/bs14100964
+            title: Trust Dynamics in Financial Decision Making Behavioral Responses to AI and Human Expert Advice Following Structural Breaks
+            doi: 10.3390/bs14100964
+          - slug: bs15101370
+            pmcid: PMC12561693
+            paper_id: doi:10.3390/bs15101370
+            title: Trust Formation Error Impact and Repair in Human-AI Financial Advisory A Dynamic Behavioral Analysis
+            doi: 10.3390/bs15101370
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF audit runtime
+        run: python -m pip install --disable-pip-version-check requests pypdf
+      - name: Resolve PMC OA resource and verify PDF
+        run: |
+          python open_evidence_runner/recover_pmc_oa_pdf.py \
+            --pmcid "${{ matrix.pmcid }}" \
+            --paper-id "${{ matrix.paper_id }}" \
+            --title "${{ matrix.title }}" \
+            --doi "${{ matrix.doi }}" \
+            --output "pmc-${{ matrix.slug }}"
+      - name: Upload verified PMC OA package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pmc-oa-${{ matrix.slug }}
+          path: pmc-${{ matrix.slug }}/
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error

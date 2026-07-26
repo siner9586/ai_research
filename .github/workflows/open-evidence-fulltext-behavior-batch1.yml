@@ -43,3 +43,21 @@ jobs:
           retention-days: 30
           compression-level: 6
           if-no-files-found: error
+      - name: Upload JMIR stakeholder trust PDF artifact
+        if: ${{ hashFiles('fulltext-behavior-batch1/doi_10.2196_78757.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: fulltext-doi-10.2196-78757
+          path: fulltext-behavior-batch1/doi_10.2196_78757.pdf
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload JMIR medical AI acceptance PDF artifact
+        if: ${{ hashFiles('fulltext-behavior-batch1/doi_10.2196_47031.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: fulltext-doi-10.2196-47031
+          path: fulltext-behavior-batch1/doi_10.2196_47031.pdf
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error

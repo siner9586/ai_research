@@ -53,8 +53,28 @@ def get_bytes(session: requests.Session, url: str) -> tuple[bytes, str, str, int
     return data, response.url, (response.headers.get("content-type") or "").lower(), response.status_code
 
 
-def extract_pdf_from_tgz(data: bytes) -> tuple[bytes, str]:
+def get_ncbi_dataset_bytes(session: requests.Session, url: str) -> tuple[bytes, str, str, int, str | None]:
+    """Retrieve an NCBI OA dataset, with the documented 2026 legacy-path migration fallback.
+
+    The PMC OA service may still return /pub/pmc/oa_package/... while legacy files have moved
+    to /pub/pmc/deprecated/oa_package/.... The fallback remains on the official NCBI host,
+    is used only after an HTTP 404, and is fully recorded in the audit result.
+    """
+    try:
+        data, final_url, content_type, status = get_bytes(session, url)
+        return data, final_url, content_type, status, None
+    except requests.HTTPError as exc:
+        status_code = exc.response.status_code if exc.response is not None else None
+        if status_code != 404 or "/pub/pmc/oa_package/" not in url:
+            raise
+        fallback_url = url.replace("/pub/pmc/oa_package/", "/pub/pmc/deprecated/oa_package/", 1)
+        data, final_url, content_type, status = get_bytes(session, fallback_url)
+        return data, final_url, content_type, status, fallback_url
+
+
+def extract_pdf_from_tgz(data: bytes) -> tuple[bytes, str, list[dict]]:
     candidates: list[tuple[int, str, bytes]] = []
+    pdf_manifest: list[dict] = []
     with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as tar:
         for member in tar.getmembers():
             if not member.isfile() or not member.name.lower().endswith(".pdf"):
@@ -63,13 +83,19 @@ def extract_pdf_from_tgz(data: bytes) -> tuple[bytes, str]:
             if stream is None:
                 continue
             content = stream.read()
+            pdf_manifest.append({
+                "member": member.name,
+                "size_bytes": len(content),
+                "pdf_magic": content[:5] == b"%PDF-",
+                "sha256": hashlib.sha256(content).hexdigest(),
+            })
             if content[:5] == b"%PDF-":
                 candidates.append((len(content), member.name, content))
     if not candidates:
         raise RuntimeError("no_pdf_in_oa_tgz")
     candidates.sort(reverse=True)
     _, name, content = candidates[0]
-    return content, name
+    return content, name, pdf_manifest
 
 
 def main() -> None:
@@ -83,7 +109,7 @@ def main() -> None:
     args.output.mkdir(parents=True, exist_ok=True)
 
     session = requests.Session()
-    session.headers.update({"User-Agent": "open-evidence-pmc-oa-recovery/1.0 (lawful OA research archive)"})
+    session.headers.update({"User-Agent": "open-evidence-pmc-oa-recovery/1.1 (lawful OA research archive)"})
     api_url = f"https://www.ncbi.nlm.nih.gov/pmc/utils/oa/oa.fcgi?id={args.pmcid}"
     api_data, api_final_url, api_content_type, api_status = get_bytes(session, api_url)
     root = ET.fromstring(api_data)
@@ -96,18 +122,21 @@ def main() -> None:
     links = []
     for link in record.findall("link"):
         links.append({"format": link.attrib.get("format"), "href": link.attrib.get("href"), "updated": link.attrib.get("updated")})
+
     selected = next((item for item in links if item.get("format") == "pdf" and item.get("href")), None)
     archive_member = None
+    archive_pdf_manifest: list[dict] = []
+    deprecated_fallback_url = None
     if selected:
         resource_url = https_ftp(selected["href"])
-        pdf_bytes, final_url, content_type, http_status = get_bytes(session, resource_url)
+        pdf_bytes, final_url, content_type, http_status, deprecated_fallback_url = get_ncbi_dataset_bytes(session, resource_url)
     else:
         selected = next((item for item in links if item.get("format") == "tgz" and item.get("href")), None)
         if not selected:
             raise RuntimeError(f"no_pdf_or_tgz_link:{links!r}")
         resource_url = https_ftp(selected["href"])
-        tgz_bytes, final_url, content_type, http_status = get_bytes(session, resource_url)
-        pdf_bytes, archive_member = extract_pdf_from_tgz(tgz_bytes)
+        tgz_bytes, final_url, content_type, http_status, deprecated_fallback_url = get_ncbi_dataset_bytes(session, resource_url)
+        pdf_bytes, archive_member, archive_pdf_manifest = extract_pdf_from_tgz(tgz_bytes)
     if pdf_bytes[:5] != b"%PDF-":
         raise RuntimeError(f"not_pdf_magic:{pdf_bytes[:20]!r}")
 
@@ -140,11 +169,13 @@ def main() -> None:
         "oa_record_retracted": retracted,
         "oa_links": links,
         "selected_format": selected.get("format") if selected else None,
-        "selected_url": resource_url,
+        "selected_url_from_oa_service": resource_url,
+        "deprecated_migration_fallback_url": deprecated_fallback_url,
         "resource_final_url": final_url,
         "resource_http_status": http_status,
         "resource_content_type": content_type,
         "archive_pdf_member": archive_member,
+        "archive_pdf_manifest": archive_pdf_manifest,
         "size_bytes": len(pdf_bytes),
         "sha256": sha256(path),
         "page_count": pages,

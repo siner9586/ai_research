@@ -1,0 +1,43 @@
+name: open-evidence-resource-audit-hccd-osf
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install structural audit runtime
+        run: python -m pip install --disable-pip-version-check requests openpyxl
+      - name: Audit official Zenodo and OSF resources
+        run: python open_evidence_runner/audit_hccd_osf_resources.py --output resource-audit-hccd-osf
+      - name: Validate accounting
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('resource-audit-hccd-osf/completion_summary.json')
+          if not p.exists(): raise SystemExit('completion summary missing')
+          s=json.loads(p.read_text())
+          assert 'completed_sources' in s
+          PY
+      - name: Upload verified files and audit manifests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-resource-audit-hccd-osf
+          path: resource-audit-hccd-osf/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

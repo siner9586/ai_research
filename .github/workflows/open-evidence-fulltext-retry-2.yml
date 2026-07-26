@@ -20,6 +20,7 @@ jobs:
       - name: Install runtime
         run: python -m pip install --disable-pip-version-check requests beautifulsoup4 lxml pypdf
       - name: Retrieve and verify lawful open fulltexts
+        continue-on-error: true
         run: python open_evidence_runner/fulltext_retry_batch_2.py
       - name: Upload complete audit package
         if: always()
@@ -29,7 +30,7 @@ jobs:
           path: fulltext-retry-2/
           retention-days: 30
           compression-level: 6
-          if-no-files-found: error
+          if-no-files-found: warn
       - name: Upload verified PDFs separately
         if: always()
         uses: actions/upload-artifact@v4

@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: open-evidence-openalex-terms-${{ github.event.pull_request.number || github.ref }}
@@ -53,6 +54,54 @@ jobs:
           python-version: "3.12"
       - name: Install runtime
         run: python -m pip install --disable-pip-version-check requests
+      - name: Restore latest checkpoint artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_NAME: openalex-term-${{ matrix.year }}-${{ matrix.term_key }}
+        run: |
+          python - <<'PY'
+          import io, json, os, pathlib, zipfile
+          import requests
+
+          repo = os.environ["GITHUB_REPOSITORY"]
+          run_id = os.environ["GITHUB_RUN_ID"]
+          name = os.environ["ARTIFACT_NAME"]
+          headers = {
+              "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
+              "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+          }
+          url = f"https://api.github.com/repos/{repo}/actions/runs/{run_id}/artifacts"
+          response = requests.get(url, headers=headers, params={"name": name, "per_page": 100}, timeout=60)
+          response.raise_for_status()
+          artifacts = [a for a in response.json().get("artifacts", []) if not a.get("expired")]
+          if not artifacts:
+              print(json.dumps({"artifact": name, "restored": False, "reason": "no_prior_artifact"}))
+              raise SystemExit(0)
+          artifact = max(artifacts, key=lambda a: (a.get("created_at") or "", int(a["id"])))
+          archive = requests.get(artifact["archive_download_url"], headers=headers, timeout=300)
+          archive.raise_for_status()
+          root = pathlib.Path("output").resolve()
+          root.mkdir(parents=True, exist_ok=True)
+          with zipfile.ZipFile(io.BytesIO(archive.content)) as zf:
+              for member in zf.infolist():
+                  target = (root / member.filename).resolve()
+                  if root not in target.parents and target != root:
+                      raise RuntimeError(f"unsafe_artifact_member:{member.filename}")
+              zf.extractall(root)
+          completion = list(root.glob("completion/openalex_*.json"))
+          checkpoint = list(root.glob("checkpoints/**/*.json"))
+          state = json.loads(completion[0].read_text()) if completion else {}
+          print(json.dumps({
+              "artifact": name,
+              "restored": True,
+              "artifact_id": artifact["id"],
+              "prior_completed": bool(state.get("completed")),
+              "prior_pages": state.get("pages_completed"),
+              "prior_cursor": state.get("cursor_end"),
+              "checkpoint_files": len(checkpoint),
+          }, indent=2))
+          PY
       - name: Exhaust one official OpenAlex cursor chain
         env:
           OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}

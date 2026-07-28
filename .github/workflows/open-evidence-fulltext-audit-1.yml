@@ -25,6 +25,8 @@ jobs:
         run: python open_evidence_runner/fulltext_batch_acl_springer.py
       - name: Audit institutional repository PMC and AAAI batch
         run: python open_evidence_runner/fulltext_batch_repo_pmc_aaai.py
+      - name: Audit JMIR and ACL human-study fulltexts
+        run: python open_evidence_runner/fulltext_batch_jmir_acl.py
       - name: Upload complete existing audit package
         uses: actions/upload-artifact@v4
         with:
@@ -46,6 +48,14 @@ jobs:
         with:
           name: open-evidence-fulltext-repo-pmc-aaai
           path: fulltext-repo-pmc-aaai/
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload JMIR and ACL audit package
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-jmir-acl
+          path: fulltext-jmir-acl/
           retention-days: 30
           compression-level: 0
           if-no-files-found: error

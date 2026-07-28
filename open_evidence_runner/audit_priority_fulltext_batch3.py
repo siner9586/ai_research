@@ -45,6 +45,14 @@ TARGETS = [
         "version": "publishedVersion",
         "license": "AAAI open access",
     },
+    {
+        "paper_id": "doi:10.1609/aaai.v32i1.11353",
+        "title": "Building More Explainable Artificial Intelligence With Argumentation",
+        "doi": "10.1609/aaai.v32i1.11353",
+        "url": "https://ojs.aaai.org/index.php/AAAI/article/view/11353/11212",
+        "version": "publishedVersion",
+        "license": "AAAI open access",
+    },
 ]
 
 ALLOWED_HOSTS = {
@@ -145,7 +153,7 @@ def main() -> None:
     session = requests.Session()
     retry = Retry(total=3, connect=3, read=3, status=2, backoff_factor=3, status_forcelist=(429, 500, 502, 503, 504), allowed_methods=frozenset({"GET", "HEAD"}), raise_on_status=False)
     session.mount("https://", HTTPAdapter(max_retries=retry))
-    session.headers.update({"User-Agent": "open-evidence-priority-fulltext/1.1 (lawful OA research audit)"})
+    session.headers.update({"User-Agent": "open-evidence-priority-fulltext/1.2 (lawful OA research audit)"})
     results = [audit_one(session, target, args.output) for target in TARGETS]
     counts: dict[str, int] = {}
     for result in results:

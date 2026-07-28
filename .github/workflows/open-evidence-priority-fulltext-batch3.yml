@@ -27,8 +27,8 @@ jobs:
           import json
           from pathlib import Path
           s=json.loads(Path('priority-fulltext-batch3/completion_summary.json').read_text())
-          assert s['targets']==4
-          assert sum(s['status_counts'].values())==4
+          assert s['targets']==5
+          assert sum(s['status_counts'].values())==5
           assert s['status_counts'].get('oa_pdf_verified',0)>=1
           PY
       - name: Upload aggregate audit package
@@ -67,12 +67,21 @@ jobs:
           retention-days: 30
           compression-level: 0
           if-no-files-found: error
-      - name: Upload AAAI PDF
+      - name: Upload AAAI 2024 PDF
         if: ${{ hashFiles('priority-fulltext-batch3/doi_10.1609_aaai.v38i16.29783.pdf') != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: pdf-doi-10.1609-aaai-v38i16-29783
           path: priority-fulltext-batch3/doi_10.1609_aaai.v38i16.29783.pdf
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload AAAI 2018 PDF
+        if: ${{ hashFiles('priority-fulltext-batch3/doi_10.1609_aaai.v32i1.11353.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-doi-10.1609-aaai-v32i1-11353
+          path: priority-fulltext-batch3/doi_10.1609_aaai.v32i1.11353.pdf
           retention-days: 30
           compression-level: 0
           if-no-files-found: error

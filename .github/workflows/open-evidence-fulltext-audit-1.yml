@@ -23,6 +23,8 @@ jobs:
         run: python open_evidence_runner/fulltext_batch_audit.py --output fulltext-audit-1
       - name: Audit ACL and Springer batch
         run: python open_evidence_runner/fulltext_batch_acl_springer.py
+      - name: Audit institutional repository PMC and AAAI batch
+        run: python open_evidence_runner/fulltext_batch_repo_pmc_aaai.py
       - name: Upload complete existing audit package
         uses: actions/upload-artifact@v4
         with:
@@ -36,6 +38,14 @@ jobs:
         with:
           name: open-evidence-fulltext-acl-springer
           path: fulltext-acl-springer/
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload repository PMC and AAAI audit package
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-repo-pmc-aaai
+          path: fulltext-repo-pmc-aaai/
           retention-days: 30
           compression-level: 0
           if-no-files-found: error

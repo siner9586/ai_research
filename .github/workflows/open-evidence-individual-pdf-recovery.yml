@@ -1,0 +1,110 @@
+name: open-evidence-individual-pdf-recovery
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - slug: arxiv-2603-19843
+            paper_id: arxiv:2603.19843
+            title: Overreliance on AI in Information-seeking from Video Content
+            doi: 10.48550/arxiv.2603.19843
+            url: https://arxiv.org/pdf/2603.19843
+            expected_sha256: 3f78d6cde447e295401f0d532ab2365fb7c7b7420d5dfd5985ebed8e29015c41
+            version: arxiv_v1
+            license: arXiv-hosted
+          - slug: arxiv-2606-06081
+            paper_id: arxiv:2606.06081
+            title: A Framework for Measuring Appropriate Reliance on Set-Valued AI Advice
+            doi: 10.48550/arxiv.2606.06081
+            url: https://arxiv.org/pdf/2606.06081
+            expected_sha256: 773c5d5a42b132d9eddf9e54babf935f900821f285899eacade33b8edb7652bb
+            version: arxiv_oa
+            license: arXiv-hosted
+          - slug: bmc-s41235-026-00707-z
+            paper_id: doi:10.1186/s41235-026-00707-z
+            title: AI-augmented decision-making in face matching comparing concurrent and non-concurrent advice presentation
+            doi: 10.1186/s41235-026-00707-z
+            url: https://link.springer.com/content/pdf/10.1186/s41235-026-00707-z.pdf
+            expected_sha256: 5d71dac3ce8d56a5caa81e525a930907956a4ba6f6319e8865752168cae80b3b
+            version: publisher_oa
+            license: publisher-open-access
+          - slug: acl-2026-findings-422
+            paper_id: doi:10.18653/v1/2026.findings-acl.422
+            title: AI Take the Wheel What Drives Delegation and Trust in Human-Computer Cooperative Question Answering
+            doi: 10.18653/v1/2026.findings-acl.422
+            url: https://aclanthology.org/2026.findings-acl.422.pdf
+            expected_sha256: 4f08963e82bb79135f8f44d4731d136ce20e7875213fb88a7f004583bc024d9a
+            version: publisher_oa
+            license: ACL-Anthology-open
+          - slug: acl-d18-1128
+            paper_id: doi:10.18653/v1/D18-1128
+            title: Do Explanations Make VQA Models More Predictable to a Human
+            doi: 10.18653/v1/D18-1128
+            url: https://aclanthology.org/D18-1128.pdf
+            expected_sha256: 507f78ee93678147dd03912e9c80170219b8027076ee99b91728292f274e8cc4
+            version: publisher_oa
+            license: ACL-Anthology-open
+          - slug: acl-d19-1002
+            paper_id: doi:10.18653/v1/D19-1002
+            title: Attention is not not Explanation
+            doi: 10.18653/v1/D19-1002
+            url: https://aclanthology.org/D19-1002.pdf
+            expected_sha256: 874e427b9a56ce57360ca360b1dbd07f35ca9d2aad49a39ac5dfb7828e54ffaf
+            version: publisher_oa
+            license: ACL-Anthology-open
+          - slug: acl-n19-1357
+            paper_id: doi:10.18653/v1/N19-1357
+            title: Attention is not Explanation
+            doi: 10.18653/v1/N19-1357
+            url: https://aclanthology.org/N19-1357.pdf
+            expected_sha256: 3750735a8bfd5f7d960a7cdb1bbdf6e16ac34cf0d449cf5c4bc45e3c3549e607
+            version: publisher_oa
+            license: ACL-Anthology-open
+          - slug: acl-p19-1452
+            paper_id: doi:10.18653/v1/P19-1452
+            title: BERT Rediscovers the Classical NLP Pipeline
+            doi: 10.18653/v1/P19-1452
+            url: https://aclanthology.org/P19-1452.pdf
+            expected_sha256: 0591cb3c1dadfe9be9a9f314a5abb3db12a8ff49bf0a648d0f44e18230e01bea
+            version: publisher_oa
+            license: ACL-Anthology-open
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF audit runtime
+        run: python -m pip install --disable-pip-version-check requests pypdf
+      - name: Recover and validate one lawful PDF
+        run: |
+          python open_evidence_runner/recover_individual_pdf.py \
+            --paper-id "${{ matrix.paper_id }}" \
+            --title "${{ matrix.title }}" \
+            --doi "${{ matrix.doi }}" \
+            --url "${{ matrix.url }}" \
+            --expected-sha256 "${{ matrix.expected_sha256 }}" \
+            --version "${{ matrix.version }}" \
+            --license "${{ matrix.license }}" \
+            --output "individual-${{ matrix.slug }}"
+      - name: Upload single-PDF artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: individual-pdf-${{ matrix.slug }}
+          path: individual-${{ matrix.slug }}/
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error

@@ -1,0 +1,87 @@
+name: open-evidence-priority-fulltext-batch3
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install --disable-pip-version-check requests pypdf
+      - name: Download and verify selected lawful OA PDFs
+        run: python open_evidence_runner/audit_priority_fulltext_batch3.py --output priority-fulltext-batch3
+      - name: Validate summary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('priority-fulltext-batch3/completion_summary.json').read_text())
+          assert s['targets']==5
+          assert sum(s['status_counts'].values())==5
+          assert s['status_counts'].get('oa_pdf_verified',0)>=1
+          PY
+      - name: Upload aggregate audit package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: priority-fulltext-batch3-audit
+          path: priority-fulltext-batch3/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error
+      - name: Upload Refubium PDF
+        if: ${{ hashFiles('priority-fulltext-batch3/doi_10.1145_3757451.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-doi-10.1145-3757451
+          path: priority-fulltext-batch3/doi_10.1145_3757451.pdf
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload Lancet Digital Health PDF
+        if: ${{ hashFiles('priority-fulltext-batch3/doi_10.1016_j.landig.2025.100912.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-doi-10.1016-j.landig-2025-100912
+          path: priority-fulltext-batch3/doi_10.1016_j.landig.2025.100912.pdf
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload responsibility-sharing PDF
+        if: ${{ hashFiles('priority-fulltext-batch3/doi_10.1016_j.chbah.2023.100009.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-doi-10.1016-j.chbah-2023-100009
+          path: priority-fulltext-batch3/doi_10.1016_j.chbah.2023.100009.pdf
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload AAAI 2024 PDF
+        if: ${{ hashFiles('priority-fulltext-batch3/doi_10.1609_aaai.v38i16.29783.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-doi-10.1609-aaai-v38i16-29783
+          path: priority-fulltext-batch3/doi_10.1609_aaai.v38i16.29783.pdf
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload AAAI 2018 PDF
+        if: ${{ hashFiles('priority-fulltext-batch3/doi_10.1609_aaai.v32i1.11353.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-doi-10.1609-aaai-v32i1-11353
+          path: priority-fulltext-batch3/doi_10.1609_aaai.v32i1.11353.pdf
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error

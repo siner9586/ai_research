@@ -1,0 +1,42 @@
+name: open-evidence-g-rat-code-audit
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install --disable-pip-version-check requests
+      - name: Audit fixed repository revision
+        run: python open_evidence_runner/audit_grat_repository.py --output g-rat-audit
+      - name: Validate audit
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('g-rat-audit/completion_summary.json').read_text())
+          assert s['fixed_commit']=='d27993218649d8bfcf54fcdabc2711e81bded3c8'
+          assert s['license_status']=='MIT'
+          assert s['embedded_secret_candidates']==[]
+          assert s['code_executed'] is False
+          PY
+      - name: Upload fixed code snapshot and audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: g-rat-fixed-commit-audit
+          path: g-rat-audit/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

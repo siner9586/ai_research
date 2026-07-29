@@ -1,0 +1,45 @@
+name: open-evidence-fulltext-formal-direct3
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF audit runtime
+        run: python -m pip install --disable-pip-version-check requests pypdf
+      - name: Download and validate direct lawful fulltexts
+        run: python open_evidence_runner/fulltext_formal_direct3.py --output fulltext-formal-direct3
+      - name: Validate accounting
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('fulltext-formal-direct3/completion_summary.json')
+          if not p.exists():
+              raise SystemExit('completion summary missing')
+          s=json.loads(p.read_text())
+          assert s['targets']==24
+          assert s['verified']+s['manual_review']+s['retryable']==24
+          PY
+      - name: Upload aggregate verified and retryable audit package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-formal-direct3
+          path: fulltext-formal-direct3/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

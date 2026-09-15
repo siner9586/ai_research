@@ -1,0 +1,63 @@
+name: open-evidence-fulltext-behavior-batch1
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF audit runtime
+        run: python -m pip install --disable-pip-version-check requests pypdf
+      - name: Download and verify lawful open fulltexts
+        run: python open_evidence_runner/fulltext_behavior_batch1.py --output fulltext-behavior-batch1
+      - name: Validate result accounting
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('fulltext-behavior-batch1/completion_summary.json')
+          if not p.exists():
+              raise SystemExit('completion summary missing')
+          s=json.loads(p.read_text())
+          assert s['targets']==6
+          assert s['verified']+s['manual_review']+s['retryable']==6
+          PY
+      - name: Upload audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-behavior-batch1
+          path: fulltext-behavior-batch1/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error
+      - name: Upload JMIR stakeholder trust PDF artifact
+        if: ${{ hashFiles('fulltext-behavior-batch1/doi_10.2196_78757.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: fulltext-doi-10.2196-78757
+          path: fulltext-behavior-batch1/doi_10.2196_78757.pdf
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload JMIR medical AI acceptance PDF artifact
+        if: ${{ hashFiles('fulltext-behavior-batch1/doi_10.2196_47031.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: fulltext-doi-10.2196-47031
+          path: fulltext-behavior-batch1/doi_10.2196_47031.pdf
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error

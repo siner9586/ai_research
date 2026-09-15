@@ -1,0 +1,62 @@
+name: open-evidence-europe-pmc-fulltext-xml
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install audit runtime
+        run: python -m pip install --disable-pip-version-check requests
+      - name: Fetch and verify Europe PMC JATS XML
+        run: python open_evidence_runner/europe_pmc_fulltext_xml_fallback.py --output europe-pmc-fulltext-xml
+      - name: Validate accounting
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('europe-pmc-fulltext-xml/completion_summary.json')
+          if not p.exists(): raise SystemExit('completion summary missing')
+          s=json.loads(p.read_text())
+          assert s['targets']==2
+          assert s['verified']+s['retryable']==2
+          PY
+      - name: Upload aggregate XML audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-europe-pmc-fulltext-xml
+          path: europe-pmc-fulltext-xml/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error
+      - name: Upload 2025 full-text XML
+        if: ${{ hashFiles('europe-pmc-fulltext-xml/doi_10.3390_bs15101370.xml') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: fulltext-xml-doi-10.3390-bs15101370
+          path: europe-pmc-fulltext-xml/doi_10.3390_bs15101370.xml
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload 2024 full-text XML
+        if: ${{ hashFiles('europe-pmc-fulltext-xml/doi_10.3390_bs14100964.xml') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: fulltext-xml-doi-10.3390-bs14100964
+          path: europe-pmc-fulltext-xml/doi_10.3390_bs14100964.xml
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error

@@ -1,0 +1,97 @@
+name: open-evidence-screen-seed-rescue
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: open-evidence-screen-seed-rescue-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  normalize-screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deterministic screening runtime
+        run: python -m pip install --disable-pip-version-check pandas numpy
+      - name: Download original official Semantic Scholar aggregate
+        uses: actions/download-artifact@v4
+        with:
+          name: semantic-scholar-backfill-all
+          path: input-original
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: siner9586/ai_research
+          run-id: 30084756249
+      - name: Download completed recall-rescue aggregate
+        uses: actions/download-artifact@v4
+        with:
+          name: semantic-scholar-seed-rescue-all
+          path: input-rescue
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: siner9586/ai_research
+          run-id: 30101449933
+      - name: Deduplicate against original retrieval and screen new records
+        run: |
+          python open_evidence_runner/screen_seed_rescue.py \
+            --original-root input-original \
+            --rescue-root input-rescue \
+            --output output
+      - name: Materialize MAG identifiers without touching OpenAlex IDs
+        run: |
+          python open_evidence_runner/repair_seed_rescue_mag_id.py \
+            --artifact-dir output
+      - name: Verify local counts, identifiers and hashes
+        run: |
+          python - <<'PY'
+          import gzip, hashlib, json, sqlite3
+          from pathlib import Path
+          import pandas as pd
+
+          root = Path('output')
+          summary = json.loads((root/'normalization_screening_summary.json').read_text())
+          assert summary['rescue_unique_records'] == 82441
+          assert summary['duplicates_against_original'] == 2064
+          assert summary['new_unique_candidates'] == 80377
+          assert summary['screening_status'] == {'exclude': 71233, 'uncertain': 4883, 'include': 4261}
+          assert summary['selected_for_candidate_import'] == 9144
+
+          repair = json.loads((root/'mag_id_repair_audit.json').read_text())
+          assert repair['rule'] == 'externalIds.MAG -> mag_id; never openalex_id'
+
+          selected = pd.read_csv(root/'candidate_records_selected.csv.gz', compression='gzip', dtype=str, keep_default_na=False)
+          assert 'mag_id' in selected.columns
+          assert not selected['openalex_id'].str.fullmatch(r'\d+').any()
+          expected_mag = selected['external_ids'].map(
+              lambda value: str(json.loads(value).get('MAG') or '').strip() if value else ''
+          )
+          assert (selected['mag_id'] == expected_mag).all()
+
+          with sqlite3.connect(root/'s2_rescue_selected.sqlite') as connection:
+              columns = {row[1] for row in connection.execute('PRAGMA table_info(candidate_records)')}
+              assert 'mag_id' in columns
+              assert connection.execute("SELECT count(*) FROM candidate_records WHERE openalex_id GLOB '[0-9]*' AND openalex_id NOT GLOB '*[^0-9]*'").fetchone()[0] == 0
+
+          for line in (root/'sha256sums.txt').read_text().splitlines():
+              digest, name = line.split('  ', 1)
+              actual = hashlib.sha256((root/name).read_bytes()).hexdigest()
+              assert digest == actual, name
+          PY
+      - name: Upload normalization and screening audit package
+        uses: actions/upload-artifact@v4
+        with:
+          name: semantic-scholar-seed-rescue-normalized-screened
+          path: output/
+          retention-days: 30
+          compression-level: 9
+          if-no-files-found: error

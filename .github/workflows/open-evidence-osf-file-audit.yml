@@ -1,0 +1,61 @@
+name: open-evidence-osf-file-audit
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-osf-project:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        target_id:
+          - osf-algorithm-appreciation
+          - osf-algorithm-social-advice-exp1
+          - osf-algorithm-social-advice-exp2
+          - osf-algorithm-social-advice-exp3
+          - osf-human-reliance-ai-2026
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install file-audit runtime
+        run: python -m pip install --disable-pip-version-check requests openpyxl
+      - name: Traverse official OSF API and audit public files
+        run: >-
+          python open_evidence_runner/audit_osf_public_files.py
+          --targets open_evidence_runner/osf_targets.json
+          --target-id "${{ matrix.target_id }}"
+          --output "output-${{ matrix.target_id }}"
+      - name: Validate package hashes and audit status
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('output-${{ matrix.target_id }}')
+          report=json.loads((root/'audit_report.json').read_text())
+          assert report['completed'] is True
+          assert report['official_api']=='https://api.osf.io/v2'
+          for line in (root/'sha256sums.txt').read_text().splitlines():
+              expected,rel=line.split('  ',1)
+              actual=hashlib.sha256((root/rel).read_bytes()).hexdigest()
+              assert actual==expected,(rel,actual,expected)
+          PY
+      - name: Upload OSF file-level audit package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: osf-file-audit-${{ matrix.target_id }}
+          path: output-${{ matrix.target_id }}/
+          retention-days: 30
+          compression-level: 9
+          if-no-files-found: error

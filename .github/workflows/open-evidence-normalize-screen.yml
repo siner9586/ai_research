@@ -1,0 +1,64 @@
+name: open-evidence-normalize-screen
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: open-evidence-normalize-screen-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  normalize-screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install tabular runtime
+        run: python -m pip install --disable-pip-version-check pandas numpy pyarrow
+      - name: Download verified arXiv aggregate
+        uses: actions/download-artifact@v4
+        with:
+          name: arxiv-backfill-all
+          path: artifact-arxiv
+          github-token: ${{ github.token }}
+          repository: siner9586/ai_research
+          run-id: 30084959838
+      - name: Download verified Semantic Scholar aggregate
+        uses: actions/download-artifact@v4
+        with:
+          name: semantic-scholar-backfill-all
+          path: artifact-semantic-scholar
+          github-token: ${{ github.token }}
+          repository: siner9586/ai_research
+          run-id: 30084756249
+      - name: Normalize, deduplicate, and screen every candidate
+        run: python open_evidence_runner/normalize_screen_s2_arxiv.py --arxiv-root artifact-arxiv --s2-root artifact-semantic-scholar --output normalized-screened
+      - name: Upload compact public-data outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: normalized-screened-s2-arxiv
+          path: |
+            normalized-screened/*.parquet
+            normalized-screened/*.csv.gz
+            normalized-screened/normalization_screening_summary.json
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error
+      - name: Upload SQLite fallback separately
+        uses: actions/upload-artifact@v4
+        with:
+          name: normalized-screened-s2-arxiv-sqlite
+          path: normalized-screened/open_evidence_s2_arxiv.sqlite
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

@@ -1,0 +1,86 @@
+name: open-evidence-independent-screen-v2
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  independent-screen:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - source: Semantic Scholar rescue
+            reviewer: machine-rule-v2:s2-rescue
+            run_id: 30103594843
+            artifact: semantic-scholar-seed-rescue-normalized-screened
+            root: source-s2
+            output: output-s2
+          - source: PubMed
+            reviewer: machine-rule-v2:pubmed
+            run_id: 30104290733
+            artifact: pubmed-normalized-screened
+            root: source-pubmed
+            output: output-pubmed
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download verified first-pass artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.root }}
+          github-token: ${{ github.token }}
+          repository: siner9586/ai_research
+          run-id: ${{ matrix.run_id }}
+      - name: Resolve artifact files
+        id: files
+        shell: bash
+        run: |
+          CANDIDATES=$(find "${{ matrix.root }}" -name candidate_records_selected.csv.gz -type f -print -quit)
+          DECISIONS=$(find "${{ matrix.root }}" -name screening_decisions_selected.csv.gz -type f -print -quit)
+          test -n "$CANDIDATES"
+          test -n "$DECISIONS"
+          echo "candidates=$CANDIDATES" >> "$GITHUB_OUTPUT"
+          echo "decisions=$DECISIONS" >> "$GITHUB_OUTPUT"
+      - name: Run isolated second-pass rules
+        run: >-
+          python open_evidence_runner/independent_screen_v2.py
+          --candidates "${{ steps.files.outputs.candidates }}"
+          --first-decisions "${{ steps.files.outputs.decisions }}"
+          --source "${{ matrix.source }}"
+          --reviewer "${{ matrix.reviewer }}"
+          --output "${{ matrix.output }}"
+      - name: Validate strict output counts
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv,gzip,json,glob
+          summary_path=glob.glob('${{ matrix.output }}/independent_screen_v2_summary.json')[0]
+          summary=json.load(open(summary_path))
+          with gzip.open('${{ matrix.output }}/screening_decisions_independent_v2.csv.gz','rt',encoding='utf-8-sig') as f:
+              decisions=sum(1 for _ in csv.DictReader(f))
+          with gzip.open('${{ matrix.output }}/screening_comparison_and_adjudication.csv.gz','rt',encoding='utf-8-sig') as f:
+              comparisons=sum(1 for _ in csv.DictReader(f))
+          assert summary['completed'] is True
+          assert decisions==summary['records']==comparisons
+          assert summary['agreement_count']+summary['adjudication_count']>=summary['records']
+          PY
+      - name: Upload second-pass audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: independent-screen-v2-${{ matrix.output }}
+          path: ${{ matrix.output }}/
+          retention-days: 30
+          compression-level: 9
+          if-no-files-found: error

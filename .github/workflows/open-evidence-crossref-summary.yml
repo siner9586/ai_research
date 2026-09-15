@@ -1,0 +1,32 @@
+name: open-evidence-crossref-summary
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  extract-summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install remote ZIP range reader
+        run: python -m pip install --disable-pip-version-check requests remotezip
+      - name: Extract summary and manifest only
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python open_evidence_runner/extract_remote_artifact_summary.py --repository siner9586/ai_research --artifact-id 8593556035 --output crossref-summary
+      - name: Upload compact audit summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: crossref-summary-only
+          path: crossref-summary/
+          retention-days: 30
+          compression-level: 9
+          if-no-files-found: error

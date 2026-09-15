@@ -1,0 +1,72 @@
+name: open-evidence-crossref-2024-2026-summary
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  extract-year:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - year: 2024
+            artifact_id: 8610551595
+          - year: 2025
+            artifact_id: 8610959696
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HTTP runtime
+        run: python -m pip install --disable-pip-version-check requests
+      - name: Extract annual summary and preserve incomplete evidence
+        id: extract
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "summary-${{ matrix.year }}" "diagnostic-${{ matrix.year }}"
+          set +e
+          python open_evidence_runner/extract_remote_crossref_year.py \
+            --repository siner9586/ai_research \
+            --artifact-id "${{ matrix.artifact_id }}" \
+            --year "${{ matrix.year }}" \
+            --output "summary-${{ matrix.year }}" \
+            >"diagnostic-${{ matrix.year }}/stdout.log" \
+            2>"diagnostic-${{ matrix.year }}/stderr.log"
+          rc=$?
+          printf '{"year":%s,"artifact_id":%s,"exit_code":%s}\n' \
+            "${{ matrix.year }}" "${{ matrix.artifact_id }}" "$rc" \
+            >"diagnostic-${{ matrix.year }}/result.json"
+          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Upload extracted annual summary whether complete or incomplete
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crossref-${{ matrix.year }}-summary-evidence
+          path: summary-${{ matrix.year }}/
+          retention-days: 30
+          compression-level: 9
+          if-no-files-found: error
+      - name: Upload extraction diagnostic
+        if: steps.extract.outputs.exit_code != '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: crossref-${{ matrix.year }}-summary-diagnostic
+          path: diagnostic-${{ matrix.year }}/
+          retention-days: 30
+          compression-level: 9
+          if-no-files-found: error
+      - name: Fail incomplete extraction after evidence upload
+        if: steps.extract.outputs.exit_code != '0'
+        run: exit 1

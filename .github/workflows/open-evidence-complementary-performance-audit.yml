@@ -1,0 +1,41 @@
+name: open-evidence-complementary-performance-audit
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime
+        run: python -m pip install --disable-pip-version-check requests
+      - name: Audit fixed repository revision
+        run: python open_evidence_runner/audit_complementary_performance.py --output complementary-performance-audit
+      - name: Validate result
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('complementary-performance-audit/completion_summary.json').read_text())
+          assert s['fixed_commit']=='6cebab4ffd2b332ebec5e27e7632e7bf1c36ba5f'
+          assert s['trial_level_candidate_files']
+          assert s['code_executed'] is False
+          PY
+      - name: Upload audit and immutable snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: complementary-performance-fixed-revision-audit
+          path: complementary-performance-audit/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

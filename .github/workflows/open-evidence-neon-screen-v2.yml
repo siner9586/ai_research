@@ -1,0 +1,17 @@
+name: open-evidence-neon-screen-v2-legacy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notice:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Security boundary notice
+        run: |
+          echo 'Neon RLS intentionally authorizes only open-evidence-neon-import.yml.'
+          echo 'The v2 staging job has been moved to that existing authorized workflow path.'
+          echo 'This duplicate workflow is retained as a manual audit notice only.'

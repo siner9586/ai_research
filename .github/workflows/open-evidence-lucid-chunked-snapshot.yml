@@ -1,0 +1,63 @@
+name: open-evidence-lucid-chunked-snapshot
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HTTP runtime
+        run: python -m pip install --disable-pip-version-check requests
+      - name: Create verified Lucid snapshot
+        run: |
+          python open_evidence_runner/archive_fixed_github_snapshot.py \
+            --repository tensorflow/lucid \
+            --commit 6dcc927e4ff4e7ef4d9c54d27b0352849dadd1bb \
+            --expected-license Apache-2.0 \
+            --output lucid-snapshot
+      - name: Split archive below connector limit
+        run: |
+          python open_evidence_runner/split_fixed_snapshot.py \
+            --input lucid-snapshot/tensorflow__lucid_6dcc927e4ff4.tar.gz \
+            --output lucid-parts \
+            --chunk-mib 75
+          cp lucid-snapshot/snapshot_audit.json lucid-parts/snapshot_audit.json
+          cp lucid-snapshot/file_manifest.csv lucid-parts/file_manifest.csv
+      - name: Upload part 1
+        uses: actions/upload-artifact@v4
+        with:
+          name: lucid-fixed-snapshot-part001
+          path: lucid-parts/*.part001
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload part 2
+        uses: actions/upload-artifact@v4
+        with:
+          name: lucid-fixed-snapshot-part002
+          path: lucid-parts/*.part002
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload audit manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: lucid-fixed-snapshot-manifest
+          path: |
+            lucid-parts/parts_manifest.json
+            lucid-parts/snapshot_audit.json
+            lucid-parts/file_manifest.csv
+          retention-days: 30
+          compression-level: 9
+          if-no-files-found: error

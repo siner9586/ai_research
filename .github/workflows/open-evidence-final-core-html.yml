@@ -1,0 +1,41 @@
+name: open-evidence-final-core-html
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install audit runtime
+        run: python -m pip install --disable-pip-version-check requests
+      - name: Verify lawful publisher HTML
+        run: python open_evidence_runner/final_core_html_audit.py --output final-core-html
+      - name: Validate audit result
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('final-core-html/completion_summary.json').read_text())
+          assert s['targets']==1
+          assert s['verified']==1
+          assert s['completed'] is True
+          PY
+      - name: Upload publisher HTML and audit record
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-final-core-html
+          path: final-core-html/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

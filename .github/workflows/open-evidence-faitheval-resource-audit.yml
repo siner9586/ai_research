@@ -1,0 +1,49 @@
+name: open-evidence-faitheval-resource-audit
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install resource audit runtime
+        run: python -m pip install --disable-pip-version-check requests pandas pyarrow
+      - name: Audit fixed code commit and public benchmark datasets
+        run: python open_evidence_runner/run_faitheval_resources_retry.py --output faitheval-resource-audit
+      - name: Validate hashes and evidence boundaries
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('faitheval-resource-audit')
+          s=json.loads((root/'completion_summary.json').read_text())
+          assert s['repository']['fixed_commit']=='58d35840e3fbc7bf4b7672582a417b3b3a327dec'
+          assert s['repository']['license_status']=='Apache-2.0'
+          assert s['repository']['embedded_secret_candidates']==[]
+          assert s['dataset_count']==3
+          assert s['dataset_files_downloaded']==3
+          assert s['dataset_rows_total']==4992
+          assert s['code_executed'] is False
+          for line in (root/'SHA256SUMS.txt').read_text().splitlines():
+              expected,rel=line.split('  ',1)
+              assert hashlib.sha256((root/rel).read_bytes()).hexdigest()==expected
+          PY
+      - name: Upload fixed code and benchmark audit package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: faitheval-code-and-dataset-audit
+          path: faitheval-resource-audit/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

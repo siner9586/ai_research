@@ -1,0 +1,32 @@
+name: open-evidence-fulltext-retry
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  archive-five-fulltexts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install audit runtime
+        run: python -m pip install --disable-pip-version-check requests pypdf
+      - name: Download and verify legal OA PDFs
+        run: python open_evidence_runner/fulltext_archive_batch.py fulltext-output
+      - name: Upload verified PDF package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: legal-oa-fulltext-retry-five
+          path: fulltext-output/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

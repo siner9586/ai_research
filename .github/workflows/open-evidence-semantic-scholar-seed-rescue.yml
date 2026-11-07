@@ -1,0 +1,87 @@
+name: open-evidence-semantic-scholar-seed-rescue
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: open-evidence-semantic-scholar-seed-rescue-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  rescue-year:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        year: [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install runtime
+        run: python -m pip install --disable-pip-version-check requests urllib3
+      - name: Exhaust official Semantic Scholar tokens for recall-rescue queries
+        env:
+          SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+        run: |
+          python open_evidence_runner/semantic_scholar_seed_rescue.py \
+            --year "${{ matrix.year }}" \
+            --output "output-${{ matrix.year }}" \
+            --queries open_evidence_runner/seed_rescue_queries.json \
+            --seeds open_evidence_runner/missed_gold_seeds_20260724.csv \
+            --hours 5.5
+      - name: Upload annual rescue audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semantic-scholar-seed-rescue-${{ matrix.year }}
+          path: output-${{ matrix.year }}/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error
+
+  aggregate:
+    if: always()
+    needs: rescue-year
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download annual rescue artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: semantic-scholar-seed-rescue-*
+          path: combined
+          merge-multiple: true
+      - name: Build combined rescue master and cross-year validation summary
+        run: |
+          python open_evidence_runner/combine_seed_rescue.py \
+            --input combined \
+            --output aggregate \
+            --seeds open_evidence_runner/missed_gold_seeds_20260724.csv
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          summary = json.loads(Path('aggregate/semantic_scholar_seed_rescue_summary.json').read_text())
+          assert summary['version_year_mismatches_resolved'] >= 1
+          assert summary['missed_gold_seeds_recovered'] == summary['missed_gold_seeds_expected']
+          assert summary['recall_target_passed'] is True
+          PY
+      - name: Upload combined rescue evidence package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semantic-scholar-seed-rescue-all
+          path: aggregate/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

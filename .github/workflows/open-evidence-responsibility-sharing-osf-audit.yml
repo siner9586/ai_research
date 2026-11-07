@@ -1,0 +1,47 @@
+name: open-evidence-responsibility-sharing-osf-audit
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install audit runtime
+        run: python -m pip install --disable-pip-version-check requests pandas openpyxl pyreadstat
+      - name: Traverse official OSF API and audit data/code
+        run: python open_evidence_runner/audit_responsibility_sharing_osf.py --output responsibility-sharing-osf-audit
+      - name: Validate audit hashes and result
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('responsibility-sharing-osf-audit')
+          report=json.loads((root/'audit_report.json').read_text())
+          assert report['official_api']=='https://api.osf.io/v2'
+          assert report['completed'] is True
+          assert report['participant_level_candidate_files']
+          assert report['code_executed'] is False
+          for line in (root/'sha256sums.txt').read_text().splitlines():
+              expected,rel=line.split('  ',1)
+              actual=hashlib.sha256((root/rel).read_bytes()).hexdigest()
+              assert actual==expected,(rel,actual,expected)
+          PY
+      - name: Upload OSF data/code audit package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: responsibility-sharing-osf-data-code-audit
+          path: responsibility-sharing-osf-audit/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

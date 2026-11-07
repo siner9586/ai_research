@@ -1,0 +1,27 @@
+name: open-evidence-crossref-cursor-diagnostic
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --disable-pip-version-check requests
+      - name: Compare cursor behavior across sort modes
+        run: python open_evidence_runner/crossref_cursor_diagnostic.py
+      - name: Upload diagnostic JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: crossref-cursor-diagnostic
+          path: crossref_cursor_diagnostic.json
+          retention-days: 30
+          if-no-files-found: error

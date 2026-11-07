@@ -1,0 +1,69 @@
+name: open-evidence-code-snapshot-batch
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - slug: tensorflow-lucid
+            repository: tensorflow/lucid
+            commit: 6dcc927e4ff4e7ef4d9c54d27b0352849dadd1bb
+            expected_license: Apache-2.0
+          - slug: jayded-eraserbenchmark
+            repository: jayded/eraserbenchmark
+            commit: 36467f1662812cbd4fbdd66879946cd7338e08ec
+            expected_license: Apache-2.0
+          - slug: transformer-explainability
+            repository: hila-chefer/Transformer-Explainability
+            commit: c3e578f76b954e8528afeaaee26de3f07e3fe559
+            expected_license: MIT
+          - slug: transformer-mm-explainability
+            repository: hila-chefer/Transformer-MM-Explainability
+            commit: 58eaea85ac9c34aff052f368514b35d2e4c8dd3c
+            expected_license: MIT
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HTTP runtime
+        run: python -m pip install --disable-pip-version-check requests
+      - name: Download and audit fixed commit snapshot
+        run: |
+          python open_evidence_runner/archive_fixed_github_snapshot.py \
+            --repository "${{ matrix.repository }}" \
+            --commit "${{ matrix.commit }}" \
+            --expected-license "${{ matrix.expected_license }}" \
+            --output "snapshot-${{ matrix.slug }}"
+      - name: Validate no code execution and fixed revision
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = next(Path('.').glob('snapshot-*/snapshot_audit.json'))
+          s = json.loads(p.read_text())
+          assert s['validation_status'] == 'verified_fixed_commit_snapshot'
+          assert s['code_executed'] is False
+          assert len(s['commit']) == 40
+          assert s['file_count'] > 0
+          PY
+      - name: Upload snapshot and audit files
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-snapshot-${{ matrix.slug }}
+          path: snapshot-${{ matrix.slug }}/
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error

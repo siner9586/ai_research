@@ -1,0 +1,78 @@
+name: open-evidence-osf-harmonize-exp2-exp3
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  harmonize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install harmonization runtime
+        run: python -m pip install --disable-pip-version-check pandas
+      - name: Download verified OSF experiment 2 audit artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: osf-live-project-tree-b7we5
+          path: artifact-exp2
+          github-token: ${{ github.token }}
+          repository: siner9586/ai_research
+          run-id: 30136917490
+      - name: Download verified OSF experiment 3 audit artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: osf-live-project-tree-6rjuz
+          path: artifact-exp3
+          github-token: ${{ github.token }}
+          repository: siner9586/ai_research
+          run-id: 30136917490
+      - name: Harmonize and de-identify trial records
+        run: >-
+          python open_evidence_runner/harmonize_osf_algorithm_social_advice.py
+          --exp2-root artifact-exp2
+          --exp3-root artifact-exp3
+          --output harmonized-exp2-exp3
+      - name: Validate harmonized row counts, identifiers and hashes
+        run: |
+          python - <<'PY'
+          import gzip,hashlib,json
+          from pathlib import Path
+          import pandas as pd
+          root=Path('harmonized-exp2-exp3')
+          report=json.loads((root/'harmonization_summary.json').read_text())
+          assert report['completed'] is True
+          assert report['combined_rows']==9270
+          assert report['experiments'][0]['source_rows']==4905
+          assert report['experiments'][0]['participants']==514
+          assert report['experiments'][1]['source_rows']==4365
+          assert report['experiments'][1]['participants']==456
+          assert report['experiments'][1]['quality_correctness_equivalence_verified'] is True
+          assert report['ipd_use_status'].startswith('archived_and_structurally_verified')
+          for exp in report['experiments']:
+              assert exp['participant_identifiers_exported'] is False
+          combined=root/'s41598-021-87480-9_exp2_exp3_trial_ipd.csv.gz'
+          assert hashlib.sha256(combined.read_bytes()).hexdigest()==report['combined_sha256']
+          frame=pd.read_csv(combined)
+          assert len(frame)==9270
+          assert 'ResponseId' not in frame.columns
+          assert frame['participant_id'].str.fullmatch(r'[0-9a-f]{64}').all()
+          assert frame['woa_raw'].between(0,1,inclusive='both').all()
+          PY
+      - name: Upload de-identified trial IPD and reproducibility summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: osf-harmonized-trial-ipd-exp2-exp3
+          path: harmonized-exp2-exp3/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

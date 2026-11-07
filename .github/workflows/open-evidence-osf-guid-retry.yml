@@ -1,0 +1,51 @@
+name: open-evidence-osf-guid-retry
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-guid:
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        guid: [ym3ug, hyz6d, vgh9k]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install OSF audit runtime
+        run: python -m pip install --disable-pip-version-check requests openpyxl
+      - name: Resolve GUID type and audit lawful public files
+        run: >-
+          python open_evidence_runner/audit_osf_guid_retry.py
+          --guid "${{ matrix.guid }}"
+          --output "osf-guid-${{ matrix.guid }}"
+      - name: Validate diagnostic package
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('osf-guid-${{ matrix.guid }}')
+          report=json.loads((root/'osf_guid_audit.json').read_text())
+          assert report['guid']=='${{ matrix.guid }}'
+          assert report['status'] in {'files_audited','resolved_no_selected_files','retryable_or_access_limited'}
+          assert isinstance(report['errors'], list)
+          PY
+      - name: Upload OSF GUID audit package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: osf-guid-audit-${{ matrix.guid }}
+          path: osf-guid-${{ matrix.guid }}/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

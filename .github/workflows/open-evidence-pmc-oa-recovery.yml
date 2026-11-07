@@ -1,0 +1,109 @@
+name: open-evidence-pmc-oa-recovery
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - slug: bs14100964
+            pmcid: PMC11505338
+            paper_id: doi:10.3390/bs14100964
+            title: Trust Dynamics in Financial Decision Making Behavioral Responses to AI and Human Expert Advice Following Structural Breaks
+            doi: 10.3390/bs14100964
+          - slug: bs15101370
+            pmcid: PMC12561693
+            paper_id: doi:10.3390/bs15101370
+            title: Trust Formation Error Impact and Repair in Human-AI Financial Advisory A Dynamic Behavioral Analysis
+            doi: 10.3390/bs15101370
+          - slug: jamia-ocag082
+            pmcid: PMC13385988
+            paper_id: doi:10.1093/jamia/ocag082
+            title: AI-assisted clinical decision support study
+            doi: 10.1093/jamia/ocag082
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF audit runtime
+        run: python -m pip install --disable-pip-version-check requests pypdf
+      - name: Save raw PMC OA service response
+        run: |
+          mkdir -p "pmc-${{ matrix.slug }}"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import requests
+          pmcid = "${{ matrix.pmcid }}"
+          out = Path("pmc-${{ matrix.slug }}")
+          url = f"https://www.ncbi.nlm.nih.gov/pmc/utils/oa/oa.fcgi?id={pmcid}"
+          try:
+              response = requests.get(url, timeout=(45, 180), allow_redirects=True, headers={"User-Agent":"open-evidence-pmc-diagnostic/1.0"})
+              (out / "oa_service_response.xml").write_bytes(response.content)
+              meta = {
+                  "pmcid": pmcid,
+                  "requested_url": url,
+                  "final_url": response.url,
+                  "status_code": response.status_code,
+                  "content_type": response.headers.get("content-type"),
+                  "size_bytes": len(response.content),
+                  "prefix": response.content[:300].decode("utf-8", errors="replace"),
+              }
+          except Exception as exc:
+              meta = {"pmcid": pmcid, "requested_url": url, "error": f"{type(exc).__name__}:{exc}"}
+          (out / "oa_service_http.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
+          print(json.dumps(meta, indent=2))
+          PY
+      - name: Resolve PMC OA resource and verify PDF
+        id: recover_pdf
+        continue-on-error: true
+        run: |
+          python open_evidence_runner/recover_pmc_oa_pdf.py \
+            --pmcid "${{ matrix.pmcid }}" \
+            --paper-id "${{ matrix.paper_id }}" \
+            --title "${{ matrix.title }}" \
+            --doi "${{ matrix.doi }}" \
+            --output "pmc-${{ matrix.slug }}" \
+            > "pmc-${{ matrix.slug }}/recovery_stdout.txt" 2> "pmc-${{ matrix.slug }}/recovery_stderr.txt"
+      - name: Record recovery outcome
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          out = Path("pmc-${{ matrix.slug }}")
+          status = "${{ steps.recover_pdf.outcome }}"
+          payload = {
+              "pmcid": "${{ matrix.pmcid }}",
+              "paper_id": "${{ matrix.paper_id }}",
+              "step_outcome": status,
+              "audit_json_exists": (out / "audit.json").exists(),
+              "pdf_files": [p.name for p in out.glob("*.pdf")],
+          }
+          (out / "workflow_outcome.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
+          print(json.dumps(payload, indent=2))
+          PY
+      - name: Upload PMC OA diagnostic or verified package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pmc-oa-${{ matrix.slug }}
+          path: pmc-${{ matrix.slug }}/
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Fail after preserving diagnostics when recovery failed
+        if: steps.recover_pdf.outcome != 'success'
+        run: exit 1

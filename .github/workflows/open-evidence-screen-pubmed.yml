@@ -1,0 +1,73 @@
+name: open-evidence-screen-pubmed
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: open-evidence-screen-pubmed-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  normalize-screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deterministic screening runtime
+        run: python -m pip install --disable-pip-version-check pandas numpy
+      - name: Download original Semantic Scholar master
+        uses: actions/download-artifact@v4
+        with:
+          name: semantic-scholar-backfill-all
+          path: input-original
+          github-token: ${{ github.token }}
+          repository: siner9586/ai_research
+          run-id: 30084756249
+      - name: Download verified PubMed aggregate
+        uses: actions/download-artifact@v4
+        with:
+          name: pubmed-backfill-all
+          path: input-pubmed
+          github-token: ${{ github.token }}
+          repository: siner9586/ai_research
+          run-id: 30102209945
+      - name: Deduplicate and screen PubMed records
+        run: |
+          python open_evidence_runner/screen_pubmed.py \
+            --original-root input-original \
+            --pubmed-root input-pubmed \
+            --output output
+      - name: Verify expected counts and file hashes
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root = Path('output')
+          summary = json.loads((root/'normalization_screening_summary.json').read_text())
+          assert summary['pubmed_unique_records'] == 6538
+          assert summary['duplicates_against_existing'] == 922
+          assert summary['new_unique_candidates'] == 5616
+          assert summary['screening_status'] == {'uncertain': 2353, 'include': 1996, 'exclude': 1267}
+          assert summary['selected_for_candidate_import'] == 4349
+          for line in (root/'sha256sums.txt').read_text().splitlines():
+              digest, name = line.split('  ', 1)
+              assert hashlib.sha256((root/name).read_bytes()).hexdigest() == digest, name
+          PY
+      - name: Upload PubMed normalized screening package
+        uses: actions/upload-artifact@v4
+        with:
+          name: pubmed-normalized-screened
+          path: output/
+          retention-days: 30
+          compression-level: 9
+          if-no-files-found: error

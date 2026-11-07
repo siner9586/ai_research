@@ -1,0 +1,25 @@
+name: open-evidence-runner-smoke
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Confirm public hosted runner
+        run: |
+          python --version
+          curl -fsS --retry 3 --max-time 30 'https://api.crossref.org/works?query=explanation%20faithfulness&filter=from-pub-date:2018-01-01,until-pub-date:2018-12-31&rows=1' -o /tmp/crossref.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/crossref.json'))
+          print({'runner':'ok','crossref_status':p['status'],'items':len(p['message']['items'])})
+          PY

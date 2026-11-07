@@ -1,0 +1,44 @@
+name: open-evidence-osf-tcyk9-audit
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install file-audit runtime
+        run: python -m pip install --disable-pip-version-check requests pandas openpyxl pyreadstat
+      - name: Traverse OSF official API and audit public files
+        run: python open_evidence_runner/audit_osf_project_files.py --node-id tcyk9 --output osf-tcyk9
+      - name: Validate audit boundaries
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          summary = json.loads(Path('osf-tcyk9/completion_summary.json').read_text())
+          assert summary['node_id'] == 'tcyk9'
+          assert summary['public'] is True
+          assert summary['file_count'] > 0
+          assert summary['code_executed'] is False
+          assert summary['validation_status'] == 'audited'
+          PY
+      - name: Upload OSF project audit and lawful public files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: osf-tcyk9-public-files-audit
+          path: osf-tcyk9/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

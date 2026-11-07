@@ -1,0 +1,48 @@
+name: open-evidence-fulltext-audit-2
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF audit runtime
+        run: python -m pip install --disable-pip-version-check requests pypdf
+      - name: Download and verify lawful open experiment fulltexts
+        run: python open_evidence_runner/fulltext_batch_audit_2.py --output fulltext-audit-2
+      - name: Validate audit outputs
+        run: |
+          python - <<'PY'
+          import csv, json
+          from pathlib import Path
+          root = Path('fulltext-audit-2')
+          summary = json.loads((root / 'completion_summary.json').read_text())
+          rows = json.loads((root / 'fulltext_audit.json').read_text())
+          manifest = list(csv.DictReader((root / 'sha256_manifest.csv').open()))
+          assert summary['targets'] == 17
+          assert len(rows) == 17
+          assert len(manifest) == 17
+          assert summary['verified'] >= 1
+          assert summary['completed'] is True
+          assert all(row['validation_status'] in {'verified','needs_manual_title_review','retryable'} for row in rows)
+          PY
+      - name: Upload verified PDFs, failures, hashes and repository audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-audit-2
+          path: fulltext-audit-2/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

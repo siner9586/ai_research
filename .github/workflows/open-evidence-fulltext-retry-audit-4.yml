@@ -1,0 +1,54 @@
+name: open-evidence-fulltext-retry-audit-4
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF and HTML audit runtime
+        run: python -m pip install --disable-pip-version-check requests pypdf beautifulsoup4
+      - name: Retry official arXiv, PMLR and Distill sources
+        run: python open_evidence_runner/fulltext_retry_batch_4.py
+      - name: Validate retry audit output
+        run: |
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          from pypdf import PdfReader
+          root=Path('fulltext-retry-audit-4')
+          rows=json.loads((root/'audit_report.json').read_text())
+          summary=json.loads((root/'completion_summary.json').read_text())
+          assert len(rows)==8 and summary['targets']==8
+          assert summary['verified_pdf']+summary['verified_html']+summary['retryable']==8
+          assert summary['verified_pdf']+summary['verified_html']>=1
+          for row in rows:
+              if row['validation_status']=='verified':
+                  p=root/row['local_file']; assert p.read_bytes()[:5]==b'%PDF-'
+                  assert hashlib.sha256(p.read_bytes()).hexdigest()==row['sha256']
+                  assert len(PdfReader(str(p)).pages)==row['page_count']
+              elif row['validation_status']=='publisher_html_verified':
+                  p=root/row['local_file']; assert b'<html' in p.read_bytes()[:20000].lower()
+                  assert hashlib.sha256(p.read_bytes()).hexdigest()==row['sha256']
+                  assert row['license_match'] is True
+          PY
+      - name: Upload retried fulltexts, publisher HTML and audit errors
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-retry-audit-4
+          path: fulltext-retry-audit-4/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

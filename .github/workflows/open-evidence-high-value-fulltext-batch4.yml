@@ -1,0 +1,109 @@
+name: open-evidence-high-value-fulltext-batch4
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install audit runtime
+        run: python -m pip install --disable-pip-version-check requests pypdf beautifulsoup4
+      - name: Audit seven high-value fulltexts and official supplements
+        run: python open_evidence_runner/audit_high_value_fulltext_batch4.py --output high-value-fulltext-batch4
+      - name: Validate hashes and result accounting
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('high-value-fulltext-batch4')
+          s=json.loads((root/'completion_summary.json').read_text())
+          assert s['targets']==7
+          assert s['oa_pdf_verified']+s['manual_review']+s['retryable']==7
+          assert s['oa_pdf_verified']>=1
+          for line in (root/'SHA256SUMS.txt').read_text().splitlines():
+              expected,rel=line.split('  ',1)
+              assert hashlib.sha256((root/rel).read_bytes()).hexdigest()==expected
+          PY
+      - name: Upload aggregate audit package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: high-value-fulltext-batch4-audit
+          path: high-value-fulltext-batch4/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error
+      - name: Upload deceptive explanations PDF
+        if: ${{ hashFiles('high-value-fulltext-batch4/pdfs/doi_10.48550_arxiv.2210.08960.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-arxiv-2210.08960
+          path: high-value-fulltext-batch4/pdfs/doi_10.48550_arxiv.2210.08960.pdf
+          retention-days: 30
+          compression-level: 0
+      - name: Upload shades of uncertainty PDF
+        if: ${{ hashFiles('high-value-fulltext-batch4/pdfs/doi_10.48550_arxiv.2602.01264.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-arxiv-2602.01264
+          path: high-value-fulltext-batch4/pdfs/doi_10.48550_arxiv.2602.01264.pdf
+          retention-days: 30
+          compression-level: 0
+      - name: Upload FaithEval PDF
+        if: ${{ hashFiles('high-value-fulltext-batch4/pdfs/doi_10.48550_arxiv.2410.03727.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-arxiv-2410.03727
+          path: high-value-fulltext-batch4/pdfs/doi_10.48550_arxiv.2410.03727.pdf
+          retention-days: 30
+          compression-level: 0
+      - name: Upload breast-cancer clinician PDF
+        if: ${{ hashFiles('high-value-fulltext-batch4/pdfs/doi_10.48550_arxiv.2412.11298.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-arxiv-2412.11298
+          path: high-value-fulltext-batch4/pdfs/doi_10.48550_arxiv.2412.11298.pdf
+          retention-days: 30
+          compression-level: 0
+      - name: Upload JMIR randomized experiment PDF
+        if: ${{ hashFiles('high-value-fulltext-batch4/pdfs/doi_10.2196_66760.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-doi-10.2196-66760
+          path: high-value-fulltext-batch4/pdfs/doi_10.2196_66760.pdf
+          retention-days: 30
+          compression-level: 0
+      - name: Upload npj clinical explanation PDF
+        if: ${{ hashFiles('high-value-fulltext-batch4/pdfs/doi_10.1038_s41746-025-01958-8.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-doi-10.1038-s41746-025-01958-8
+          path: high-value-fulltext-batch4/pdfs/doi_10.1038_s41746-025-01958-8.pdf
+          retention-days: 30
+          compression-level: 0
+      - name: Upload eye-tracking explanation PDF
+        if: ${{ hashFiles('high-value-fulltext-batch4/pdfs/doi_10.3390_jemr19030055.pdf') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-doi-10.3390-jemr19030055
+          path: high-value-fulltext-batch4/pdfs/doi_10.3390_jemr19030055.pdf
+          retention-days: 30
+          compression-level: 0
+      - name: Upload official supplementary materials
+        if: ${{ hashFiles('high-value-fulltext-batch4/supplements/**') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: high-value-fulltext-batch4-supplements
+          path: high-value-fulltext-batch4/supplements/
+          retention-days: 30
+          compression-level: 0

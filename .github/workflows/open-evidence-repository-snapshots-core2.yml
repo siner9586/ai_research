@@ -1,0 +1,82 @@
+name: open-evidence-repository-snapshots-core2
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - slug: clairewoodcock-impact-explanations-ai-sc
+            repo: clairewoodcock/impact-explanations-ai-sc
+            commit: 2c989a9d7803124d3b3918ab830e2836b9dc1d46
+            expected_license: not_declared
+          - slug: peterbhase-las-nl-explanations
+            repo: peterbhase/LAS-NL-Explanations
+            commit: cf57de5eea5c5d9b5d1c27eb7696e7966a803224
+            expected_license: MIT
+          - slug: uw-hai-complementary-performance
+            repo: uw-hai/Complementary-Performance
+            commit: 6cebab4ffd2b332ebec5e27e7632e7bf1c36ba5f
+            expected_license: not_declared
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone exact public commit without executing code
+        env:
+          REPO: ${{ matrix.repo }}
+          COMMIT: ${{ matrix.commit }}
+          SLUG: ${{ matrix.slug }}
+          EXPECTED_LICENSE: ${{ matrix.expected_license }}
+        run: |
+          set -euo pipefail
+          mkdir -p "snapshot/${SLUG}"
+          git init "snapshot/${SLUG}/repository"
+          git -C "snapshot/${SLUG}/repository" remote add origin "https://github.com/${REPO}.git"
+          git -C "snapshot/${SLUG}/repository" fetch --depth=1 origin "${COMMIT}"
+          git -C "snapshot/${SLUG}/repository" checkout --detach FETCH_HEAD
+          test "$(git -C "snapshot/${SLUG}/repository" rev-parse HEAD)" = "${COMMIT}"
+          rm -rf "snapshot/${SLUG}/repository/.git"
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          slug=os.environ['SLUG']; repo=os.environ['REPO']; commit=os.environ['COMMIT']; expected=os.environ['EXPECTED_LICENSE']
+          root=Path('snapshot')/slug/'repository'
+          files=[]
+          for p in sorted(root.rglob('*')):
+              if p.is_file():
+                  h=hashlib.sha256(p.read_bytes()).hexdigest()
+                  files.append({'path':str(p.relative_to(root)),'size_bytes':p.stat().st_size,'sha256':h})
+          license_candidates=[f['path'] for f in files if Path(f['path']).name.lower() in {'license','license.md','license.txt','copying'}]
+          metadata={
+              'repository':repo,
+              'commit':commit,
+              'expected_license':expected,
+              'license_files':license_candidates,
+              'file_count':len(files),
+              'total_bytes':sum(f['size_bytes'] for f in files),
+              'code_executed':False,
+              'inventory':'file_inventory.json',
+          }
+          out=Path('snapshot')/slug
+          (out/'file_inventory.json').write_text(json.dumps(files,indent=2),encoding='utf-8')
+          (out/'snapshot_metadata.json').write_text(json.dumps(metadata,indent=2),encoding='utf-8')
+          PY
+          tar -C "snapshot/${SLUG}" -czf "snapshot/${SLUG}/${SLUG}-${COMMIT}.tar.gz" repository
+          sha256sum "snapshot/${SLUG}/${SLUG}-${COMMIT}.tar.gz" > "snapshot/${SLUG}/SHA256SUMS.txt"
+      - name: Upload pinned snapshot and audit metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: repository-snapshot-${{ matrix.slug }}
+          path: snapshot/${{ matrix.slug }}/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

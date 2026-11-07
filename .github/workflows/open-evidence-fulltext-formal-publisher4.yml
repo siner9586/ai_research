@@ -1,0 +1,44 @@
+name: open-evidence-fulltext-formal-publisher4
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install audit runtime
+        run: python -m pip install --disable-pip-version-check requests pypdf
+      - name: Audit lawful publisher and repository fulltexts
+        run: python open_evidence_runner/fulltext_formal_publisher4.py --output fulltext-formal-publisher4
+      - name: Validate result accounting
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('fulltext-formal-publisher4/completion_summary.json')
+          if not p.exists(): raise SystemExit('completion summary missing')
+          s=json.loads(p.read_text())
+          assert s['targets']==18
+          assert s['verified']+s['manual_review']+s['retryable']==18
+          PY
+      - name: Upload mixed fulltext audit package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-formal-publisher4
+          path: fulltext-formal-publisher4/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

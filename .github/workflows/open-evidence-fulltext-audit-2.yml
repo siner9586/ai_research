@@ -1,0 +1,40 @@
+name: open-evidence-fulltext-audit-2
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF audit runtime
+        run: python -m pip install --disable-pip-version-check requests pypdf
+      - name: Download and verify lawful open fulltexts batch 2
+        run: python open_evidence_runner/fulltext_batch_2.py --output fulltext-audit-2
+      - name: Validate audit summary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('fulltext-audit-2/completion_summary.json').read_text())
+          assert s['targets']==12
+          assert s['verified']==12
+          assert s['manual_review']==0
+          assert s['retryable']==0
+          PY
+      - name: Upload aggregate audit package
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-audit-2
+          path: fulltext-audit-2/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error

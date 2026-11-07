@@ -1,0 +1,61 @@
+name: open-evidence-fulltext-audit-1
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF audit runtime
+        run: python -m pip install --disable-pip-version-check requests pypdf
+      - name: Reproduce existing verified batch
+        run: python open_evidence_runner/fulltext_batch_audit.py --output fulltext-audit-1
+      - name: Audit ACL and Springer batch
+        run: python open_evidence_runner/fulltext_batch_acl_springer.py
+      - name: Audit institutional repository PMC and AAAI batch
+        run: python open_evidence_runner/fulltext_batch_repo_pmc_aaai.py
+      - name: Audit JMIR and ACL human-study fulltexts
+        run: python open_evidence_runner/fulltext_batch_jmir_acl.py
+      - name: Upload complete existing audit package
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-audit-1
+          path: fulltext-audit-1/
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error
+      - name: Upload ACL and Springer audit package
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-acl-springer
+          path: fulltext-acl-springer/
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload repository PMC and AAAI audit package
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-repo-pmc-aaai
+          path: fulltext-repo-pmc-aaai/
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload JMIR and ACL audit package
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-evidence-fulltext-jmir-acl
+          path: fulltext-jmir-acl/
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
